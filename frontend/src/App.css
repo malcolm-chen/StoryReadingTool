@@ -1,0 +1,289 @@
+.App {
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.background-container {
+  position: fixed;
+  margin-left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+}
+
+.login-container {
+  margin-top: 20%;
+  width: 70%;
+}
+
+.login-container Form {
+  width: 50%;
+  margin: auto;
+  margin-top: 5%;
+}
+
+.login-container Button {
+  width: 100%;
+  font-size: 20px;
+}
+
+#login-btn {
+  background-color: #bae8e8;
+  color: #272343;
+}
+
+#login-btn:hover {
+  border: 4px solid #272343;
+  background-color: #a0f5f5;
+}
+
+.header {
+  padding: 1%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; 
+  align-items: center;
+  background-color: #e3f6f5;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 7%;
+}
+
+#breadcrumbs {
+  margin-top: 4%;
+  margin-left: 1%;
+}
+
+.main-content {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 12vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 5%;
+}
+
+.instruction-box {
+  position: relative;
+  margin-top: 3%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.instruction-box-greet {
+  position: relative;
+  margin-top: 3%;
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+}
+
+.instruction {
+  float: left;
+  color: #272343;
+}
+
+#library-page-title {
+  margin-top: 2%;
+}
+
+.user-avatar {
+  float: right;
+  right: 1%;
+}
+
+.library {
+  width: 90vw;
+  margin: auto;
+  margin-top: 3%;
+  height: 50vh;
+  justify-content: center;
+}
+
+.bookCardFrame {
+  width: 30vw;
+  height: 50vh;
+}
+
+.bookCardContent {
+  height: 40vh;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bookCardContent h4 {
+  margin-top: 5%;
+}
+
+.bookCardFrame Button {
+  margin: auto;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.bookCover {
+  width: fit-content;
+  height: 30vh;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.5);
+  margin-bottom: 3%;
+}
+
+.mode-select {
+  width: 40vw;
+  margin: auto;
+  margin-top: 5vw;
+  color: #272343;
+}
+
+.mode-btns-box {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 40vh;
+  gap: 10vw;
+  margin-top: 10vh;
+}
+
+#mode-btns {
+  margin: auto;
+  margin-bottom: 2vh;
+  width: 30vw;
+  height: 10vh;
+  font-size: 30px;
+  background-color: #bae8e8;
+  color: #272343;
+}
+
+#mode-btns:hover {
+  border: 4px solid #272343;
+  background-color: #a0f5f5;
+}
+
+.title {
+  padding-top: 1%;
+}
+
+#book-box {
+  width: 100%;
+  height: 75vh;
+  margin-top: 0px;
+}
+
+#book-box img {
+  max-width: 100vw;
+  max-height: 70vh;
+}
+
+#book-content {
+  margin-top: 1vh;
+  width: 100%;
+  height: 70vh;
+  position: relative;
+}
+
+#caption {
+  margin-top: 1vh;
+  margin-bottom: 1vh;
+  font-weight: 200;
+}
+
+#prev-btn, #next-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 50%; 
+}
+
+#prev-btn {
+  left: 10vw;
+}
+
+#next-btn {
+  right: 10vw;
+}
+
+.greet-chat-box {
+  width: 70vw;
+  height: 40vh;
+  margin: auto;
+  margin-top: 5vh;
+  padding: 1vw;
+  border: 2px solid #272343;
+  border-radius: 2vw;
+}
+
+#chat-window {
+  width: 100%;
+  height: 80%;
+  background-color: #e3f6f584;
+  border-radius: 2vw;
+  overflow-y: scroll;
+}
+
+#chatbot-msg {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+}
+
+#msg-bubble {
+  background-color: #bae8e8;
+  color: #272343;
+  padding: 2vw;
+  margin: 1vw;
+  border-radius: 10px;
+  text-align: left;
+}
+
+#chatbot-avatar {
+  float: left;
+  width: 8vw;
+}

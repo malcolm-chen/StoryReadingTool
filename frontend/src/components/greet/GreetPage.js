@@ -4,13 +4,16 @@ import { Avatar, Container, Box, Typography, Breadcrumbs, Link, IconButton, Line
 import { Button, Image } from 'react-bootstrap';
 import { GiSpellBook } from "react-icons/gi";
 import { FcNext } from "react-icons/fc";
-import { MdArrowCircleLeft, MdArrowCircleRight, MdOutlineReplayCircleFilled } from "react-icons/md";
+import { RiChatVoiceFill } from "react-icons/ri";
+import { MdOutlineReplayCircleFilled } from "react-icons/md";
 
 const GreetPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
     const [user, setUser] = useState(location.state?.user || 'User');
+    const [isListening, setIsListening] = useState(false); 
+    const [transcript, setTranscript] = useState('');
     const penguin = './files/imgs/penguin1.svg';
 
     let audio = new Audio();
@@ -26,6 +29,36 @@ const GreetPage = () => {
         audio.pause();
         navigate('/mode', { state: { title: title, user: user } });
     };
+
+    const startVoiceRecognition = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        recognition.start();
+        setIsListening(true);
+
+        recognition.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            setTranscript(text);
+            handleSubmit(text); 
+        };
+
+        recognition.onend = () => {
+            setIsListening(false); 
+        };
+
+        recognition.onerror = (error) => {
+            console.error('Speech recognition error:', error);
+            setIsListening(false);
+        };
+    };
+
+    const handleSubmit = (text) => {
+        console.log('Submitted text:', text);
+    };
+
 
     useEffect(() => {
         
@@ -63,8 +96,14 @@ const GreetPage = () => {
                         </Box>
                     </Box>
                     <Box id='chat-input'>
-                        <input id='chat-input-text' type='text' placeholder='Type here...' />
-                        <Button id='chat-input-btn' variant='solid' size='md' style={{ backgroundColor: '#bae8e8', color: '#272343' }}>Send</Button>
+                        {!isListening && (
+                            <IconButton id='voice-input-btn' variant='plain' onClick={startVoiceRecognition} >
+                                <RiChatVoiceFill size={40} color='#7AA2E3' style={{marginRight: "2vw"}} />
+                                <Typography id='voice-input-text' level='h4'>Click here to reply!</Typography>
+                            </IconButton>
+                        )}
+                        {isListening && (
+                        <input id='chat-input-text' type='text' placeholder='Listening...' value={transcript}/>)}                    
                     </Box>
                 </Box>
             </Box>

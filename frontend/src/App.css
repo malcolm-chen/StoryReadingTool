@@ -251,7 +251,7 @@
 
 .greet-chat-box {
   width: 70vw;
-  height: 40vh;
+  height: 50vh;
   margin: auto;
   margin-top: 5vh;
   padding: 1vw;
@@ -261,7 +261,7 @@
 
 #chat-window {
   width: 100%;
-  height: 80%;
+  height: 75%;
   background-color: #e3f6f584;
   border-radius: 2vw;
   overflow-y: scroll;
@@ -286,4 +286,26 @@
 #chatbot-avatar {
   float: left;
   width: 8vw;
+}
+
+#chat-input {
+  width: 100%;
+  height: 25%;
+  margin-top: 1vh;
+  padding: 1vw;
+  background-color: rgba(228, 234, 239, 0.425);
+  border-radius: 2vw;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+}
+
+#chat-input-text {
+  width: 80%;
+  height: 7vh;
+  padding: 2vh;
+  border-radius: 2vw;
+  border: 2px solid #2723438a;
+  font-size: 20px;
+  margin-right: 5vw;
 }

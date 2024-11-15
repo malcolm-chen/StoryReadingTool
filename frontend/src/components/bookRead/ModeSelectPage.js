@@ -3,12 +3,16 @@ import { Avatar, Button, Box, Card, Typography, Breadcrumbs } from '@mui/joy';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FcReading, FcIdea, FcNext } from "react-icons/fc";
 import { GiSpellBook } from "react-icons/gi";
+import { IoLibrary } from "react-icons/io5";
+import { MdChromeReaderMode } from "react-icons/md";
+import Header from '../header';
 
 const ModeSelectPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
     const [user, setUser] = useState(location.state?.user || 'User');
+    console.log(user);
     const [modeSet, setModeSet] = useState(false);
 
     const handleModeSelect = (isReadMode) => {
@@ -28,18 +32,14 @@ const ModeSelectPage = () => {
 
     return (
         <Box className="background-container">
-            <Box className='header' >
-                <Typography level='h4' component='h1' sx={{ fontWeight: 'bold', textAlign: 'center', color: '#272343', fontStyle: 'italic' }}>
-                    <GiSpellBook size={30} color='229799' style={{ marginRight: "1%" }}/>StoryMate
-                </Typography>
-                <Avatar className='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793'}}>{user.substring(0, 2)}</Avatar>
-            </Box>
-            <Breadcrumbs id='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
-                <Link href='/select' onClick={handleLinkSelect} >Library</Link>
-                <Typography>Mode Select</Typography>
+            <Header user={user} />
+            <Breadcrumbs className='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
+                <Link href='/select' onClick={handleLinkSelect} ><IoLibrary /> Library</Link>
+                <Typography><MdChromeReaderMode /> Mode Select</Typography>
             </Breadcrumbs>
             <Box className='main-content'>
                 <Box className='instruction-box'>
+                    <Typography id='page-title' level='h2'><MdChromeReaderMode size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Mode Select</Typography>
                     <Typography className='instruction' level="h4" gutterBottom><FcNext style={{ marginRight: "1%" }}/> Select a mode to read the book!</Typography>
                 </Box>
                 <Box className='mode-select'>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Typography, Button } from '@mui/joy';
+import { Container, Typography, Box, Button } from '@mui/joy';
 import { FloatingLabel, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
@@ -42,28 +42,30 @@ const LandingPage = () => {
 
     return (
         <Container className="login-container">
-            <Typography level="h1">Let's read!</Typography>
-            <Typography level="h3">Create your username.</Typography>
-            <Form onSubmit={handleSubmit}>
-                <FloatingLabel
-                    controlId="floatingInput"
-                    label="Username"
-                    className="mb-3">
-                    <Form.Control
-                        type="text"
-                        placeholder="Your Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)} // Update username state
-                    />
-                </FloatingLabel>
-                
-                {/* Display error message if validation fails */}
-                {error && <Typography color="error">{error}</Typography>}
+            <Box id='login-box'>
+                <h1>Let's read!</h1>
+                <Typography level="h3">Enter your username.</Typography>
+                <Form id='login-form' onSubmit={handleSubmit}>
+                    <FloatingLabel id='login-label'
+                        controlId="floatingInput"
+                        label="Username"
+                        className="mb-3">
+                        <Form.Control
+                            type="text"
+                            placeholder="Your Username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)} // Update username state
+                        />
+                    </FloatingLabel>
+                    
+                    {/* Display error message if validation fails */}
+                    {<span className="error" style={{ height: '24px'}}>{error}</span>}
 
-                <Button id='login-btn' variant="solid" type="submit">
-                    Log In
-                </Button>
-            </Form>
+                    <Button id='login-btn' className='mybtn' variant="solid" type="submit">
+                        Log In
+                    </Button>
+                </Form>
+            </Box>
         </Container>
     );
 };

@@ -5,11 +5,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { GiSpellBook } from "react-icons/gi";
 import { FcNext } from "react-icons/fc";
 import { IoLibrary } from "react-icons/io5";
+import Header from '../header';
 
 const BookSelectPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [user, setUser] = useState(location.state?.user || 'User');
+    console.log(user);
+    // log type of user
+    console.log(typeof user);
     const moveToStory = () => {
         navigate('/mode', { state: {
             title: 'Amara and the Bats',
@@ -18,29 +22,24 @@ const BookSelectPage = () => {
     }
     return (
         <Box className="background-container">
-            <Box className='header' >
-                <Typography level='h4' component='h1' sx={{ fontWeight: 'bold', textAlign: 'center', color: '#272343', fontStyle: 'italic' }}>
-                    <GiSpellBook size={30} color='229799' style={{ marginRight: "1%" }}/>StoryMate
-                </Typography>
-                <Avatar className='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793'}} >{user.substring(0, 2)}</Avatar>
-            </Box>
+            <Header user={user} />
             <Box className='main-content'>
-                <Box className='instruction-box'>
+                <Box className='instruction-box' id='instruction-box-library'>
+                    <Typography id='page-title' level='h2'><IoLibrary size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Library</Typography>
                     <Typography className='instruction' level='h4'><FcNext style={{ marginRight: "1%" }}/> Select a book that you want to read!</Typography>
-                    <Typography id='library-page-title' level='h2'><IoLibrary size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Library</Typography>
                 </Box>
                 <Box spacing={3} className='library'>
-                    <Grid item xs={12} sm={4}>
-                        <Card className="bookCardFrame" onClick={moveToStory} sx={{backgroundColor: '#fffffe', }}>
+                    <div className='book-list'>
+                        <Card className="bookCardFrame" onClick={moveToStory} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
                             <CardContent className='bookCardContent'>
                                 <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
                                 <Typography level='h3'>Amara and the Bats</Typography>
                             </CardContent>
                             <CardActions>
-                                <Button variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
+                                <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
                             </CardActions>
                         </Card>
-                    </Grid>
+                    </div>
                 </Box>
             </Box>
         </Box>

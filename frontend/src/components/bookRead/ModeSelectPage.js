@@ -39,16 +39,18 @@ const ModeSelectPage = () => {
             </Breadcrumbs>
             <Box className='main-content'>
                 <Box className='instruction-box'>
-                    <Typography id='page-title' level='h2'><MdChromeReaderMode size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Mode Select</Typography>
-                    <Typography className='instruction' level="h4" gutterBottom><FcNext style={{ marginRight: "1%" }}/> Select a mode to read the book!</Typography>
+                    <h2 id='page-title'><MdChromeReaderMode size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Mode Select</h2>
+                    <h4 className='instruction'>
+                        {/* <FcNext style={{ marginRight: "1%" }}/>  */}
+                    Select a mode to read the book!</h4>
                 </Box>
                 <Box className='mode-select'>
                     <Button id='mode-btns' onClick={() => handleModeSelect(true)}><FcReading style={{ marginRight: "3vh" }} />  Read Only</Button>
-                    <Typography className='mode-text' level='h4' sx={{ fontWeight: '300' }} >Enjoy reading along with a narration.</Typography>
+                    <h4 className='mode-text' sx={{ fontWeight: '300' }} >Enjoy reading along with a narration.</h4>
                 </Box>
                 <Box className='mode-select'>
                     <Button id='mode-btns' onClick={() => handleModeSelect(false)}><FcIdea style={{ marginRight: "3vh" }} />  Read and Chat</Button>
-                    <Typography className='mode-text' level='h4' sx={{ fontWeight: '300' }} >Enjoy interactively reading with a reading mate.</Typography>
+                    <h4 className='mode-text' sx={{ fontWeight: '300' }} >Enjoy interactively reading with a reading mate.</h4>
                 </Box>
             </Box>
         </Box>

@@ -44,7 +44,7 @@ const LandingPage = () => {
         <Container className="login-container">
             <Box id='login-box'>
                 <h1>Let's read!</h1>
-                <Typography level="h3">Enter your username.</Typography>
+                <h3>Enter your username.</h3>
                 <Form id='login-form' onSubmit={handleSubmit}>
                     <FloatingLabel id='login-label'
                         controlId="floatingInput"

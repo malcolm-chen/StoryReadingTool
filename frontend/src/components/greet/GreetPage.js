@@ -11,7 +11,8 @@ import { FaRecordVinyl } from "react-icons/fa6";
 import { IoLibrary } from "react-icons/io5";
 import { FaBook } from "react-icons/fa";
 import { MdChromeReaderMode } from "react-icons/md";
-import { BsFillSkipForwardFill } from "react-icons/bs";
+import { FaAnglesRight } from "react-icons/fa6";
+import { AiOutlineLoading } from "react-icons/ai";
 import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
 import { WavRenderer } from '../../utils/wav_renderer.ts';
 import { RealtimeClient } from '@openai/realtime-api-beta';
@@ -256,26 +257,31 @@ const GreetPage = () => {
             <Box className='main-content'>
                 <Box className='instruction-box-greet'>
                     <img src={penguinSrc} alt='penguin' style={{ width: "60px", height: "60px", marginRight: '16px' }} />
-                    <Typography id='page-title' level='h2' style={{ display: "flex", alignItems: "center" }} >Meet </Typography>
-                    <Typography id='page-title' level='h2' style={{ marginLeft: "5px", marginRight: "5px", color: "#ffd803", fontWeight: "900" }} > Sparky </Typography>
-                    <Typography id='page-title' level='h2'>, your reading mate!</Typography>
+                    <h2 id='page-title' style={{ display: "flex", alignItems: "center" }} >Meet </h2>
+                    <h2 id='page-title' style={{ marginLeft: "5px", marginRight: "5px", color: "#ffd803", fontWeight: "900" }} > Sparky✨ </h2>
+                    <h2 id='page-title' >, your reading mate!</h2>
                 </Box>
                 <Box className='greet-chat-box'>
                     <Box id='chat-window'>
+                        {chatHistory.length == 0 && (
+                            <Box id='loading-box'>
+                                <AiOutlineLoading id='loading-icon' size={40} color='#7AA2E3' />
+                            </Box>
+                        )}
                         {chatHistory.filter(msg => msg.type === 'message').map((msg, index) => (
                             <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                 {msg.role === 'user' ? (
                                     <Box id="user-chat">
-                                        <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "1vw"}}>{'U'.substring(0, 2)}</Avatar>
+                                        <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "1vw"}}>{user.substring(0, 2)}</Avatar>
                                         <Box id="msg-bubble">
-                                            <Typography level='body-lg'>{msg.content[0].transcript}</Typography>
+                                            <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
                                         </Box>
                                     </Box>
                                 ) : (
                                     <Box id="chatbot-chat">
                                         <Image id='chatbot-avatar' src={penguinSrc}></Image>
                                         <Box id="msg-bubble">
-                                            <Typography level='body-lg'>{msg.content[0].transcript}</Typography>
+                                            <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
                                         </Box>
                                     </Box>
                                 )}
@@ -283,7 +289,7 @@ const GreetPage = () => {
                         ))}
                     </Box>
                     {canPushToTalk && !isEnding && (
-                    <button id='chat-input' 
+                    <button id='chat-input-greet' 
                     disabled={!isConnected || !canPushToTalk}
                     onMouseDown={startRecording}
                     onTouchStart={startRecording}
@@ -304,23 +310,23 @@ const GreetPage = () => {
                             {!isRecording && (
                                 <RiChatVoiceFill size={40} color='#7AA2E3' style={{marginRight: "2vw"}} />
                             )}
-                            <Typography id='voice-input-text' level='h4'>{isRecording ? 'release to send' : 'push to talk'}</Typography>
+                            <h4 id='voice-input-text'>{isRecording ? 'release to send' : 'push to talk'}</h4>
                        
                         </button>
                     )}
                     {isEnding && (
-                    <Box id='chat-input'>
-                            <Box id='chat-end' onClick={handleEndGreet}>
-                                <IconButton id='to-chatread-btn' >
-                                    <GiSpellBook size={40} color='#7AA2E3' />
-                                </IconButton>
-                                <Typography id='voice-input-text' level='h4'>Let's start reading and chatting!</Typography>
-                            </Box>
+                    <Box id='chat-input-greet'>
+                        <Box id='chat-end' onClick={handleEndGreet}>
+                            <IconButton id='to-chatread-btn' >
+                                <GiSpellBook size={40} color='#7AA2E3' />
+                            </IconButton>
+                            <h4 id='voice-input-text'>Let's start reading and chatting!</h4>
+                        </Box>
                     </Box>
                         )}                    
                 </Box>
                 <div id='skip-btn-container'>
-                    <IconButton id='skip-btn' variant='plain' onClick={handleEndGreet} > <BsFillSkipForwardFill style={{ marginRight: '20px' }}/> Skip  </IconButton>
+                    <IconButton id='skip-btn' variant='plain' onClick={handleEndGreet} > <FaAnglesRight style={{ marginRight: '20px' }}/> Skip  </IconButton>
                 </div>
             </Box>
         </Box>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Button, Typography, Container, Box, Grid, Card, CardActions, CardContent, CardMedia } from '@mui/joy';
+import { Avatar, Button, Box, Grid, Card, CardActions, CardContent, CardMedia } from '@mui/joy';
 import { Image } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GiSpellBook } from "react-icons/gi";
@@ -25,15 +25,17 @@ const BookSelectPage = () => {
             <Header user={user} />
             <Box className='main-content'>
                 <Box className='instruction-box' id='instruction-box-library'>
-                    <Typography id='page-title' level='h2'><IoLibrary size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Library</Typography>
-                    <Typography className='instruction' level='h4'><FcNext style={{ marginRight: "1%" }}/> Select a book that you want to read!</Typography>
+                    <h2 id='page-title'><IoLibrary size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Library</h2>
+                    <h4 className='instruction'>
+                        {/* <FcNext style={{ marginRight: "1%" }}/>  */}
+                        Select a book that you want to read!</h4>
                 </Box>
                 <Box spacing={3} className='library'>
                     <div className='book-list'>
                         <Card className="bookCardFrame" onClick={moveToStory} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
                             <CardContent className='bookCardContent'>
                                 <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
-                                <Typography level='h3'>Amara and the Bats</Typography>
+                                <h3>Amara and the Bats</h3>
                             </CardContent>
                             <CardActions>
                                 <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>

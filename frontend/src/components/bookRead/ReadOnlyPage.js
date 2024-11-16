@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Container, Box, Typography, Breadcrumbs, Link, IconButton, LinearProgress } from '@mui/joy';
+import { Avatar, Container, Box, Breadcrumbs, Link, IconButton, LinearProgress, Typography } from '@mui/joy';
 import { Button } from 'react-bootstrap';
 import { GiSpellBook } from "react-icons/gi";
 import { IoLibrary } from "react-icons/io5";
@@ -130,10 +130,10 @@ const ReadOnlyPage = () => {
                 <h3 className="title">{title}</h3>
                 <Box id="book-box" mt={4}>
                     <Box id='book-content' mt={4}>
-                        <Typography id="caption" level='h4' sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                             {pages[currentPage]?.text[currentSentence]}
                             <IconButton variant='plain' onClick={handleReplay}><MdOutlineReplayCircleFilled size={30} color='#7AA2E3' /></IconButton>
-                        </Typography>
+                        </h4>
                         <Box id='book-img'>
                             <IconButton id="prev-btn" variant='plain' onClick={handlePrevPage} disabled={currentPage === 0}>
                                 <MdArrowCircleLeft size={60} color='#7AA2E3'/>
@@ -146,7 +146,7 @@ const ReadOnlyPage = () => {
                     </Box>
                 </Box>
                 <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
-                    <Typography level="h4">Page {currentPage + 1} of {pages.length}</Typography>
+                    <h4>Page {currentPage + 1} of {pages.length}</h4>
                     <LinearProgress determinate value={ (currentPage + 1) / pages.length * 100} />
                 </Box>
             </Box>

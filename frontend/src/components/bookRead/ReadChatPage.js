@@ -5,8 +5,7 @@ import { MdArrowCircleLeft, MdArrowCircleRight, MdOutlineReplayCircleFilled } fr
 import { Button, Image } from 'react-bootstrap';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { GiSpellBook } from "react-icons/gi";
-import { FcNext } from "react-icons/fc";
-import { BsFillSendFill } from "react-icons/bs";
+import { AiOutlineLoading } from "react-icons/ai";
 import { RiChatVoiceFill } from "react-icons/ri";
 import { IoLibrary } from "react-icons/io5";
 import { MdChromeReaderMode } from "react-icons/md";
@@ -17,7 +16,6 @@ import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
 import Header from '../header';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 
-const client = new RealtimeClient({ url: 'ws://localhost:8765' });
 let audio = new Audio();
 
 const ReadChatPage = () => {
@@ -103,6 +101,7 @@ const ReadChatPage = () => {
      * Disconnect and reset conversation state
      */
     const disconnectConversation = useCallback(async () => {
+        console.log('disconnecting conversation');
         setIsConnected(false);
         setRealtimeEvents([]);
         setItems([]);
@@ -174,13 +173,13 @@ const ReadChatPage = () => {
         if (pages[currentPage]?.text) {
             let sentenceIndex = 0;
             const playNextSentence = () => {
-                console.log(sentenceIndex, pages[currentPage].text.length);
+                // console.log(sentenceIndex, pages[currentPage].text.length);
                 if (sentenceIndex < pages[currentPage].text.length) {
                     setCurrentSentence(sentenceIndex);
                     audio.src = `/files/books/${title}/audio/p${currentPage}sec${sentenceIndex}.mp3`;
 
                     audio.onended = () => {
-                        console.log('end');
+                        // console.log('end');
                         sentenceIndex += 1;
                         playNextSentence();
                     };
@@ -225,7 +224,12 @@ const ReadChatPage = () => {
             audio.currentTime = 0;
             setIsKnowledge(false);
             if (isClientSetup) {
+                console.log('disconnecting conversation');
+                // deleteConversationItem(items[0].id);
                 disconnectConversation();
+                const client = clientRef.current;
+                client.reset();
+                setChatHistory([]);
                 setIsClientSetup(false);
             }
             const newPage = currentPage - 1;
@@ -243,7 +247,12 @@ const ReadChatPage = () => {
             audio.currentTime = 0;
             setIsKnowledge(false);
             if (isClientSetup) {
+                console.log('disconnecting conversation');
+                // deleteConversationItem(items[0].id);
                 disconnectConversation();
+                const client = clientRef.current;
+                client.reset();
+                setChatHistory([]);
                 setIsClientSetup(false);
             }
             const newPage = currentPage + 1;
@@ -268,30 +277,39 @@ const ReadChatPage = () => {
 
 
     const updateClientInstruction = async () => {
+        const client = clientRef.current;
         client.updateSession({ instructions: `
             You are a friendly chatbot interacting with a 6-8-year-old child reading a storybook with a 6-8-year-old child. You and the child will take turns in dialogue, with you posing one question per round, for a total of no more than three questions. If the child demonstrates a good understanding of the material, reduce the number of questions.
-            You need to initiate the conversation by asking the first question.
-            Your questions should match the child's age, with a friendly, conversational style. Use simple, easy-to-understand language that is lively and interesting. Make your questions natural, so the child doesn't feel like they are completing a task.
+                The child is called ${user}.
+                The child's age is ${age}.
+                The child's interests are ${interests}.
 
-            There will be a concept word in the story text, and the concept word is associated with a piece of external science knowledge.
-            The generated questions should be based on the concept word in the story text and associated with external science knowledge.
-            The generated questions should contain the associated external science knowledge to enrich the child's science knowledge.
-            The generated question series should follow the performance expectation of preschoolers.
-            The generated question series should be based on the story text, concept word, knowledge, and the performance expectation I provide.
-
-            Your reply should include: 1) Judge the correctness of the answer, 2) Provide friendly, encouraging feedback, 3) Provide an explanation of the answer to the previous question, 4) If the dialogue is not over, move on to the next question. 
-            If the child answers incorrectly, use guiding them step by step to think prompt children thinking. 
-            If the child does not respond, you can simply reply with "It's okay, let's think together" and explain, or "I didn't hear your answer, can you say it again?" and repeat the question.
-            Keep your responses concise, with each part not exceeding 15 words, and try to use simple vocabulary.
-
-            Here is the story text: ${knowledge[currentPage]?.section_text}
-            Here is the concept word: ${knowledge[currentPage]?.keyword}
-            Here is the associated external science knowledge: ${knowledge[currentPage]?.knowledge}
+                You need to initiate the conversation by asking the first question.
+                Your questions should match the child's age and interests, with a friendly, conversational style. Use simple, easy-to-understand language that is lively and interesting. Make your questions natural, so the child doesn't feel like they are completing a task.
+    
+                There will be a concept word in the story text, and the concept word is associated with a piece of external knowledge.
+                
+                !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
+                
+                The generated question series should be based on the concept word in the story text and associated with external knowledge.
+                The generated question series should contain the associated external knowledge to enrich the child's knowledge.
+                The generated question series should follow the performance expectation of preschoolers.
+                The generated question series should be based on the story text, concept word, knowledge, and the performance expectation I provide.
+    
+                Your reply should include: 1) Judge the correctness of the answer, 2) Provide friendly, encouraging feedback, 3) Provide an explanation of the answer to the previous question, 4) If the dialogue is not over, move on to the next question. 
+                If the child answers incorrectly, use guiding them step by step to think prompt children thinking. 
+                If the child does not respond, you can simply reply with "It's okay, let's think together" and explain, or "I didn't hear your answer, can you say it again?" and repeat the question.
+                **Keep your responses concise, with each part not exceeding 15 words, and try to use simple vocabulary.**
+    
+                Here is the story text: ${knowledge[currentPage]?.section_text}
+                Here is the concept word: ${knowledge[currentPage]?.keyword}
+                Here is the associated external science knowledge: ${knowledge[currentPage]?.knowledge}
         ` });
     }
 
     const setupClient = async () => {
         (async () => {
+            console.log('setting up client');
             const wavStreamPlayer = wavStreamPlayerRef.current;
             const client = clientRef.current;
             client.updateSession({ instructions: `
@@ -304,7 +322,8 @@ const ReadChatPage = () => {
                 Your questions should match the child's age and interests, with a friendly, conversational style. Use simple, easy-to-understand language that is lively and interesting. Make your questions natural, so the child doesn't feel like they are completing a task.
     
                 There will be a concept word in the story text, and the concept word is associated with a piece of external knowledge.
-                For each round, only include ONE question so it will not confuse the child.
+                
+                !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
                 
                 The generated question series should be based on the concept word in the story text and associated with external knowledge.
                 The generated question series should contain the associated external knowledge to enrich the child's knowledge.
@@ -314,7 +333,7 @@ const ReadChatPage = () => {
                 Your reply should include: 1) Judge the correctness of the answer, 2) Provide friendly, encouraging feedback, 3) Provide an explanation of the answer to the previous question, 4) If the dialogue is not over, move on to the next question. 
                 If the child answers incorrectly, use guiding them step by step to think prompt children thinking. 
                 If the child does not respond, you can simply reply with "It's okay, let's think together" and explain, or "I didn't hear your answer, can you say it again?" and repeat the question.
-                Keep your responses concise, with each part not exceeding 15 words, and try to use simple vocabulary.
+                **Keep your responses concise, with each part not exceeding 15 words, and try to use simple vocabulary.**
     
                 Here is the story text: ${knowledge[currentPage]?.section_text}
                 Here is the concept word: ${knowledge[currentPage]?.keyword}
@@ -323,27 +342,30 @@ const ReadChatPage = () => {
             
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
-            client.addTool({
-                "name": "end_conversation",
-                "description": "Ends the conversation with the user",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        end: {
-                            type: "boolean",
-                            description: "Whether to end the conversation",
-                        }
-                    },
-                    "required": ["end"]
-                }
-            },
-            async ({end}) => {
-                if (end) {
-                    console.log('ending conversation');
-                    setIsEnding(true);
-                    // await disconnectConversation();
-                }
-            });
+            console.log(client.tools);
+            if (client.tools.length == 0) {
+                client.addTool({
+                    "name": "end_conversation",
+                    "description": "Ends the conversation with the user",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "end": {
+                                "type": "boolean",
+                                "description": "Whether to end the conversation",
+                            }
+                        },
+                        "required": ["end"]
+                    }
+                },
+                async ({end}) => {
+                    if (end) {
+                        console.log('ending conversation');
+                        setIsEnding(true);
+                        // await disconnectConversation();
+                    }
+                });
+            }
             // client.updateSession({
             //     turn_detection: { type: 'server_vad' }, // or 'server_vad'
             //     input_audio_transcription: { model: 'whisper-1' },
@@ -428,10 +450,10 @@ const ReadChatPage = () => {
                     <h3 className="title">{title}</h3>
                     <Box id="book-box" mt={4}>
                         <Box id='book-content' mt={4}>
-                            <Typography id="caption" level='h4' sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                 {pages[currentPage]?.text[currentSentence]}
                                 <IconButton variant='plain' onClick={handleReplay}><MdOutlineReplayCircleFilled size={30} color='#7AA2E3' /></IconButton>
-                            </Typography>
+                            </h4>
                             <Box id='book-img'>
                                 <IconButton id="prev-btn-chat" variant='plain' onClick={handlePrevPage} disabled={currentPage === 0}>
                                     <MdArrowCircleLeft size={60} color='#7AA2E3'/>
@@ -444,27 +466,32 @@ const ReadChatPage = () => {
                         </Box>            
                     </Box>
                     <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
-                        <Typography level="h4">Page {currentPage + 1} of {pages.length}</Typography>
+                        <h4>Page {currentPage + 1} of {pages.length}</h4>
                         <LinearProgress determinate value={ (currentPage + 1) / pages.length * 100} />
                     </Box>
                 </Box>
                 {isKnowledge && (
                     <Box id='chat-container'>
                         <Box id='chat-window'>
-                            {chatHistory.map((msg, index) => (
+                            {chatHistory.length == 0 && (
+                                <Box id='loading-box'>
+                                    <AiOutlineLoading id='loading-icon' size={40} color='#7AA2E3' />
+                                </Box>
+                            )}
+                            {chatHistory.filter(msg => msg.type === 'message').map((msg, index) => (
                                 <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                     {msg.role === 'user' ? (
                                         <Box id="user-chat">
-                                            <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "1vw"}}>{'U'.substring(0, 2)}</Avatar>
+                                            <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "1vw"}}>{user.substring(0, 2)}</Avatar>
                                             <Box id="msg-bubble">
-                                                <Typography level='body-lg'>{msg.formatted.transcript}</Typography>
+                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
                                             </Box>
                                         </Box>
                                     ) : (
                                         <Box id="chatbot-chat">
                                             <Image id='chatbot-avatar' src={penguin}></Image>
                                             <Box id="msg-bubble">
-                                                <Typography level='body-lg'>{msg.formatted.transcript}</Typography>
+                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
                                             </Box>
                                         </Box>
                                     )}
@@ -493,7 +520,7 @@ const ReadChatPage = () => {
                             {!isRecording && (
                                 <RiChatVoiceFill size={40} color='#7AA2E3' style={{marginRight: "2vw"}} />
                             )}
-                            <Typography id='voice-input-text' level='h4'>{isRecording ? 'release to send' : 'push to talk'}</Typography>
+                            <h4 id='voice-input-text'>{isRecording ? 'release to send' : 'push to talk'}</h4>
                         
                             </button>
                         )}
@@ -503,7 +530,7 @@ const ReadChatPage = () => {
                                     <IconButton id='to-chatread-btn' >
                                         <GiSpellBook size={40} color='#7AA2E3' />
                                     </IconButton>
-                                    <Typography id='voice-input-text' level='h4'>Let's start reading and chatting!</Typography>
+                                    <h4 id='voice-input-text'>Let's start reading and chatting!</h4>
                                 </Box>
                             </Box>
                         )}          

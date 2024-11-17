@@ -10,11 +10,12 @@ import { RiChatVoiceFill } from "react-icons/ri";
 import { IoLibrary } from "react-icons/io5";
 import { MdChromeReaderMode } from "react-icons/md";
 import { FaRecordVinyl } from "react-icons/fa";
-
+import { Switch, FormLabel, FormControl, FormHelperText } from '@mui/joy';
 import { FaBook } from "react-icons/fa";
 import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
 import Header from '../header';
 import { RealtimeClient } from '@openai/realtime-api-beta';
+import { useSwipeable } from 'react-swipeable';
 
 let audio = new Audio();
 
@@ -40,6 +41,7 @@ const ReadChatPage = () => {
     const [memoryKv, setMemoryKv] = useState({});
     const [age, setAge] = useState(location.state?.age || '');
     const [interests, setInterests] = useState(location.state?.interest || '');
+    const [showCaption, setShowCaption] = useState(true);
 
     console.log(age, interests);
     
@@ -280,30 +282,30 @@ const ReadChatPage = () => {
         const client = clientRef.current;
         client.updateSession({ instructions: `
             You are a friendly chatbot interacting with a 6-8-year-old child reading a storybook with a 6-8-year-old child. You and the child will take turns in dialogue, with you posing one question per round, for a total of no more than three questions. If the child demonstrates a good understanding of the material, reduce the number of questions.
-                The child is called ${user}.
-                The child's age is ${age}.
-                The child's interests are ${interests}.
+            The child is called ${user}.
+            The child's age is ${age}.
+            The child's interests are ${interests}.
 
-                You need to initiate the conversation by asking the first question.
-                Your questions should match the child's age and interests, with a friendly, conversational style. Use simple, easy-to-understand language that is lively and interesting. Make your questions natural, so the child doesn't feel like they are completing a task.
-    
-                There will be a concept word in the story text, and the concept word is associated with a piece of external knowledge.
-                
-                !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
-                
-                The generated question series should be based on the concept word in the story text and associated with external knowledge.
-                The generated question series should contain the associated external knowledge to enrich the child's knowledge.
-                The generated question series should follow the performance expectation of preschoolers.
-                The generated question series should be based on the story text, concept word, knowledge, and the performance expectation I provide.
-    
-                Your reply should include: 1) Judge the correctness of the answer, 2) Provide friendly, encouraging feedback, 3) Provide an explanation of the answer to the previous question, 4) If the dialogue is not over, move on to the next question. 
-                If the child answers incorrectly, use guiding them step by step to think prompt children thinking. 
-                If the child does not respond, you can simply reply with "It's okay, let's think together" and explain, or "I didn't hear your answer, can you say it again?" and repeat the question.
-                **Keep your responses concise, with each part not exceeding 15 words, and try to use simple vocabulary.**
-    
-                Here is the story text: ${knowledge[currentPage]?.section_text}
-                Here is the concept word: ${knowledge[currentPage]?.keyword}
-                Here is the associated external science knowledge: ${knowledge[currentPage]?.knowledge}
+            You need to initiate the conversation by asking the first question.
+            Your questions should match the child's age and interests, with a friendly, conversational style. Use simple, easy-to-understand language that is lively and interesting. Make your questions natural, so the child doesn't feel like they are completing a task.
+
+            There will be a concept word in the story text, and the concept word is associated with a piece of external knowledge.
+            
+            The generated question series should be based on the concept word in the story text and associated with external knowledge.
+            The generated question series should contain the associated external knowledge to enrich the child's knowledge.
+            The generated question series should follow the performance expectation of preschoolers.
+            The generated question series should be based on the story text, concept word, knowledge, and the performance expectation I provide.
+
+            Your reply should include: 1) Judge the correctness of the answer, 2) Provide friendly, encouraging feedback, 3) Provide an explanation of the answer to the previous question, 4) If the dialogue is not over, move on to the next question. 
+            If the child answers incorrectly, use guiding them step by step to think prompt children thinking. 
+            If the child does not respond, you can simply reply with "It's okay, let's think together" and explain, or "I didn't hear your answer, can you say it again?" and repeat the question.
+
+            Here is the story text: ${knowledge[currentPage]?.section_text}
+            Here is the concept word: ${knowledge[currentPage]?.keyword}
+            Here is the associated external science knowledge: ${knowledge[currentPage]?.knowledge}
+
+            **Keep your questions and responses concise. They should be no more than 30 words, and use simple vocabulary.**
+            !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
         ` });
     }
 
@@ -314,30 +316,30 @@ const ReadChatPage = () => {
             const client = clientRef.current;
             client.updateSession({ instructions: `
                 You are a friendly chatbot interacting with a 6-8-year-old child reading a storybook with a 6-8-year-old child. You and the child will take turns in dialogue, with you posing one question per round, for a total of no more than three questions. If the child demonstrates a good understanding of the material, reduce the number of questions.
-                The child is called ${user}.
+            The child is called ${user}.
                 The child's age is ${age}.
                 The child's interests are ${interests}.
 
                 You need to initiate the conversation by asking the first question.
                 Your questions should match the child's age and interests, with a friendly, conversational style. Use simple, easy-to-understand language that is lively and interesting. Make your questions natural, so the child doesn't feel like they are completing a task.
-    
+
                 There will be a concept word in the story text, and the concept word is associated with a piece of external knowledge.
-                
-                !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
                 
                 The generated question series should be based on the concept word in the story text and associated with external knowledge.
                 The generated question series should contain the associated external knowledge to enrich the child's knowledge.
                 The generated question series should follow the performance expectation of preschoolers.
                 The generated question series should be based on the story text, concept word, knowledge, and the performance expectation I provide.
-    
+
                 Your reply should include: 1) Judge the correctness of the answer, 2) Provide friendly, encouraging feedback, 3) Provide an explanation of the answer to the previous question, 4) If the dialogue is not over, move on to the next question. 
                 If the child answers incorrectly, use guiding them step by step to think prompt children thinking. 
                 If the child does not respond, you can simply reply with "It's okay, let's think together" and explain, or "I didn't hear your answer, can you say it again?" and repeat the question.
-                **Keep your responses concise, with each part not exceeding 15 words, and try to use simple vocabulary.**
-    
+
                 Here is the story text: ${knowledge[currentPage]?.section_text}
                 Here is the concept word: ${knowledge[currentPage]?.keyword}
                 Here is the associated external science knowledge: ${knowledge[currentPage]?.knowledge}
+
+                **Keep your questions and responses concise. They should be no more than 30 words, and use simple vocabulary.**
+                !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
             ` });
             
             client.updateSession({ voice: 'alloy' });
@@ -436,33 +438,83 @@ const ReadChatPage = () => {
         loadDictionary();
     }, []);
 
+    const handleCaptionToggle = () => {
+        setShowCaption(!showCaption);
+    }
+
+    const swipeHandlers = useSwipeable({
+        onSwipedLeft: () => {
+            if (currentPage < pages.length - 1) {
+                handleNextPage();
+            }
+        },
+        onSwipedRight: () => {
+            if (currentPage > 0) {
+                handlePrevPage();
+            }
+        },
+        preventDefaultTouchmoveEvent: true,
+        trackMouse: true
+    });
 
     return (
         <Box className="background-container">
-            <Header user={user} />
-            <Breadcrumbs className='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
-                <Link href='/select' onClick={handleLinkSelect} ><IoLibrary /> Library</Link>
-                <Link href='/mode' onClick={handleLinkMode} ><MdChromeReaderMode /> Mode Select</Link>
-                <Typography><FaBook /> {title}</Typography>
-            </Breadcrumbs>
+            <Header user={user} title={title} hasTitle={true} />
+            <div className='breadcrumbs-container'>
+                <Breadcrumbs className='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
+                    <Link href='/select' onClick={handleLinkSelect} ><IoLibrary /> Library</Link>
+                    <Typography><FaBook /> {title}</Typography>
+                </Breadcrumbs>
+                <div className='space' />
+                <FormControl
+                    orientation="horizontal"
+                    sx={{ width: 260, justifyContent: 'space-between' }}>
+                    <div>
+                        <FormLabel>Show captions</FormLabel>
+                        <FormHelperText sx={{ mt: 0 }}>Turn on to see the story text.</FormHelperText>
+                    </div>
+                
+                    <Switch className='caption-switch'
+                        label="Caption"
+                        checked={showCaption}
+                        endDecorator={showCaption ? 'On' : 'Off'}
+                        onChange={handleCaptionToggle}
+                    />
+                </FormControl>
+            </div>
             <Box className='main-content' id='chat-main-content'>
                 <Box id='book-container'>
-                    <h3 className="title">{title}</h3>
                     <Box id="book-box" mt={4}>
                         <Box id='book-content' mt={4}>
-                            <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                                {pages[currentPage]?.text[currentSentence]}
-                                <IconButton variant='plain' onClick={handleReplay}><MdOutlineReplayCircleFilled size={30} color='#7AA2E3' /></IconButton>
-                            </h4>
-                            <Box id='book-img'>
-                                <IconButton id="prev-btn-chat" variant='plain' onClick={handlePrevPage} disabled={currentPage === 0}>
-                                    <MdArrowCircleLeft size={60} color='#7AA2E3'/>
-                                </IconButton>
+                            <IconButton
+                            id="prev-btn"
+                            variant='plain'
+                            onClick={handlePrevPage}
+                            disabled={currentPage === 0}
+                            sx={{ opacity: 0.1, '&:hover': { opacity: 0.5 } }}
+                            >
+                                <MdArrowCircleLeft size={60} color='#7AA2E3'/>
+                            </IconButton>
+
+                            <Box id='book-img' {...swipeHandlers}>
                                 <img src={pages[currentPage]?.image} alt={`Page ${currentPage + 1}`}/>
-                                <IconButton id="next-btn-chat" variant='plain' onClick={handleNextPage} disabled={currentPage === pages.length - 1}>
-                                    <MdArrowCircleRight size={60} color='#7AA2E3'/>
-                                </IconButton>
+                                {showCaption && <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                    {pages[currentPage]?.text[currentSentence]}
+                                    <IconButton variant='plain' onClick={handleReplay} sx={{ opacity: 0.2, '&:hover': { opacity: 0.5 } }}>
+                                        <MdOutlineReplayCircleFilled size={30} color='#7AA2E3' />
+                                    </IconButton>
+                                </h4>}
                             </Box>
+
+                            <IconButton
+                                id="next-btn"
+                                variant='plain'
+                                onClick={handleNextPage}
+                                disabled={currentPage === pages.length - 1}
+                                sx={{ opacity: 0.2, '&:hover': { opacity: 0.5 } }}
+                                >
+                                <MdArrowCircleRight size={60} color='#7AA2E3'/>
+                            </IconButton>
                         </Box>            
                     </Box>
                     <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
@@ -470,9 +522,10 @@ const ReadChatPage = () => {
                         <LinearProgress determinate value={ (currentPage + 1) / pages.length * 100} />
                     </Box>
                 </Box>
+
                 {isKnowledge && (
-                    <Box id='chat-container'>
-                        <Box id='chat-window'>
+                        <Box id='chat-container'>
+                            <Box id='chat-window'>
                             {chatHistory.length == 0 && (
                                 <Box id='loading-box'>
                                     <AiOutlineLoading id='loading-icon' size={40} color='#7AA2E3' />
@@ -534,7 +587,7 @@ const ReadChatPage = () => {
                                 </Box>
                             </Box>
                         )}          
-                    </Box>
+                        </Box>
                 )}
             </Box>
         </Box>

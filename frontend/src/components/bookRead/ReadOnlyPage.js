@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Container, Box, Breadcrumbs, Link, IconButton, LinearProgress, Typography } from '@mui/joy';
-import { Button } from 'react-bootstrap';
+import { Avatar, Container, Box, FormControl, FormLabel, FormHelperText, Breadcrumbs, Link, IconButton, LinearProgress, Typography, Switch } from '@mui/joy';
 import { GiSpellBook } from "react-icons/gi";
 import { IoLibrary } from "react-icons/io5";
 import { MdChromeReaderMode } from "react-icons/md";
 import { FaBook } from "react-icons/fa";
 import { MdArrowCircleLeft, MdArrowCircleRight, MdOutlineReplayCircleFilled } from "react-icons/md";
 import Header from '../header';
+import { useSwipeable } from 'react-swipeable';
 
 let audio = new Audio();
 
@@ -16,6 +16,7 @@ const ReadOnlyPage = () => {
     const navigate = useNavigate();
     const user = location.state?.user || 'User';
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
+    const [showCaption, setShowCaption] = useState(true);
     
     const [currentPage, setCurrentPage] = useState(() => {
         const savedPage = localStorage.getItem(`${title}-currentPage`);
@@ -68,6 +69,22 @@ const ReadOnlyPage = () => {
             playNextSentence();
         }
     };
+
+    const handleProgressBarClick = (event) => {
+        const progressBar = event.currentTarget;
+        const clickPosition = event.clientX - progressBar.getBoundingClientRect().left;
+        const progressBarWidth = progressBar.offsetWidth;
+        const clickRatio = clickPosition / progressBarWidth;
+        const newPage = Math.floor(clickRatio * pages.length);
+    
+        if (newPage >= 0 && newPage < pages.length) {
+            audio.pause();
+            setCurrentPage(newPage);
+            setCurrentSentence(0);
+            localStorage.setItem(`${title}-currentPage`, newPage);
+            localStorage.setItem(`${title}-currentSentence`, 0);
+        }
+    };
     
     useEffect(() => {
         if (pages.length > 0) {
@@ -118,36 +135,90 @@ const ReadOnlyPage = () => {
         navigate('/mode', { state: { title: title, user: user } });
     };
 
+    const swipeHandlers = useSwipeable({
+        onSwipedLeft: () => {
+            if (currentPage < pages.length - 1) {
+                handleNextPage();
+            }
+        },
+        onSwipedRight: () => {
+            if (currentPage > 0) {
+                handlePrevPage();
+            }
+        },
+        preventDefaultTouchmoveEvent: true,
+        trackMouse: true
+    });
+
+    const handleCaptionToggle = () => {
+        setShowCaption(!showCaption);
+    };
+
     return (
         <Box className="background-container">
-            <Header user={user} />
-            <Breadcrumbs className='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
-                <Link href='/select' onClick={handleLinkSelect} ><IoLibrary /> Library</Link>
-                <Link href='/mode' onClick={handleLinkMode} ><MdChromeReaderMode /> Mode Select</Link>
-                <Typography><FaBook /> {title}</Typography>
-            </Breadcrumbs>
+            <Header user={user} title={title} hasTitle={true} />
+            <div className='breadcrumbs-container'>
+                <Breadcrumbs className='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
+                    <Link href='/select' onClick={handleLinkSelect} ><IoLibrary /> Library</Link>
+                    <Typography><FaBook /> {title}</Typography>
+                </Breadcrumbs>
+                <div className='space' />
+                <FormControl
+                    orientation="horizontal"
+                    sx={{ width: 260, justifyContent: 'space-between' }}>
+                    <div>
+                        <FormLabel>Show captions</FormLabel>
+                        <FormHelperText sx={{ mt: 0 }}>Turn on to see the story text.</FormHelperText>
+                    </div>
+                
+                    <Switch className='caption-switch'
+                        label="Caption"
+                        checked={showCaption}
+                        endDecorator={showCaption ? 'On' : 'Off'}
+                        onChange={handleCaptionToggle}
+                    />
+                </FormControl>
+            </div>
+
             <Box className='main-content'>
-                <h3 className="title">{title}</h3>
                 <Box id="book-box" mt={4}>
                     <Box id='book-content' mt={4}>
-                        <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                            {pages[currentPage]?.text[currentSentence]}
-                            <IconButton variant='plain' onClick={handleReplay}><MdOutlineReplayCircleFilled size={30} color='#7AA2E3' /></IconButton>
-                        </h4>
-                        <Box id='book-img'>
-                            <IconButton id="prev-btn" variant='plain' onClick={handlePrevPage} disabled={currentPage === 0}>
-                                <MdArrowCircleLeft size={60} color='#7AA2E3'/>
-                            </IconButton>
+                        <IconButton
+                        id="prev-btn"
+                        variant='plain'
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 0}
+                        sx={{ opacity: 0.1, '&:hover': { opacity: 0.5 } }}
+                        >
+                            <MdArrowCircleLeft size={60} color='#7AA2E3'/>
+                        </IconButton>
+
+                        <Box id='book-img' {...swipeHandlers}>
                             <img src={pages[currentPage]?.image} alt={`Page ${currentPage + 1}`}/>
-                            <IconButton id="next-btn" variant='plain' onClick={handleNextPage} disabled={currentPage === pages.length - 1}>
-                                <MdArrowCircleRight size={60} color='#7AA2E3'/>
-                            </IconButton>
+                            {showCaption && <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                {pages[currentPage]?.text[currentSentence]}
+                                <IconButton variant='plain' onClick={handleReplay} sx={{ opacity: 0.2, '&:hover': { opacity: 0.5 } }}>
+                                    <MdOutlineReplayCircleFilled size={30} color='#7AA2E3' />
+                                </IconButton>
+                            </h4>}
                         </Box>
+
+                        <IconButton
+                            id="next-btn"
+                            variant='plain'
+                            onClick={handleNextPage}
+                            disabled={currentPage === pages.length - 1}
+                            sx={{ opacity: 0.2, '&:hover': { opacity: 0.5 } }}
+                            >
+                            <MdArrowCircleRight size={60} color='#7AA2E3'/>
+                        </IconButton>
                     </Box>
                 </Box>
                 <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
                     <h4>Page {currentPage + 1} of {pages.length}</h4>
-                    <LinearProgress determinate value={ (currentPage + 1) / pages.length * 100} />
+                    <Box onClick={handleProgressBarClick} sx={{ cursor: 'pointer', width: '100%' }}>
+                        <LinearProgress determinate value={(currentPage + 1) / pages.length * 100} />
+                    </Box>
                 </Box>
             </Box>
         </Box>

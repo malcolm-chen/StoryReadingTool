@@ -248,10 +248,9 @@ const GreetPage = () => {
 
     return (
         <Box className="background-container">
-            <Header user={user} />
+            <Header user={user} title={title} hasTitle={true} />
             <Breadcrumbs className='breadcrumbs' separator="›" aria-label="breadcrumbs" size='lg'>
                 <Link href='/select' onClick={handleLinkSelect} ><IoLibrary /> Library</Link>
-                <Link href='/mode' onClick={handleLinkMode} ><MdChromeReaderMode /> Mode Select</Link>
                 <Typography><FaBook /> {title}</Typography>
             </Breadcrumbs>
             <Box className='main-content'>

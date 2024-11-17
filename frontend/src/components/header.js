@@ -2,7 +2,8 @@ import { Avatar } from '@mui/joy';
 import { GiSpellBook } from "react-icons/gi";
 
 export default function Header(args) {
-    const { user } = args;
+    const { user, title, hasTitle } = args;
+
     return (
         <div className='header' >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
@@ -11,7 +12,8 @@ export default function Header(args) {
             StoryMate
         </h4>
         </div>
-        <div className='space' />
+        {hasTitle && <h3 className="header-title"><a style={{ color: '#272343', fontWeight: 'lighter' }}>📖 Now Reading: </a> {title}</h3>}
+        {!hasTitle && <div className='space' />}
         <Avatar className='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793'}}>{user.substring(0, 2)}</Avatar>
     </div>
     );

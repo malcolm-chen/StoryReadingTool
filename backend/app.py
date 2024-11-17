@@ -26,7 +26,13 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 VOICE = 'alloy'
 
-users = []
+def load_json(filename):
+    with open(filename, 'r') as file:
+        return json.load(file)
+    
+def save_json(data, filename):
+    with open(filename, 'w') as file:
+        json.dump(data, file)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -43,9 +49,11 @@ def greet_message(username):
 def get_users():
     data = request.get_json()
     username = data['username']
+    users = load_json('users.json')
     isValid = username in users
     if username not in users:
         users.append(username)
+    save_json(users, 'users.json')
     return jsonify(isValid)
 
 def save_audio(base64_audio, folder_path, filename):

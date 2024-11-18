@@ -16,6 +16,7 @@ import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
 import Header from '../header';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 import { useSwipeable } from 'react-swipeable';
+import { Modal, ModalDialog, ModalClose } from '@mui/joy';
 
 let audio = new Audio();
 
@@ -563,6 +564,17 @@ const ReadChatPage = () => {
 
                 {isKnowledge && (
                         <Box id='chat-container'>
+                            <IconButton
+                                onClick={() => setIsKnowledge(false)}
+                                sx={{
+                                    position: 'absolute',
+                                    top: '0px',
+                                    right: '0px',
+                                    zIndex: 1
+                                }}
+                            >
+                                <ModalClose />
+                            </IconButton>
                             <Box id='chat-window'>
                             {chatHistory.length == 0 && (
                                 <Box id='loading-box'>
@@ -640,6 +652,7 @@ const ReadChatPage = () => {
                 )}
             </Box>
         </Box>
+        
     );
 };
 

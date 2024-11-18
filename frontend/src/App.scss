@@ -362,6 +362,8 @@
   // border: 2px solid #272343;
   border-radius: 16px;
   box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.5);
+  position: relative;
+  margin-bottom: 16px;
 }
 
 #chat-window {
@@ -373,6 +375,7 @@
   flex-grow: 1;
   justify-content: center;
   position: relative;
+  margin-top: 24px;
 }
 
 #chatbot-chat {
@@ -447,6 +450,7 @@
 #chat-main-content {
   display: flex;
   flex-direction: row;
+  position: relative;
 }
 
 #book-container {
@@ -473,6 +477,11 @@
   position: relative;
   box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.3);
   border-radius: 16px;
+  position: absolute;
+  z-index: 100;
+  right: 16px;
+  bottom: 16px;
+  background-color: #ffffff;
 }
 
 #prev-btn-chat, #next-btn-chat {

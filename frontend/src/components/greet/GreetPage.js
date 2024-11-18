@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Container, Box, Typography, Breadcrumbs, Link, IconButton, LinearProgress } from '@mui/joy';
+import { Avatar, Container, ModalClose, Box, Typography, Breadcrumbs, Link, IconButton, LinearProgress } from '@mui/joy';
 import { Button, Image } from 'react-bootstrap';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { GiSpellBook } from "react-icons/gi";
@@ -322,11 +322,12 @@ const GreetPage = () => {
                             <h4 id='voice-input-text'>Let's start reading and chatting!</h4>
                         </Box>
                     </Box>
-                        )}                    
+                        )}  
+                    <div id='skip-btn-container'>
+                        <IconButton id='skip-btn' variant='plain' onClick={handleEndGreet} > <FaAnglesRight style={{ marginRight: '20px' }}/> Skip  </IconButton>
+                    </div>                  
                 </Box>
-                <div id='skip-btn-container'>
-                    <IconButton id='skip-btn' variant='plain' onClick={handleEndGreet} > <FaAnglesRight style={{ marginRight: '20px' }}/> Skip  </IconButton>
-                </div>
+                
             </Box>
         </Box>
     )

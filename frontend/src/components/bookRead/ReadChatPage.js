@@ -390,7 +390,7 @@ const ReadChatPage = () => {
                         24000
                     );
                     item.formatted.file = wavFile;
-                    console.log(items);
+                    setChatHistory(items);
                 }
                 if (items.s)
                 setItems(items);

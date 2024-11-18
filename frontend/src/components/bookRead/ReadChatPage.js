@@ -567,19 +567,23 @@ const ReadChatPage = () => {
                                             <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "1vw"}}>{user.substring(0, 2)}</Avatar>
                                             <Box id="msg-bubble">
                                                 <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
-                                                {msg.status === 'completed' && (
-                                                    <IconButton variant='plain' onClick={() => handleReplay(index)}>
-                                                        <MdOutlineReplayCircleFilled size={30} color='#7AA2E3' />
-                                                    </IconButton>
-                                                )}
                                             </Box>
                                         </Box>
                                     ) : (
                                         <Box id="chatbot-chat">
                                             <Image id='chatbot-avatar' src={penguin}></Image>
-                                            <Box id="msg-bubble">
+                                            <Box id="msg-bubble" style={{ position: 'relative' }} >
                                                 <h5 level='body-lg' style={{margin: '0px'}}>
                                                     {msg.content[0].transcript}
+                                                    {msg.status === 'completed' && (
+                                                        <IconButton variant='plain' onClick={() => handleReplay(index)} style={{ 
+                                                            position: 'absolute', 
+                                                            right: '8px', 
+                                                            bottom: '8px', 
+                                                        }}>
+                                                            <MdOutlineReplayCircleFilled size={25} color='#7AA2E3' />
+                                                        </IconButton>
+                                                    )}
                                                 </h5>
                                             </Box>
                                         </Box>

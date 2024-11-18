@@ -238,4 +238,4 @@ def get_audio(filename):
     return send_from_directory('/audio_files', filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

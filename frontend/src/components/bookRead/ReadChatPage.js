@@ -54,7 +54,7 @@ const ReadChatPage = () => {
         new WavStreamPlayer({ sampleRate: 24000 })
     );
     const clientRef = useRef(
-        new RealtimeClient( { url: 'ws://localhost:8765' } )
+        new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766' } )
     );
     
     const [currentPage, setCurrentPage] = useState(() => {

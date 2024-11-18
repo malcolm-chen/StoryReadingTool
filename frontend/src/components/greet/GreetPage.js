@@ -42,7 +42,7 @@ const GreetPage = () => {
         new WavStreamPlayer({ sampleRate: 24000 })
     );
     const clientRef = useRef(
-        new RealtimeClient( { url: 'ws://localhost:8765' } )
+        new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766' } )
     );
 
     const model = 'gpt-4o-realtime-preview-2024-10-01';

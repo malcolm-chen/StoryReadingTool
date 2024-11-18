@@ -3,7 +3,7 @@ import { RealtimeClient } from '@openai/realtime-api-beta';
 
 const VoiceAgent = () => {
   useEffect(() => {
-    const client = new RealtimeClient({ url: 'ws://localhost:8765' });
+    const client = new RealtimeClient({ url: 'wss://storybook-reader.hailab.io:8766' });
 
     // Set parameters before connecting
     client.updateSession({ instructions: 'You are a great, upbeat friend.' });

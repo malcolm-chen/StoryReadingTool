@@ -468,8 +468,10 @@
   /* width: 40%;
   height: 100%; */
   margin: 0 16px;
+  padding: 16px;
   width: 35%;
   position: relative;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.3);
 }
 
 #prev-btn-chat, #next-btn-chat {

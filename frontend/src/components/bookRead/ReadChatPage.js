@@ -42,8 +42,7 @@ const ReadChatPage = () => {
     const [age, setAge] = useState(location.state?.age || '');
     const [interests, setInterests] = useState(location.state?.interest || '');
     const [showCaption, setShowCaption] = useState(true);
-
-    console.log(age, interests);
+    const [isMessageComplete, setIsMessageComplete] = useState(false);
     
     const penguin = './files/imgs/penguin1.svg';
     
@@ -95,7 +94,7 @@ const ReadChatPage = () => {
         setIsConnected(true);
 
         if (client.getTurnDetectionType() === 'server_vad') {
-        await wavRecorder.record((data) => client.appendInputAudio(data.mono));
+            await wavRecorder.record((data) => client.appendInputAudio(data.mono));
         }
     }, []);
 
@@ -212,12 +211,6 @@ const ReadChatPage = () => {
             playPageSentences();  
         }
     }, [pages, currentPage]);
-
-    const handleReplay = () => {
-        audio.pause();
-        setCurrentSentence(0);
-        playPageSentences();
-    };
 
     const handlePrevPage = () => {
         console.log(currentPage);
@@ -340,11 +333,11 @@ const ReadChatPage = () => {
 
                 **Keep your questions and responses concise. They should be no more than 30 words, and use simple vocabulary.**
                 !!FOR EACH ROUND, ONLY ASK ONE QUESTION SO IT WILL NOT CONFUSE THE CHILD.!!
+                !!DO NOT ASSUME THE CHILD'S ANSWER!!
             ` });
             
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
-            console.log(client.tools);
             if (client.tools.length == 0) {
                 client.addTool({
                     "name": "end_conversation",
@@ -382,7 +375,6 @@ const ReadChatPage = () => {
             });
             client.on('conversation.updated', async ({ item, delta }) => {
                 const items = client.conversation.getItems();
-                console.log(items);
                 if (delta?.transcript) {
                     setChatHistory(items);
                     const chatWindow = document.getElementById('chat-window');
@@ -392,13 +384,15 @@ const ReadChatPage = () => {
                     wavStreamPlayer.add16BitPCM(delta.audio, item.id);
                 }
                 if (item.status === 'completed' && item.formatted.audio?.length) {
-                const wavFile = await WavRecorder.decode(
-                    item.formatted.audio,
-                    24000,
-                    24000
-                );
-                item.formatted.file = wavFile;
+                    const wavFile = await WavRecorder.decode(
+                        item.formatted.audio,
+                        24000,
+                        24000
+                    );
+                    item.formatted.file = wavFile;
+                    console.log(items);
                 }
+                if (items.s)
                 setItems(items);
             });
             
@@ -457,6 +451,39 @@ const ReadChatPage = () => {
         trackMouse: true
     });
 
+    const handleImageClick = (event) => {
+        const { left, width } = event.currentTarget.getBoundingClientRect();
+        const clickX = event.clientX - left;
+    
+        if (clickX < width / 2) {
+            handlePrevPage();
+        } else {
+            handleNextPage();
+        }
+    };
+
+    const handleProgressBarClick = (event) => {
+        const progressBar = event.currentTarget;
+        const clickPosition = event.clientX - progressBar.getBoundingClientRect().left;
+        const progressBarWidth = progressBar.offsetWidth;
+        const clickRatio = clickPosition / progressBarWidth;
+        const newPage = Math.floor(clickRatio * pages.length);
+    
+        if (newPage >= 0 && newPage < pages.length) {
+            audio.pause();
+            setCurrentPage(newPage);
+            setCurrentSentence(0);
+            localStorage.setItem(`${title}-currentPage`, newPage);
+            localStorage.setItem(`${title}-currentSentence`, 0);
+        }
+    };
+
+    const handleReplay = (index) => {
+        console.log(index, chatHistory);
+        let replayAudio = new Audio(chatHistory[index].formatted.file.url);
+        replayAudio.play();
+    }
+
     return (
         <Box className="background-container">
             <Header user={user} title={title} hasTitle={true} />
@@ -496,13 +523,13 @@ const ReadChatPage = () => {
                                 <MdArrowCircleLeft size={60} color='#7AA2E3'/>
                             </IconButton>
 
-                            <Box id='book-img' {...swipeHandlers}>
+                            <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
                                 <img src={pages[currentPage]?.image} alt={`Page ${currentPage + 1}`}/>
                                 {showCaption && <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                     {pages[currentPage]?.text[currentSentence]}
-                                    <IconButton variant='plain' onClick={handleReplay} sx={{ opacity: 0.2, '&:hover': { opacity: 0.5 } }}>
+                                    {/* <IconButton variant='plain' onClick={handleReplay} sx={{ opacity: 0.2, '&:hover': { opacity: 0.5 } }}>
                                         <MdOutlineReplayCircleFilled size={30} color='#7AA2E3' />
-                                    </IconButton>
+                                    </IconButton> */}
                                 </h4>}
                             </Box>
 
@@ -519,7 +546,9 @@ const ReadChatPage = () => {
                     </Box>
                     <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
                         <h4>Page {currentPage + 1} of {pages.length}</h4>
-                        <LinearProgress determinate value={ (currentPage + 1) / pages.length * 100} />
+                        <Box onClick={handleProgressBarClick} sx={{ cursor: 'pointer', width: '100%' }}>
+                            <LinearProgress determinate value={(currentPage + 1) / pages.length * 100} />
+                        </Box>
                     </Box>
                 </Box>
 
@@ -538,13 +567,20 @@ const ReadChatPage = () => {
                                             <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "1vw"}}>{user.substring(0, 2)}</Avatar>
                                             <Box id="msg-bubble">
                                                 <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
+                                                {msg.status === 'completed' && (
+                                                    <IconButton variant='plain' onClick={() => handleReplay(index)}>
+                                                        <MdOutlineReplayCircleFilled size={30} color='#7AA2E3' />
+                                                    </IconButton>
+                                                )}
                                             </Box>
                                         </Box>
                                     ) : (
                                         <Box id="chatbot-chat">
                                             <Image id='chatbot-avatar' src={penguin}></Image>
                                             <Box id="msg-bubble">
-                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
+                                                <h5 level='body-lg' style={{margin: '0px'}}>
+                                                    {msg.content[0].transcript}
+                                                </h5>
                                             </Box>
                                         </Box>
                                     )}

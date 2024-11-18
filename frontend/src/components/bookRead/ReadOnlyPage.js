@@ -64,6 +64,9 @@ const ReadOnlyPage = () => {
                         playNextSentence();
                     };
                     audio.play();
+                } else {
+                    console.log('this page ends');
+                    handleNextPage();
                 }
             };
             playNextSentence();

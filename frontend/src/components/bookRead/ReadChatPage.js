@@ -481,6 +481,7 @@ const ReadChatPage = () => {
     
         if (newPage >= 0 && newPage < pages.length) {
             audio.pause();
+            setIsKnowledge(false);
             setCurrentPage(newPage);
             setCurrentSentence(0);
             localStorage.setItem(`${title}-currentPage`, newPage);

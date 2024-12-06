@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { Container, Typography, Box, Button } from '@mui/joy';
+import { Container, Typography, Box, Button, Input } from '@mui/joy';
 import { FloatingLabel, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { GiSpellBook } from "react-icons/gi";
 
 const LandingPage = () => {
     const [username, setUsername] = useState(""); // State to store username
     const [error, setError] = useState(""); // State to store validation error
     const [responseMessage, setResponseMessage] = useState('');
+    const [password, setPassword] = useState(""); // State to store password
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -25,13 +27,14 @@ const LandingPage = () => {
               },
               body: JSON.stringify({
                 username: username,
+                password: password,
               }), 
             });
             if (response.ok) {
                 setError("");
                 navigate('/select', { state: { user: username } });
             } else {
-                setError("Username is already taken.");
+                setError("Password is incorrect.");
                 return;
             }
           } catch (error) {
@@ -42,30 +45,44 @@ const LandingPage = () => {
 
     return (
         <Container className="login-container">
+            <div className="logo-container">
+                <GiSpellBook size={80} color='#229799' />
+            </div>
             <Box id='login-box'>
-                <h1>Let's read!</h1>
-                <h3>Enter your username.</h3>
+                <h1 style={{ marginBottom: '30px', fontFamily: 'BM Jua' }}>Let's read with <span style={{ color: '#229799' }}>StoryMate</span>!</h1>
                 <Form id='login-form' onSubmit={handleSubmit}>
-                    <FloatingLabel id='login-label'
-                        controlId="floatingInput"
-                        label="Username"
-                        className="mb-3">
-                        <Form.Control
-                            type="text"
-                            placeholder="Your Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)} // Update username state
-                        />
-                    </FloatingLabel>
+                    <h4 style={{ textAlign: 'left', display: 'block', width: '100%' }}>What's your name?</h4>
+                    <Input
+                        type="text"
+                        placeholder="Your Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)} // Update username state
+                        id='login-input'
+                        style={{ borderRadius: '30px' }}
+                    />
                     
                     {/* Display error message if validation fails */}
-                    {<span className="error" style={{ height: '24px'}}>{error}</span>}
+                    {<span style={{ height: '36px'}}></span>}
+
+                    <h4 style={{ textAlign: 'left', display: 'block', width: '100%' }}>What's your password?</h4>
+                    <Input
+                        type="text"
+                        placeholder="Your Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)} // Update password state
+                        id='login-input'
+                        style={{ borderRadius: '30px' }}
+                    />
+                    {<span className="error" style={{ height: '36px'}}>{error}</span>}
 
                     <Button id='login-btn' className='mybtn' variant="solid" type="submit">
-                        Log In
+                        Get Started!
                     </Button>
                 </Form>
             </Box>
+            <div className="star">
+                <img src = './files/imgs/star.svg' alt='star' />
+            </div>
         </Container>
     );
 };

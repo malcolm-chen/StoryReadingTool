@@ -177,8 +177,10 @@ const ReadOnlyPage = () => {
                     <Switch className='caption-switch'
                         label="Caption"
                         checked={showCaption}
+                        onChange={(event) => setShowCaption(event.target.checked)}
+                        color={showCaption ? 'success' : 'neutral'}
+                        variant={showCaption ? 'solid' : 'outlined'}
                         endDecorator={showCaption ? 'On' : 'Off'}
-                        onChange={handleCaptionToggle}
                     />
                 </FormControl>
             </div>

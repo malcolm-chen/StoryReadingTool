@@ -119,8 +119,7 @@ const GreetPage = () => {
      * In push-to-talk mode, start recording
      * .appendInputAudio() for each sample
      */
-    const startRecording = async (e) => {
-        e.preventDefault();
+    const startRecording = async () => {
         setIsRecording(true);
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
@@ -136,8 +135,7 @@ const GreetPage = () => {
     /**
      * In push-to-talk mode, stop recording
      */
-    const stopRecording = async (e) => {
-        e.preventDefault();
+    const stopRecording = async () => {
         setIsRecording(false);
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
@@ -164,13 +162,15 @@ const GreetPage = () => {
                 Question 2: [Make a positive, affirmative response to the child's answer] Do you have any favorite topics? Like space, princesses, dinosaurs, or cars? You can talk about anything you like!
                 If you cannot recognize the child's response, you should tell the child that you cannot hear them, and ask the question again.
                 After question 2, acknowledge the child's stated interests, introduce the upcoming interactive story reading activity to the child, and end the conversation.
-                The introduction: We will now enter the read and chat mode. In this mode, we will explore knowledge together, and you can answer questions by clicking buttons on the screen. Are you ready? Let's start reading!` 
+                The introduction: We will now enter the read and chat mode. In this mode, we will explore knowledge together, and you can answer questions by clicking buttons on the screen. Are you ready? Let's start reading!
+                After the introduction, you should end the conversation. Don't ask any more questions or wait for the child's response.
+                `
             });
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
             client.addTool({
                 "name": "end_conversation",
-                "description": "Ends the conversation with the user",
+                "description": "Ends the conversation with the user immediately after the introduction",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -221,12 +221,12 @@ const GreetPage = () => {
                     wavStreamPlayer.add16BitPCM(delta.audio, item.id);
                 }
                 if (item.status === 'completed' && item.formatted.audio?.length) {
-                const wavFile = await WavRecorder.decode(
-                    item.formatted.audio,
-                    24000,
-                    24000
-                );
-                item.formatted.file = wavFile;
+                    const wavFile = await WavRecorder.decode(
+                        item.formatted.audio,
+                        24000,
+                        24000
+                    );
+                    item.formatted.file = wavFile;
                 }
                 setItems(items);
             });
@@ -288,28 +288,31 @@ const GreetPage = () => {
                         ))}
                     </Box>
                     {canPushToTalk && !isEnding && (
-                    <button id='chat-input-greet' 
-                    disabled={!isConnected || !canPushToTalk}
-                    onMouseDown={startRecording}
-                    onTouchStart={startRecording}
-                    onMouseUp={stopRecording}
-                    onTouchEnd={stopRecording}
-                    onContextMenu={(e) => e.preventDefault()}
-                    style={{
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                    >
+                        <button id='chat-input-greet' 
+                            disabled={!isConnected || !canPushToTalk}
+                            onClick={() => {
+                                if (isRecording) {
+                                    stopRecording();
+                                } else {
+                                    startRecording();
+                                }
+                            }}
+                            onContextMenu={(e) => e.preventDefault()}
+                            style={{
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
                             {isRecording && (
                                 <FaRecordVinyl size={40} color='#7AA2E3' style={{marginRight: "2vw"}} />
                             )}
                             {!isRecording && (
                                 <RiChatVoiceFill size={40} color='#7AA2E3' style={{marginRight: "2vw"}} />
                             )}
-                            <h4 id='voice-input-text'>{isRecording ? 'release to send' : 'push to talk'}</h4>
+                            <h4 id='voice-input-text'>{isRecording ? 'Speaking...Click tosend' : 'Click to talk'}</h4>
                        
                         </button>
                     )}
@@ -327,7 +330,6 @@ const GreetPage = () => {
                         <IconButton id='skip-btn' variant='plain' onClick={handleEndGreet} > <FaAnglesRight style={{ marginRight: '20px' }}/> Skip  </IconButton>
                     </div>                  
                 </Box>
-                
             </Box>
         </Box>
     )

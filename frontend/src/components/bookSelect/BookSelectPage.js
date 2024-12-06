@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Button, Box, Modal, Card, CardContent, ModalDialog, ModalClose } from '@mui/joy';
+import { Avatar, Button, Box, Card, CardContent, ModalDialog, ModalClose, CardCover, CardOverflow, IconButton } from '@mui/joy';
 import { Image } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GiSpellBook } from "react-icons/gi";
-import { FcNext } from "react-icons/fc";
-import { FcReading, FcIdea } from "react-icons/fc";
-import { IoLibrary } from "react-icons/io5";
-import Header from '../header';
+import { IoTimeOutline } from "react-icons/io5";
+import { MdTimelapse } from "react-icons/md";
+import { MdFavoriteBorder } from "react-icons/md";
+import { MdOutlineFavorite } from "react-icons/md";
+import Footer from '../footer';
 
 const BookSelectPage = () => {
     const navigate = useNavigate();
@@ -15,101 +15,193 @@ const BookSelectPage = () => {
     const [modeSet, setModeSet] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
+    const [curSelected, setCurSelected] = useState(0);
+    const [favorites, setFavorites] = useState([]);
+    const [bookList, setBookList] = useState([]);
+    const [finishedBooks, setFinishedBooks] = useState([]);
 
-    const handleOpenModal = (title) => {
-        setTitle(title);
-        setIsModalOpen(true);
-    };
+    useEffect(() => {
+        setBookList(
+            [
+                {'title': 'Amara and the Bats', 'time': '15min', 'progress': '0%'},
+                {'title': 'Oscar and the Cricket', 'time': '15min', 'progress': '0%'}
+            ]
+        );
+    }, []);
 
-    const handleCloseModal = () => {
-        setTitle('');
-        setIsModalOpen(false);
-    };
-    
-    const handleModeSelect = (isReadMode) => {
-        setModeSet(true); 
-        localStorage.setItem('modeSet', 'true');  
-        localStorage.setItem('isReadOnly', isReadMode.toString());  
-        navigate(isReadMode ? '/read' : '/greet', { state: {
-            title: title,
+    const isFavorite = (bookTitle) => favorites.includes(bookTitle);
+
+    const handleOpenBook = (bookTitle) => {
+        navigate('/read', { state: {
+            title: bookTitle,
             user: user
-        } }); 
+        } });
     };
+
+    console.log(favorites);
 
     return (
         <Box className="background-container">
-            <Header user={user} title={''} hasTitle={false} />
             <Box className='main-content'>
                 <Box className='instruction-box' id='instruction-box-library'>
-                    <h2 id='page-title'><IoLibrary size={30} color='#ffd803' style={{ marginRight: "1%" }} /> Library</h2>
+                    <h2 id='page-title'>My Library</h2>
                     <h4 className='instruction'>
-                        {/* <FcNext style={{ marginRight: "1%" }}/>  */}
-                        Select a book that you want to read!</h4>
+                        Select a book that you want to read!
+                    </h4>
                 </Box>
                 <Box spacing={3} className='library'>
-                    <div className='book-list'>
-                        <Card className="bookCardFrame" onClick={() =>handleOpenModal('Amara and the Bats')} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
-                            <CardContent className='bookCardContent'>
-                                <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
-                                <h3 className='book-card-title'>Amara and the Bats</h3>
-                            </CardContent>
-                            {/* <CardActions>
-                                <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
-                            </CardActions> */}
-                        </Card>
-                        <Card className="bookCardFrame" onClick={() =>handleOpenModal('Amara and the Bats')} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
-                            <CardContent className='bookCardContent'>
-                                <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
-                                <h3 className='book-card-title'>Amara and the Bats</h3>
-                            </CardContent>
-                            {/* <CardActions>
-                                <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
-                            </CardActions> */}
-                        </Card>
-                        <Card className="bookCardFrame" onClick={() =>handleOpenModal('Amara and the Bats')} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
-                            <CardContent className='bookCardContent'>
-                                <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
-                                <h3 className='book-card-title'>Amara and the Bats</h3>
-                            </CardContent>
-                            {/* <CardActions>
-                                <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
-                            </CardActions> */}
-                        </Card>
-                        <Card className="bookCardFrame" onClick={() =>handleOpenModal('Amara and the Bats')} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
-                            <CardContent className='bookCardContent'>
-                                <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
-                                <h3 className='book-card-title'>Amara and the Bats</h3>
-                            </CardContent>
-                            {/* <CardActions>
-                                <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
-                            </CardActions> */}
-                        </Card>
-                        <Card className="bookCardFrame" onClick={() =>handleOpenModal('Amara and the Bats')} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
-                            <CardContent className='bookCardContent'>
-                                <Image className='bookCover' src='./files/covers/AmaraAndTheBats.jpg' alt='AmaraAndTheBats' />
-                                <h3 className='book-card-title'>Amara and the Bats</h3>
-                            </CardContent>
-                            {/* <CardActions>
-                                <Button className='mybtn' variant='solid' size='md' sx={{backgroundColor: '#bae8e8', color: '#272343'}}>Read the book!</Button>
-                            </CardActions> */}
-                        </Card>
-                    </div>
+                    {curSelected === 0 &&
+                        <div className='book-list'>
+                            {bookList.map((book, index) => (
+                                <Card className="bookCardFrame" onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
+                                    <CardCover sx={{ borderRadius: '20px !important' }}>
+                                        <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='AmaraAndTheBats' />
+                                    </CardCover>
+                                    <IconButton variant="soft" sx={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+                                        {isFavorite(book.title) &&
+                                            <MdOutlineFavorite
+                                                style={{ color: '#E75C4F', fontSize: '25px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent card click event
+                                                    setFavorites(favorites.filter(title => title !== book.title));
+                                                }}
+                                            />
+                                        }
+                                        {!isFavorite(book.title) &&
+                                            <MdFavoriteBorder
+                                                style={{ color: '#272343', fontSize: '25px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent card click event
+                                                    setFavorites([...favorites, book.title]);
+                                                }}
+                                            />
+                                        }
+                                    </IconButton>
+                                    <CardOverflow className='bookCardContent'>
+                                        <h3 className='book-card-title' style={{
+                                            whiteSpace: 'nowrap', 
+                                            overflow: 'hidden', 
+                                            textOverflow: 'ellipsis' 
+                                        }}>{book.title}</h3>
+                                        <div className='book-card-info' style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                                            <p><IoTimeOutline /> <span className='book-card-info-value'>{book.time}</span></p>
+                                            <p><MdTimelapse/><span className='book-card-info-value'>{book.progress}</span></p>
+                                        </div>
+                                    </CardOverflow>
+                                </Card>
+                            ))}
+                        </div>
+                    }
+                    {curSelected === 1 &&
+                        <div className='book-list'>
+                            {/* If favorites is empty, show "No favorites yet" */}
+                            {favorites.length === 0 &&
+                                <h4>No favorites yet</h4>
+                            }
+                            {favorites.map((book, index) => (
+                                <Card className="bookCardFrame" onClick={() =>handleOpenBook(book)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
+                                    <CardCover sx={{ borderRadius: '20px !important' }}>
+                                        <img className='bookCover' src={`./files/covers/${book}.jpg`} alt='Book Cover' />
+                                    </CardCover>
+                                    <IconButton variant="soft" sx={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+                                        {isFavorite(book) &&
+                                            <MdOutlineFavorite
+                                                style={{ color: '#E75C4F', fontSize: '25px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent card click event
+                                                    setFavorites(favorites.filter(title => title !== book));
+                                                }}
+                                            />
+                                        }
+                                        {!isFavorite(book.title) &&
+                                            <MdFavoriteBorder
+                                                style={{ color: '#272343', fontSize: '25px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent card click event
+                                                    setFavorites([...favorites, book]);
+                                                }}
+                                            />
+                                        }
+                                    </IconButton>
+                                    <CardOverflow className='bookCardContent'>
+                                        <h3 className='book-card-title' style={{
+                                            whiteSpace: 'nowrap', 
+                                            overflow: 'hidden', 
+                                            textOverflow: 'ellipsis' 
+                                        }}>{book.title}</h3>
+                                        <div className='book-card-info' style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                                            <p><IoTimeOutline /> <span className='book-card-info-value'>15min</span></p>
+                                            <p><MdTimelapse/><span className='book-card-info-value'>{}</span></p>
+                                        </div>
+                                    </CardOverflow>
+                                </Card>
+                            ))}
+                        </div>
+                    }
+                    {curSelected === 2 &&
+                        <div className='book-list'>
+                            {finishedBooks.length === 0 &&
+                                <h4>No finished books yet</h4>
+                            }
+                            {finishedBooks.map((book, index) => (
+                                <Card className="bookCardFrame"  onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
+                                    <CardCover sx={{ borderRadius: '20px !important' }}>
+                                        <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='AmaraAndTheBats' />
+                                    </CardCover>
+                                    <IconButton variant="soft" sx={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+                                        {isFavorite(book.title) &&
+                                            <MdOutlineFavorite
+                                                style={{ color: '#E75C4F', fontSize: '25px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent card click event
+                                                    setFavorites(favorites.filter(title => title !== book.title));
+                                                }}
+                                            />
+                                        }
+                                        {!isFavorite(book.title) &&
+                                            <MdFavoriteBorder
+                                                style={{ color: '#272343', fontSize: '25px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent card click event
+                                                    setFavorites([...favorites, book.title]);
+                                                }}
+                                            />
+                                        }
+                                    </IconButton>
+                                    <CardOverflow className='bookCardContent'>
+                                        <h3 className='book-card-title' style={{
+                                            whiteSpace: 'nowrap', 
+                                            overflow: 'hidden', 
+                                            textOverflow: 'ellipsis' 
+                                        }}>{book.title}</h3>
+                                        <div className='book-card-info' style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                                            <p><IoTimeOutline /> <span className='book-card-info-value'>{book.time}</span></p>
+                                            <p><MdTimelapse/><span className='book-card-info-value'>{book.progress}</span></p>
+                                        </div>
+                                    </CardOverflow>
+                                </Card>
+                            ))}
+                        </div>
+                    }
                 </Box>
             </Box>
-            <Modal open={isModalOpen} onClose={handleCloseModal}>
+            {/* <Modal open={isModalOpen} onClose={handleCloseModal}>
                 <ModalDialog sx={{ padding: '36px' }}>
                     <ModalClose onClick={handleCloseModal} />
                     <h3>How do you want to read <i>{title}</i>?</h3>
                     <Box className='mode-select'>
                     <Button id='mode-btns' onClick={() => handleModeSelect(true)}><FcReading style={{ marginRight: "3vh" }} />  Read Only</Button>
-                        <h4 className='mode-text' sx={{ fontWeight: '300' }} >Enjoy reading along with a narration.</h4>
+                        
                     </Box>
                     <Box className='mode-select'>
                         <Button id='mode-btns' onClick={() => handleModeSelect(false)}><FcIdea style={{ marginRight: "3vh" }} />  Read and Chat</Button>
-                        <h4 className='mode-text' sx={{ fontWeight: '300' }} >Enjoy interactively reading with a reading mate.</h4>
                     </Box>
                 </ModalDialog>
-            </Modal>
+            </Modal> */}
+            <div className='sun'>
+                <img src = './files/imgs/sun.svg' alt='sun' />
+            </div>
+            <Footer user={user} curSelected={curSelected} setCurSelected={setCurSelected}/>
         </Box>
     );
 }

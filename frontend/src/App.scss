@@ -7,6 +7,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'BM Jua';
+  src: url('../public/files/fonts/Jua-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .App {
   text-align: center;
   width: 100%;
@@ -61,17 +68,32 @@
 }
 
 .login-container {
-  margin-left: 0;
-  height: 100%;
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  justify-items: center;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; // Full viewport height
+  width: 100vw;  // Full viewport width
+  position: relative;
 }
 
 .login-container Form {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.logo-container {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background-color: #E7F6F5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 36px;
+  margin-top: 130px;
 }
 
 #login-box {
@@ -81,7 +103,7 @@
   align-items: center;
   justify-items: center;
   margin: auto;
-  margin-top: 200px;
+  margin-top: 30px;
 }
 
 #login-form {
@@ -89,24 +111,38 @@
   margin-top: 30px;
 }
 
-#login-label {
+#login-input {
   width: 400px;
   height: 50px;
   margin: 10px 0;
+  border-radius: 30px;
+  font-size: 20px;
 }
 
 #login-btn {
   width: 400px;
-  height: 58px;
+  height: 72px;
   font-size: 20px;
+  border-radius: 30px;
+}
+
+.star {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.sun {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .mybtn {
-  background-color: #a2e3e3!important;
-  color: #272343!important;
-  &:hover {
-    background-color: #b7f8f8!important;
-  }
+  background-color: #01A2A5!important;
+  font-family: 'BM Jua'!important;
+  color: white!important;
+  font-size: 25px!important;
 }
 
 .header {
@@ -115,9 +151,29 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: #e3f6f5;
-  flex-basis: 64px;
+  background-color: #ffffff;
+  flex-basis: 90px;
   padding: 0 28px;
+}
+
+.footer {
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: row;
+  flex-basis: 128px;
+  z-index: 100;
+  bottom: 0;
+  background-color: white;
+}
+
+.footer-buttons {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-family: 'Inter', sans-serif;
 }
 
 .header-title {
@@ -135,11 +191,11 @@
   display: flex;
 }
 
-.main-content {
-  flex-grow: 1;
-  min-height: 0;
+#main-container {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
 }
 
 .instruction-box {
@@ -183,25 +239,33 @@
 .error {
   color: #d03050;
 }
+
 .book-list {
   // grid layout
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   column-gap: 20px;
   row-gap: 20px;
   justify-content: center;
+  height: 350px;
 }
 
 .bookCardFrame {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between; /* Ensures content is spaced out */
+  height: 100%;
+  border-radius: 20px !important;
 }
 
 .bookCardContent {
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   align-items: center;
+  margin-top: auto !important;
+  background-color: rgba(255, 255, 255, 0.8);
+  font-family: 'BM Jua';
+  height: 100px;
 }
 
 .bookCardContent h4 {
@@ -214,12 +278,9 @@
 }
 
 .bookCover {
-  width: fit-content;
   box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.5);
   // automatic width
-  width: 100%; 
-  max-width: 400px;
-  max-height: 400px;
+  width: calc(100% - 32px); 
 }
 
 .book-card-title {
@@ -274,18 +335,18 @@
 
 #book-content {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
   flex-grow: 1;
-  min-height: 0;
-  position: relative;
-  margin: 0;
+  max-height: calc(100% - 56px);
+  justify-content: center;
+  align-items: center;
 }
 
 #book-img {
   display: flex;
-  position: relative;
   justify-content: center;
+  max-height: 100%;
+  position: relative;
   img {
     max-width: 100%;
     max-height: 100%;
@@ -293,7 +354,8 @@
   }
   h4 {
     position: absolute;
-    width: 100%;
+    left: 0; /* Align to the left of the image */
+    right: 0; 
     color: #ffffff;
     font-weight: 500;
     font-family: 'Roboto', sans-serif;
@@ -301,12 +363,40 @@
     bottom: 0;
     margin: 0;
     background-color: #00000058;
-    // text-shadow: 
-    // -1px -1px 0 #35d0ff,  
-    //  1px -1px 0 #35d0ff,
-    // -1px  1px 0 #35d0ff,
-    //  1px  1px 0 #35d0ff;
+    text-align: center;
   }
+}
+
+#interaction-box {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 150px;
+  position: relative;
+}
+
+.penguin-message {
+  border-radius: 20px;
+  background: #BDF5F7;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  position: absolute;
+  right: 148px;
+  color: #057D7F;
+  font-family: 'BM Jua';
+  box-shadow: 0 5px 20px 0 rgba(6, 68, 65, 0.5);
+}
+
+#penguin-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  right: 32px;
 }
 
 #caption {
@@ -315,29 +405,58 @@
 }
 
 #prev-btn, #next-btn {
-  // position: absolute;
+  position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  height: 50%; 
+  height: fit-content;
+  z-index: 1;
 }
 
 #prev-btn {
-  // left: 100px;
-  height: fit-content;
+  left: 0;
 }
 
 #next-btn {
-  // right: 100px;
-  height: fit-content;
+  right: 0;
+}
+
+#play-btn-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  top: 128px;
+  right: 32px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+#caption-btn-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
 }
 
 #page-progress {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  /* margin: 8px; */
-  padding: 8px 40px;
   flex-grow: 1;
+  // left align
+  align-items: flex-start;
+  margin: 0;
 }
 
 .breadcrumbs-container {
@@ -369,7 +488,7 @@
 #chat-window {
   width: 100%;
   height: 300px;
-  background-color: #e3f6f584;
+  background-color: #ffffff00;
   border-radius: 16px;
   overflow-y: scroll;
   flex-grow: 1;
@@ -399,12 +518,16 @@
 }
 
 #msg-bubble {
-  background-color: #bae8e8;
+  background-color: #BDF5F7;
+  font-family: 'Inter', sans-serif;
+  font-style: bold;
   color: #272343;
   padding: 16px;
   margin: 8px;
   border-radius: 16px;
   text-align: left;
+  display: flex;
+  flex-direction: row;
 }
 
 #chatbot-avatar {
@@ -417,8 +540,8 @@
   height: 80px;
   margin-top: 16px;
   padding: 8px;
-  background-color: rgba(228, 234, 239, 0.425);
-  border-radius: 16px;
+  background-color: #1ECDD1;
+  border-radius: 50px;
   display: flex;
   align-items: center;
   justify-items: center;
@@ -447,42 +570,50 @@
   align-items: center;
 }
 
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex-grow: 1;
+}
+
 #chat-main-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   position: relative;
+  padding: 0;
 }
 
 #book-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  /* width: 55%;
-  height: 100%; */
-  width: 45%;
-  margin: 0 16px;
+  width: 100%;
   position: relative;
-  // background-color: #e3f6f5;
+  max-height: calc(100% - 150px);
 }
 
 #chat-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  /* width: 40%;
-  height: 100%; */
   margin: 0 16px;
   padding: 16px;
-  width: 50%;
+  width: calc(100% - 64px);
+  max-width: calc(100% - 64px);
   height: 50%;
-  position: relative;
+  position: absolute;
   box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.3);
   border-radius: 16px;
   position: absolute;
   z-index: 100;
-  right: 16px;
   bottom: 16px;
   background-color: #ffffff;
+  min-width: 0;
+  left: 16px;
+  // gradient background, set at 45%
+  background-image: linear-gradient(to bottom, #ffffff00, #F2FDFE 45%, #BDF5F7);
 }
 
 #prev-btn-chat, #next-btn-chat {
@@ -490,6 +621,7 @@
   top: 50%;
   transform: translateY(-50%);
   height: 50%; 
+  z-index: 1;
 }
 
 #prev-btn-chat {

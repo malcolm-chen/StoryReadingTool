@@ -8697,6 +8697,11 @@ react-transition-group@^4.4.5:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
+react-voice-visualizer@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/react-voice-visualizer/-/react-voice-visualizer-2.0.4.tgz#4c139b74f1956435bc8ce2a8f4b034672ba9edfb"
+  integrity sha512-YAdHVD/itgMsq7eLaoSX1dhl97PYHyRn1HnutuV4poygAhCXU/++BsEkmZMkxItpD7wadmayiVNX0BgMhuMgSg==
+
 react@^18.3.1:
   version "18.3.1"
   resolved "https://registry.yarnpkg.com/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"

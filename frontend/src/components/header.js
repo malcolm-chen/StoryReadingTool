@@ -6,7 +6,7 @@ export default function Header(args) {
     return (
         <div className='header' >
             <div className='back-button'>
-                <Link to='/select'><MdArrowBackIosNew /></Link>
+                <Link to='/select'><MdArrowBackIosNew size={24} color='#000000' /></Link>
             </div>
             {hasTitle && <h3 className="header-title">{title}</h3>}
             {!hasTitle && <div className='space' />}

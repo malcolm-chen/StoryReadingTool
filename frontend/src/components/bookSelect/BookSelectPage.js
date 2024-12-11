@@ -41,20 +41,20 @@ const BookSelectPage = () => {
     console.log(favorites);
 
     return (
-        <Box className="background-container">
+        <Box className="background-container background-container-library">
             <Box className='main-content'>
                 <Box className='instruction-box' id='instruction-box-library'>
-                    <h2 id='page-title'>My Library</h2>
+                    <h2 id='page-title'><img src='./files/imgs/penguin.svg' alt='logo' style={{ width: '60px', marginRight: '10px' }} /> My Library</h2>
                     <h4 className='instruction'>
-                        Select a book that you want to read!
+                        Reading Now
                     </h4>
                 </Box>
                 <Box spacing={3} className='library'>
                     {curSelected === 0 &&
                         <div className='book-list'>
                             {bookList.map((book, index) => (
-                                <Card className="bookCardFrame" onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
-                                    <CardCover sx={{ borderRadius: '20px !important' }}>
+                                <Card className="bookCardFrame" onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer', "--Card-radius": "30px" }}>
+                                    <CardCover>
                                         <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='AmaraAndTheBats' />
                                     </CardCover>
                                     <IconButton variant="soft" sx={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
@@ -113,7 +113,7 @@ const BookSelectPage = () => {
                                                 }}
                                             />
                                         }
-                                        {!isFavorite(book.title) &&
+                                        {!isFavorite(book) &&
                                             <MdFavoriteBorder
                                                 style={{ color: '#272343', fontSize: '25px' }}
                                                 onClick={(e) => {
@@ -128,7 +128,7 @@ const BookSelectPage = () => {
                                             whiteSpace: 'nowrap', 
                                             overflow: 'hidden', 
                                             textOverflow: 'ellipsis' 
-                                        }}>{book.title}</h3>
+                                        }}>{book}</h3>
                                         <div className='book-card-info' style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                                             <p><IoTimeOutline /> <span className='book-card-info-value'>15min</span></p>
                                             <p><MdTimelapse/><span className='book-card-info-value'>{}</span></p>
@@ -198,9 +198,9 @@ const BookSelectPage = () => {
                     </Box>
                 </ModalDialog>
             </Modal> */}
-            <div className='sun'>
+            {/* <div className='sun'>
                 <img src = './files/imgs/sun.svg' alt='sun' />
-            </div>
+            </div> */}
             <Footer user={user} curSelected={curSelected} setCurSelected={setCurSelected}/>
         </Box>
     );

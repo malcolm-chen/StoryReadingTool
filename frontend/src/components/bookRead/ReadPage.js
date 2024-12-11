@@ -218,6 +218,12 @@ const ReadChatPage = () => {
                     // setIsPlaying(false);
                     if (currentPage in knowledge) {
                         setIsKnowledge(true);
+                        if (!isClientSetup) {
+                            setupClient(instruction4Guiding);
+                            setIsClientSetup(true);
+                        } else {
+                            updateClientInstruction(instruction4Guiding);
+                        }
                     } else {
                         setIsKnowledge(false);
                     }
@@ -289,18 +295,18 @@ const ReadChatPage = () => {
 
 
     const instruction4Asking = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook and asking questions about it.
+        You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
 
         Instructions:
         - Start by asking 'Hey ${user}, what do you want to know about this page?'
         - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
-        - You need to actively answer the child's questions and provide simple explanations to help them comprehend the story.
+        - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
 
         **Important Reminders**:
-            - Maintain concise responses: each should be no more than 25 words, using simple vocabulary.
-            - Do not assume the child's response.
-            - Do not ask questions.
-            - Only recognize the child's answer in English.
+        - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
+        - Do not make up the child's response, if you do not get response, just ask again.
+        - Do not ask questions.
+        - Only recognize the child's answer in English.
 
         Essential Details:
         - **Story Title**: ${title}
@@ -308,37 +314,39 @@ const ReadChatPage = () => {
         `
     
     const instruction4Guiding = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Your dialogue will alternate with the child's, and you'll ask up to three questions per session. If the child shows good understanding, ask fewer questions.
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook.Your role is to guide a fun, interactive conversation while keeping it simple and clear.
 
-            Instructions for the Conversation:
-            1. ASK ONLY ONE QUESTION PER TURN. In your conversation, use declarative sentences all the way up and ONLY ASK ONE question at the end.
-            2. Ensure your questions are age-appropriate and align with the child's interests. Use a friendly, conversational style, with simple and engaging language.
-            3. Base each question on a "concept word" found in the story text, integrating external knowledge related to it. This helps enrich the child's learning experience.
+        Instructions for the Conversation:
+            1. **ASK ONLY ONE QUESTION PER TURN.** For each turn, use declarative sentences all the way up and ONLY ASK ONE question at the end.
+            2. Use a friendly, conversational style suitable for a 6-8-year-old child. Keep sentences simple, engaging, and under 25 words.
+            3. Base all questions on ONE "concept word" as your topic, scaffolding the child's knowledge on it by integrating the external knowledge I provide. This helps enrich the child's learning experience.
             4. Start the conversation by saying something related to the story context, and then extend to external knowledge.
-            5. After three rounds of questions, you should ask the children if they have any other questions. If not,end the conversation.
+        
+        **Behavior Examples**:
+            - Good: "The story says the rabbit hid in a burrow. What do you think animals use burrows for?"
+            - Good: "In 'Amara and the Bats,' her mom talks about bats being the only mammals that can fly. Can you think of another mammal?"
+            - Bad: "The story says the rabbit hid in a burrow. What do you think animals use burrows for? Do you know how rabbits dig burrows?"
+            - Bad: "In 'Amara and the Bats,' her mom talks about bats being the only mammals that can fly. Did you know all mammals have a backbone? Can you think of another mammal?"
 
-            Evaluation: 
-            - Judge the correctness of the child's answers.
-            - Provide friendly and encouraging feedback.
-            - Explain the correct answer if needed.
-            - If the dialogue continues, proceed to the next question.
+        **Instructions for the Conversation**:
+            - Start each turn by mentioning something related to the story or external knowledge.
+            - After three rounds of questions, ask if the child has any questions. If they don’t, politely end the conversation.
 
-            Guidelines for Responses:
-            - If the child answers incorrectly, gently guide them to the right answer, encouraging them to think it through.
-            - If you cannot recognize the child's answer in English, or no response is received, say, "I didn't hear your answer, can you say it again?"
+        **Response Guidelines**:
+            - Evaluate the child's answers and provide friendly, encouraging feedback. 
+            - If the child is incorrect, gently guide them to the right answer.
+            - If you don’t understand the child’s answer or receive no response, say: "I didn’t hear your answer. Can you say it again?"
 
-            Essential Details:
+        **Story Information**:
             - **Story Title**: ${title}
             - **Story Text**: ${pages[currentPage]?.text.join(' ')}
             - **Concept Word**: ${knowledge[currentPage]?.keyword}
             - **External Knowledge**: ${knowledge[currentPage]?.knowledge}
 
-            **Important Reminders**:
-            - Maintain concise responses: each should be no more than 25 words, using simple vocabulary.
-            - Ask only one question each turn to avoid confusion.
-            - Avoid assuming the child's response.
-            - Only ask and recognize the child's answer in English.
-        `
+        **Reminders**:
+            - Always ask only one question per turn.
+            - Use only English for questions and recognize only English answers.
+            - Avoid assuming or making up the child’s response.                 `
 
 
     const updateClientInstruction = async (instruction) => {
@@ -619,17 +627,21 @@ const ReadChatPage = () => {
                 </Box>
             </div>
             <div id='interaction-box'>
+                {/* hide the part of img exceeding the interaction box */}
+                <img src='./files/imgs/penguin-bg.svg' alt='penguin' style={{ width: '500px', position: 'absolute', bottom: '0', left: '0', overflow: 'hidden', zIndex: -1 }}></img>
                 {(!isKnowledge || !isAsking) && 
-                    <div className='penguin-message'>
-                        { isKnowledge ? 'I want to talk something about this page!' : 'Click me to ask anything you want about the story!'}
+                    // add an animation effect, let the message box flow up and down for 5 seconds  
+                    <div className='penguin-message' onClick={handlePenguinClick} >
+                        {/* add a triangle at the right of the message box, as a message tail */}
+                        <div className='message-tail'></div>
+                        { isKnowledge ? 'I want to talk something about this page!' : `Hey ${user}, click me to ask anything you want about the story! 😃`}
                     </div>
                 }
                 <div id='penguin-box' onClick={handlePenguinClick}>
-                    <Image id='penguin' src={penguin} style={{ width: '96px', height: '96px' }}></Image>
-                    <h4 style={{ fontFamily: 'BM JUA', fontSize: '20px' }}>Sparky✨</h4>
+                    <img src='./files/imgs/penguin.svg' alt='penguin' style={{ width: '128px' }}></img>
                 </div>
             </div>
-            {(isAsking) && (
+            {(isAsking || isKnowledge) && (
                     <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (
@@ -651,10 +663,10 @@ const ReadChatPage = () => {
                                     position: 'absolute',
                                     top: '8px',
                                     left: '8px',
-                                    zIndex: 1
+                                    zIndex: 1,
                                 }}
                             >
-                            {isExpandedChat ? <AiOutlineShrink size={20} color='#7AA2E3' /> : <AiOutlineExpand size={20} color='#7AA2E3' />}
+                            {isExpandedChat ? <AiOutlineShrink size={40} color='#7AA2E3' /> : <AiOutlineExpand size={40} color='#7AA2E3' />}
                         </IconButton>
                         <IconButton
                             onClick={handleCloseChat}
@@ -666,7 +678,7 @@ const ReadChatPage = () => {
                             }}
                         >
                             {/* add a close icon */}
-                            <MdClose size={20} color='#7AA2E3' />
+                            <MdClose size={40} color='#7AA2E3' />
                         </IconButton>
                     <Box id='chat-window'>
                         
@@ -692,13 +704,13 @@ const ReadChatPage = () => {
                                     </Box>
                                 ) : (
                                     <Box id="chatbot-chat">
-                                        <Image id='chatbot-avatar' src={penguin}></Image>
-                                        <Box id="msg-bubble" style={{ position: 'relative' }} >
+                                        <Image id='chatbot-avatar' src='./files/imgs/penguin.svg'></Image>
+                                        <Box id="msg-bubble" style={{ position: 'relative' }} onClick={() => handleReplay(index)}>
                                             <h5 level='body-lg' style={{margin: '0px', marginRight: '30px'}}>
                                                 {msg.content[0].transcript}
                                             </h5>
                                             {msg.status === 'completed' && (
-                                                <IconButton variant='plain' onClick={() => handleReplay(index)} style={{ 
+                                                <IconButton variant='plain' style={{ 
                                                     position: 'absolute', 
                                                     right: '8px', 
                                                     bottom: '8px', 

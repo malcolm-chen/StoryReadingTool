@@ -46,10 +46,9 @@ const LandingPage = () => {
     return (
         <Container className="login-container">
             <div className="logo-container">
-                <GiSpellBook size={80} color='#229799' />
+                <img src='./files/imgs/penguin-login.svg' alt='logo' style={{ width: '800px' }} />
             </div>
             <Box id='login-box'>
-                <h1 style={{ marginBottom: '30px', fontFamily: 'BM Jua' }}>Let's read with <span style={{ color: '#229799' }}>StoryMate</span>!</h1>
                 <Form id='login-form' onSubmit={handleSubmit}>
                     <h4 style={{ textAlign: 'left', display: 'block', width: '100%' }}>What's your name?</h4>
                     <Input
@@ -58,7 +57,7 @@ const LandingPage = () => {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)} // Update username state
                         id='login-input'
-                        style={{ borderRadius: '30px' }}
+                        style={{ borderRadius: '35px', padding: '0' }}
                     />
                     
                     {/* Display error message if validation fails */}
@@ -71,18 +70,20 @@ const LandingPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)} // Update password state
                         id='login-input'
-                        style={{ borderRadius: '30px' }}
+                        style={{ borderRadius: '35px', padding: '0' }}
                     />
                     {<span className="error" style={{ height: '36px'}}>{error}</span>}
 
                     <Button id='login-btn' className='mybtn' variant="solid" type="submit">
+                        <div style={{ width: '80%', height: '15px', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '10px', borderRadius: '30px' }}></div>
+                        <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '50px', height: '50px', position: 'absolute', top: '2px', right: '5px', borderRadius: '50%' }} />
                         Get Started!
                     </Button>
                 </Form>
             </Box>
-            <div className="star">
+            {/* <div className="star">
                 <img src = './files/imgs/star.svg' alt='star' />
-            </div>
+            </div> */}
         </Container>
     );
 };

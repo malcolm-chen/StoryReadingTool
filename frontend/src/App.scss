@@ -67,6 +67,10 @@
   justify-items: center;
 }
 
+.background-container-library {
+  background-image: linear-gradient(to bottom, #0FD7DC, #A5FDFF);
+}
+
 .login-container {
   display: flex !important;
   flex-direction: column;
@@ -75,6 +79,8 @@
   height: 100vh; // Full viewport height
   width: 100vw;  // Full viewport width
   position: relative;
+  // linear gradient background from top left to bottom right
+  background-image: linear-gradient(to bottom right, #0FD7DC, #A5FDFF);
 }
 
 .login-container Form {
@@ -84,16 +90,11 @@
 }
 
 .logo-container {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background-color: #E7F6F5;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
-  margin-bottom: 36px;
-  margin-top: 130px;
+  margin-top: calc((100vh - 800px)/2);
 }
 
 #login-box {
@@ -108,22 +109,23 @@
 
 #login-form {
   width: 400px;
-  margin-top: 30px;
 }
 
 #login-input {
   width: 400px;
   height: 50px;
   margin: 10px 0;
+  padding: 0 16px;
   border-radius: 30px;
-  font-size: 20px;
+  font-size: 25px;
 }
 
 #login-btn {
   width: 400px;
   height: 72px;
-  font-size: 20px;
-  border-radius: 30px;
+  font-size: 30px;
+  border-radius: 35px;
+  box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.3);
 }
 
 .star {
@@ -139,10 +141,12 @@
 }
 
 .mybtn {
-  background-color: #01A2A5!important;
+  background-color: #00CED3!important;
   font-family: 'BM Jua'!important;
   color: white!important;
-  font-size: 25px!important;
+  font-size: 30px!important;
+  border-radius: 35px!important;
+  position: relative;
 }
 
 .header {
@@ -165,6 +169,8 @@
   z-index: 100;
   bottom: 0;
   background-color: white;
+  // the border radius is not working
+  border-radius: 30px 30px 0 0;
 }
 
 .footer-buttons {
@@ -200,13 +206,13 @@
 
 .instruction-box {
   display: flex;
-  margin-left: 36px;
+  margin-left: 48px;
   flex-direction: column;
   text-align: left;
 }
 
 #instruction-box-library {
-  margin-top: 24px;
+  margin-top: 36px;
 }
 
 .instruction-box-greet {
@@ -219,11 +225,12 @@
 
 .instruction {
   float: left;
-  color: #2723439c !important; 
+  color: #000000E5 !important; 
 }
 
 #page-title {
   font-size: 2rem;
+  font-weight: 800;
 }
 
 #caption {
@@ -234,7 +241,7 @@
 
 
 .library {
-  margin: 36px;
+  margin: 48px;
 }
 .error {
   color: #d03050;
@@ -255,7 +262,6 @@
   flex-direction: column !important;
   justify-content: space-between; /* Ensures content is spaced out */
   height: 100%;
-  border-radius: 20px !important;
 }
 
 .bookCardContent {
@@ -278,7 +284,7 @@
 }
 
 .bookCover {
-  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.5);
   // automatic width
   width: calc(100% - 32px); 
 }
@@ -376,19 +382,43 @@
   position: relative;
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+// add an animation effect, let the message box flow up and down for 5 seconds  
 .penguin-message {
   border-radius: 20px;
-  background: #BDF5F7;
-  padding: 16px;
+  background: #9CF3F5;
+  padding: 24px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  // left align the text
+  text-align: left;
   font-size: 25px;
   position: absolute;
-  right: 148px;
-  color: #057D7F;
+  right: 200px;
+  max-width: 500px;
+  color: #003E40;
   font-family: 'BM Jua';
-  box-shadow: 0 5px 20px 0 rgba(6, 68, 65, 0.5);
+  animation: float 5s infinite;
+}
+
+.message-tail {
+  // the triangle is not working
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 30px;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  border-left: 20px solid #9CF3F5;
 }
 
 #penguin-box {
@@ -397,6 +427,7 @@
   align-items: center;
   position: absolute;
   right: 32px;
+  top: -32px;
 }
 
 #caption {
@@ -494,7 +525,8 @@
   flex-grow: 1;
   justify-content: center;
   position: relative;
-  margin-top: 24px;
+  margin-top: 48px;
+  padding: 0 16px;
 }
 
 #chatbot-chat {

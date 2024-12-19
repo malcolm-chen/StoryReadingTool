@@ -45,8 +45,11 @@ const ReadChatPage = () => {
     const [audioSpeed, setAudioSpeed] = useState(1);
     const [isPlaying, setIsPlaying] = useState(true);
     const [isAsking, setIsAsking] = useState(false);
+    const [isAsked, setIsAsked] = useState(false);
     const recorderControls = useVoiceVisualizer();
-
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [itemToRespond, setItemToRespond] = useState(null);
+    const [evaluation, setEvaluation] = useState(null);
     const penguin = './files/imgs/penguin1.svg';
     
     const wavRecorderRef = useRef(
@@ -159,9 +162,73 @@ const ReadChatPage = () => {
         const wavRecorder = wavRecorderRef.current;
         await wavRecorder.pause();
         recorderControls.stopRecording();
-        client.createResponse();
-    };
+        // client.createResponse();
+        if (isKnowledge) {
+            client.realtime.send('input_audio_buffer.commit');
+            client.conversation.queueInputAudio(client.inputAudioBuffer);
+            client.inputAudioBuffer = new Int16Array(0);
+            await client.realtime.send('response.create', {
+                response: {
+                    "modalities": ["text", "audio"],
+                    "instructions": `
+                       **Instructions for Evaluation**:
+                       Based on current conversation and the child's latest response, make an evaluation, and then provide a suggested questioning strategy for the follow-up question:
+                       1. Evaluate the child's response:
+                       - Correct: if the child's response is correct
+                       - Incorrect: if the child's response is incorrect
+                       - Off topic: if the child's response is off topic
+                       2. If the child's response is incorrect, provide a suggested questioning strategy for the follow-up question:
+                       <Example 1>
+                       previous question: Okay. Here is our first question. What is the value of 10/5?
+                       student's answer: 50
+                       error type: misinterpret
+                       strategy: simplify_question
 
+                       <Example 2>
+                       previous question: Let me know if you need any help with it. What is 3 multiplied by 4?
+                       student's answer: 20
+                       error type: guess
+                       strategy: provide_strategy
+
+                       <Example 3>
+                       previous question: For today, we will focus on \"Rounding.\" What is the place value of 2 in 521?
+                       student's answer: 20
+                       error type: guess
+                       strategy: provide_strategy
+
+                       <Example 4>
+                       previous question: For today, we will focus on \"Rounding.\" What is the place value of 2 in 521?
+                       student's answer: 200
+                       error type: guess
+                       strategy: provide_hint
+
+                       <Example 5>
+                       previous question: Are you there connected with me in the session? Please re-check your answer. What is the product of 12 and 6?
+                       student's answer: 62
+                       error type: careless
+                       strategy: provide_hint
+
+                       **Instructions for Response Format**:
+                       Before each your response, add a mark: <eval>.
+                       For example:
+                       1. <eval>The child's response is incorrect. Strategy for the follow-up question: provide_hint
+                       2. <eval>The child's response is correct.
+                       3. <eval>The child's response is off topic. Strategy for the follow-up question: steer_back_to_topic
+                    `,
+                }
+            });
+        } else {
+            client.createResponse();
+        }
+        // client.on('realtime.event', ({ time, source, event }) => {
+        //     // time is an ISO timestamp
+        //     // source is 'client' or 'server'
+        //     // event is the raw event payload (json)
+        //     if (source === 'server') {
+        //       console.log(event);
+        //     }
+        //   });
+    };
 
     useEffect(() => {
         const loadStory = async () => {
@@ -197,10 +264,10 @@ const ReadChatPage = () => {
     };
 
 
-    const playPageSentences = () => {
+    const playPageSentences = async () => {
         if (pages[currentPage]?.text) {
             let sentenceIndex = 0;
-            const playNextSentence = () => {
+            const playNextSentence = async () => {
                 // console.log(sentenceIndex, pages[currentPage].text.length);
                 setAudioPage(currentPage);
                 if (sentenceIndex < pages[currentPage].text.length) {
@@ -218,11 +285,18 @@ const ReadChatPage = () => {
                     // setIsPlaying(false);
                     if (currentPage in knowledge) {
                         setIsKnowledge(true);
-                        if (!isClientSetup) {
+                        audio.pause();
+                        setIsPlaying(false);
+                        // check if the client is not setup for guiding
+                        if (!isClientSetup && !isAsked) {
                             setupClient(instruction4Guiding);
                             setIsClientSetup(true);
                         } else {
-                            updateClientInstruction(instruction4Guiding);
+                            await disconnectConversation();
+                            const client = clientRef.current;
+                            client.reset();
+                            setupClient(instruction4Guiding);
+                            setIsClientSetup(true);
                         }
                     } else {
                         setIsKnowledge(false);
@@ -251,6 +325,7 @@ const ReadChatPage = () => {
             audio.currentTime = 0;
             setIsKnowledge(false);
             setIsAsking(false);
+            setIsAsked(false);
             setChatHistory([]);
             if (isClientSetup) {
                 console.log('disconnecting conversation');
@@ -276,6 +351,7 @@ const ReadChatPage = () => {
             // setIsPlaying(false);
             setIsKnowledge(false);
             setIsAsking(false);
+            setIsAsked(false);
             setChatHistory([]);
             if (isClientSetup) {
                 console.log('disconnecting conversation');
@@ -314,39 +390,107 @@ const ReadChatPage = () => {
         `
     
     const instruction4Guiding = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook.Your role is to guide a fun, interactive conversation while keeping it simple and clear.
-
-        Instructions for the Conversation:
-            1. **ASK ONLY ONE QUESTION PER TURN.** For each turn, use declarative sentences all the way up and ONLY ASK ONE question at the end.
-            2. Use a friendly, conversational style suitable for a 6-8-year-old child. Keep sentences simple, engaging, and under 25 words.
-            3. Base all questions on ONE "concept word" as your topic, scaffolding the child's knowledge on it by integrating the external knowledge I provide. This helps enrich the child's learning experience.
-            4. Start the conversation by saying something related to the story context, and then extend to external knowledge.
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
         
-        **Behavior Examples**:
-            - Good: "The story says the rabbit hid in a burrow. What do you think animals use burrows for?"
-            - Good: "In 'Amara and the Bats,' her mom talks about bats being the only mammals that can fly. Can you think of another mammal?"
-            - Bad: "The story says the rabbit hid in a burrow. What do you think animals use burrows for? Do you know how rabbits dig burrows?"
-            - Bad: "In 'Amara and the Bats,' her mom talks about bats being the only mammals that can fly. Did you know all mammals have a backbone? Can you think of another mammal?"
+         **Story Information**:
+        - Story Title: ${title}
+        - Story Text: ${pages[currentPage]?.text.join(' ')}
+        - Concept Word: ${knowledge[currentPage]?.keyword}
+        - Learning Objective: ${knowledge[currentPage]?.learning_objective}
+        - External Knowledge: ${knowledge[currentPage]?.knowledge}
+        - Performance Expectation: ${knowledge[currentPage]?.performance_expectation}
+        - First Question: ${knowledge[currentPage]?.first_question}
 
         **Instructions for the Conversation**:
-            - Start each turn by mentioning something related to the story or external knowledge.
-            - After three rounds of questions, ask if the child has any questions. If they don’t, politely end the conversation.
+            1. Initiate Conversation:
+                Begin the interaction by posing the first question, which will guide to the concept word.
+            2. During the Conversation (Three Turns in All):
+                a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
+                b. Evaluate Response: Before responding, evaluate the child’s answer, which should fall into one of three categories: Correct/Incorrect/Off topic
+                c. Respond:
+                    i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers. If the response is off topic, gently steer the conversation back to the original topic.
+                    ii. Explanation:
+                        For correct answers, provide a concise explanation to deepen understanding.
+                        For incorrect answers, scaffold further to guide the child’s thinking.
+                    iii. Follow-up question: if the conversation is not ended, pose a related question based on previous question to continue the discussion or transition to the end of the conversation.
+            3. End Conversation:
+                After asking 3 to 4 questions in total, ask if the child has any questions. If the child needs scaffolding, you can use more rounds.
+                If they don’t have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
 
         **Response Guidelines**:
-            - Evaluate the child's answers and provide friendly, encouraging feedback. 
-            - If the child is incorrect, gently guide them to the right answer.
-            - If you don’t understand the child’s answer or receive no response, say: "I didn’t hear your answer. Can you say it again?"
+        - Maintain a friendly, conversational tone suitable for a 6-8-year-old child.
+        - Keep sentences simple, engaging, and under 25 words.
+        - Use English exclusively for questions and responses.
+        - Avoid assuming or making up the child’s response. If you do not get response, just ask again.
+        - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.
 
-        **Story Information**:
-            - **Story Title**: ${title}
-            - **Story Text**: ${pages[currentPage]?.text.join(' ')}
-            - **Concept Word**: ${knowledge[currentPage]?.keyword}
-            - **External Knowledge**: ${knowledge[currentPage]?.knowledge}
+        **In-Context Learning Examples**:
+        [Example 1]
+        Teacher's first question: What is Amara’s favorite animal?
+        Child: Bats
+        Teacher: 
+            {Acknowledgement}: Yes, that’s correct. 
+            {Explanation}: Bats are Amara’s favorite animals!
+            {Follow-up question}: What is one thing you know about bats?
+        Child: They can fold their wings
+        Teacher:
+            {Acknowledgement}: Wow, that is a great observation!
+            {Explanation}: Like you said, bats can fold their wings in different situations.
+            {Follow-up question}: When do you think bats fold their wings? 
+        Child: Sleep
+        Teacher:
+            {Acknowledgement}: Great job! That’s what I am thinking about too!
+            {Explanation}: Bats fold their wings when they sleep, but guess what? They also fold them when it rains to stay dry, just a rain jacket! Isn’t that so interesting?
 
-        **Reminders**:
-            - Always ask only one question per turn.
-            - Use only English for questions and recognize only English answers.
-            - Avoid assuming or making up the child’s response.                 `
+        [Example 2]
+        Teacher's first question: How did Amara and her family make sure the bat is safe without touching it?
+        Child: Another person can catch it safely
+        Teacher:
+            {Acknowledgement}: Yeah, good thinking!
+            {Explanation}: Amara and her family wait for the other person to catch it, so that the bat won't get hurt.
+            {Follow-up question}: Who is the person they are waiting for?
+        Child: The person who gets pets can look after them
+        Teacher:
+            {Acknowledgement}: Ah! Interesting idea! 
+            {Explanation}: Let’s talk about what to call the person who takes care of pets. Think about how you call the person who helps in fire emergencies a firefighter
+            {Follow-up question}: What do we call that person who helps catch and take care of the bat?
+        Child: I don’t remember
+        Teacher:
+            {Acknowledgement}: That’s okay!
+            {Explanation}: The people who help animals like the bat are called a “wildlife rescuer”. They are trained to help wild animals like bats stay safe.
+            {Follow-up question}: Can we keep bats as regular pets like dogs and cats?
+        Child: No
+        Teacher:
+            {Acknowledgement}: I bet!  
+            {Explanation}: Bats aren’t pets like dogs and cats because they are wild animals and they need to live in nature.
+
+        [Example 3]
+        Teacher's first question: What did the wildlife rescue team do with the bat?
+        Child: Kept it safe
+        Teacher:
+            {Acknowledgement}: Excellent! You are really paying attention to the story details!
+            {Explanation}: The wildlife rescue team is making sure the bat is safe and helping them go back to nature. 
+            {Follow-up question}: Let’s make a closer observation. What did they use to keep the bat safe?
+        Child: A big jar so it can fly around
+        Teacher:
+            {Acknowledgement}: Aha! You jumped ahead of me a little bit, but that’s okay. 
+            {Explanation}: Before the bat got into the jar, the wildlife rescuer first used a towel to gently catch the bat and then placed it in the jar. 
+            {Follow-up question}: What did Amara notice about the bat’s appearance when she saw it up close? 
+        Child: Different than a dog and a cat
+        Teacher:
+            {Acknowledgement}: You’re on the right track! 
+            {Explanation}: Bats look different from dogs and cats because bats have wings, while dogs and cats do not.
+            {Follow-up question}: Let’s take a closer look at this bat’s picture. How did Amara describe the bat’s face?
+        Child: I think it’s kind of fluffy
+        Teacher:
+            {Acknowledgement}: Exactly! 
+            {Explanation}: The bat has a fluffy face
+            {Follow-up question}: Do you know what beady eyes are?
+        Child: like the bat’s eyes
+        Teacher:
+            {Acknowledgement}: Yes bat’s eyes are beady
+            {Explanation}: Beady means small, shiny, and round, just like the bat’s eyes.
+        `
 
 
     const updateClientInstruction = async (instruction) => {
@@ -365,29 +509,25 @@ const ReadChatPage = () => {
             
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
-            if (client.tools.length == 0) {
-                client.addTool({
-                    "name": "end_conversation",
-                    "description": "Ends the conversation with the user",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "end": {
-                                "type": "boolean",
-                                "description": "Whether to end the conversation",
-                            }
-                        },
-                        "required": ["end"]
-                    }
-                },
-                async ({end}) => {
-                    if (end) {
-                        console.log('ending conversation');
-                        setIsEnding(true);
-                        // await disconnectConversation();
-                    }
-                });
-            }
+            // if (client.tools.length == 0) {
+            //     client.addTool({
+            //         "name": "answer_evaluation",
+            //         "description": "After the child answers the question, and before you provide feedback, evaluate the answer",
+            //         "parameters": {
+            //             "type": "object",
+            //             "properties": {
+            //                 "child_response": {
+            //                     "type": "string",
+            //                     "description": "the child's answer",
+            //                 }
+            //             },
+            //             "required": ["child_response"]
+            //         }
+            //     },
+            //     async ({child_response}) => {
+            //         console.log(child_response);
+            //     });
+            // }
             // client.updateSession({
             //     turn_detection: { type: 'server_vad' }, // or 'server_vad'
             //     input_audio_transcription: { model: 'whisper-1' },
@@ -400,34 +540,91 @@ const ReadChatPage = () => {
                 await client.cancelResponse(trackId, offset);
                 }
             });
+            client.on('conversation.item.appended', (item) => {
+                console.log('conversation.item.appended');
+                // console.log(item);
+            });
             client.on('conversation.updated', async ({ item, delta }) => {
                 const items = client.conversation.getItems();
-                if (delta?.transcript) {
-                    setChatHistory(items);
-                    const chatWindow = document.getElementById('chat-window');
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                // console.log(item, item.content[0]?.transcript);
+                // if the item starts with <test>, delete it
+                if (item.content[0]?.transcript?.startsWith('<')) {
+                    // keep the item id, and when the item status is completed, delete it
+                    setItemToDelete(item.id);
+                    if (item.status === 'completed') {
+                        console.log('!!! deleting item', item.content[0]?.transcript);
+                        setEvaluation(item.content[0]?.transcript.replace('<eval>', '').trim());
+                        await client.realtime.send('conversation.item.delete', {
+                            item_id: item.id
+                        });
+                        // if this is the first completed item for the item id, send a response
+                        if (item.id !== itemToRespond && item.role === 'assistant') {
+                            setItemToRespond(item.id);
+                            await client.realtime.send('response.create', {
+                                response: {
+                                    "modalities": ["text", "audio"],
+                                    "instructions": `
+                                        You need to pose a follow-up question based on 1. the child's latest response, 2. the evaluation of the child's response, 3. story-related information.
+                                        **Learning Objective**:
+                                        - ${knowledge[currentPage]?.learning_objective}
+
+                                        **Evaluation of the child's response and suggested questioning strategy**:
+                                        - Evaluation: ${evaluation}
+
+                                        **Instructions for Response**:
+                                        i. Acknowledgement: If the answer is correct, praise their effort and highlight what they did well. If incorrect or off-topic, provide encouraging feedback (e.g., "That's a good try!") and gently guide them back on track. 
+
+                                        ii. Explanation (keep it concise, within 20 words):
+                                        - For correct answers: Give a concise, engaging explanation to deepen their understanding.
+                                        - For incorrect answers: Explain the correct concept in a child-friendly manner and offer hints or context to help the child grasp the idea.
+
+                                        iii. Follow-up Question: 
+                                        - If the conversation has not yet reached its natural conclusion, ask a related question that builds on THE LEARNING OBJECTIVE: ${knowledge[currentPage]?.learning_objective}. 
+
+                                        iv. Conclude the Conversation:
+                                        - If you feel the learning objective has been addressed effectively (usually after asking 3 to 4 questions in total), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! Do you have any questions about this page? If not, you can click the close button to continue reading the story."
+
+                                        Remember, your goal is to foster curiosity and understanding, while ensuring the child enjoys the interaction. Adjust your language and tone to be warm, supportive, and age-appropriate.
+                                        Also, keep the conversation concise, and end the conversation after asking total 3 to 4 questions.
+                                    `
+                                }
+                            });
+                        }
+                    }
                 }
-                if (delta?.audio) {
-                    wavStreamPlayer.add16BitPCM(delta.audio, item.id);
+                else if (item.id !== itemToDelete && item.content[0] && item.content[0].transcript && !item.content[0].transcript?.startsWith('<')) {
+                    console.log('item.content[0]?.transcript', item.content[0]?.transcript);
+                    if (delta?.transcript) {
+                        setChatHistory(items);
+                        // check if the chat-window element exists
+                        const chatWindow = document.getElementById('chat-window');
+                        if (chatWindow) {
+                            chatWindow.scrollTop = chatWindow.scrollHeight;
+                        }
+                    }
+                    if (delta?.audio) {
+                        wavStreamPlayer.add16BitPCM(delta.audio, item.id);
+                    }
+                    if (item.status === 'completed' && item.formatted.audio?.length) {
+                        const wavFile = await WavRecorder.decode(
+                            item.formatted.audio,
+                            24000,
+                            24000
+                        );
+                        item.formatted.file = wavFile;
+                        setChatHistory(items);
+                    }
+                    setItems(items);
                 }
-                if (item.status === 'completed' && item.formatted.audio?.length) {
-                    const wavFile = await WavRecorder.decode(
-                        item.formatted.audio,
-                        24000,
-                        24000
-                    );
-                    item.formatted.file = wavFile;
-                    setChatHistory(items);
-                }
-                if (items.s)
-                setItems(items);
+                setIsClientSetup(true);
             });
+
             
             if (!client.isConnected()) {
                 await connectConversation();
             }   
-            client.realtime.send('response.create');
         
+            client.realtime.send('response.create');
             setItems(client.conversation.getItems());
 
             return () => {
@@ -439,7 +636,7 @@ const ReadChatPage = () => {
 
     const handleEndChat = () => {
         setIsEnding(false);
-        setIsClientSetup(false);
+        // setIsClientSetup(false);
         handleNextPage();
     }
 
@@ -548,6 +745,7 @@ const ReadChatPage = () => {
                 setupClient(instruction4Guiding);
             }
             setIsClientSetup(true);
+            console.log('client is setup!');
         } else {
             if (!isKnowledge) {
                 updateClientInstruction(instruction4Asking);
@@ -558,10 +756,18 @@ const ReadChatPage = () => {
     }
 
     const handleCloseChat = async () => {
-        setIsKnowledge(false);
-        setIsAsking(false);
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
+        if (isKnowledge) {
+            setIsKnowledge(false);
+            handleNextPage();
+        }
+        else {
+            setIsAsking(false);
+            audio.play();
+            setIsPlaying(true);
+        }
+        setIsAsked(true);
     }
 
     useEffect(() => {
@@ -571,6 +777,11 @@ const ReadChatPage = () => {
             setIsPlaying(false);
         };
     }, []);
+
+    // if the 'clientsetup' changes, console log the change
+    useEffect(() => {
+        console.log('clientsetup changed', isClientSetup);
+    }, [isClientSetup]);
 
 
     return (
@@ -591,12 +802,12 @@ const ReadChatPage = () => {
 
                     <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
                         <div id='caption-btn-box'>
-                            <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 1, color: 'white', fontSize: '30px' }}>
+                            <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 1, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 <FaRegClosedCaptioning />
                             </IconButton>
                         </div>
                         <div id='play-btn-box'>
-                            <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 1, color: 'white', fontSize: '25px' }}>
+                            <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 1, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 {isPlaying ? <FaPause /> : <FaPlay />}
                             </IconButton>
                         </div>

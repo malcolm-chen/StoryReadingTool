@@ -592,7 +592,7 @@ const ReadChatPage = () => {
                         }
                     }
                 }
-                else if (item.id !== itemToDelete && item.content[0] && item.content[0].transcript && !item.content[0].transcript?.startsWith('<')) {
+                else if (item.id !== itemToDelete || (item.content[0] && item.content[0].transcript && !item.content[0].transcript?.startsWith('<'))) {
                     console.log('item.content[0]?.transcript', item.content[0]?.transcript);
                     if (delta?.transcript) {
                         setChatHistory(items);

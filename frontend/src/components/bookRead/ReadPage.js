@@ -19,8 +19,10 @@ import { MdClose } from "react-icons/md";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 
 let audio = new Audio();
+let isClientSetup = false;
 
 const ReadChatPage = () => {
+    console.log('ReadChatPage rendered');
     const location = useLocation();
     const navigate = useNavigate();
     const user = location.state?.user || 'User';
@@ -28,7 +30,7 @@ const ReadChatPage = () => {
     const [chatHistory, setChatHistory] = useState([]);
     const [knowledge, setKnowledge] = useState([]);
     const [isKnowledge, setIsKnowledge] = useState(false);
-    const [isClientSetup, setIsClientSetup] = useState(false);
+    // const [isClientSetup, setIsClientSetup] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -167,16 +169,22 @@ const ReadChatPage = () => {
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
             client.inputAudioBuffer = new Int16Array(0);
+            console.log('last question', items[items.length - 1]?.content[0]?.transcript);
             await client.realtime.send('response.create', {
                 response: {
                     "modalities": ["text", "audio"],
                     "instructions": `
                        **Instructions for Evaluation**:
-                       Based on current conversation and the child's latest response, make an evaluation, and then provide a suggested questioning strategy for the follow-up question:
-                       1. Evaluate the child's response:
-                       - Correct: if the child's response is correct
-                       - Incorrect: if the child's response is incorrect
-                       - Off topic: if the child's response is off topic
+                       Based on:
+                       - the posed question: ${items[items.length - 1]?.content[0]?.transcript}, 
+                       - the child's latest response
+                       - story context: ${pages[currentPage]?.text.join(' ')}
+                       , make an evaluation of the correctness of the child's response, and then provide a suggested questioning strategy for the follow-up question.
+                       
+                       Follow these steps:
+                       
+                       1. Evaluate the child's response: Correct/Incorrect/Off topic
+
                        2. If the child's response is incorrect, provide a suggested questioning strategy for the follow-up question:
                        <Example 1>
                        previous question: Okay. Here is our first question. What is the value of 10/5?
@@ -289,14 +297,16 @@ const ReadChatPage = () => {
                         setIsPlaying(false);
                         // check if the client is not setup for guiding
                         if (!isClientSetup && !isAsked) {
+                            console.log('setting up client for guiding');
                             setupClient(instruction4Guiding);
-                            setIsClientSetup(true);
+                            isClientSetup = true;
                         } else {
+                            console.log('resetting client for guiding');
                             await disconnectConversation();
                             const client = clientRef.current;
                             client.reset();
                             setupClient(instruction4Guiding);
-                            setIsClientSetup(true);
+                            isClientSetup = true;
                         }
                     } else {
                         setIsKnowledge(false);
@@ -333,7 +343,7 @@ const ReadChatPage = () => {
                 await disconnectConversation();
                 const client = clientRef.current;
                 client.reset();
-                setIsClientSetup(false);
+                isClientSetup = false;
             }
             const newPage = currentPage - 1;
             setCurrentPage(newPage);
@@ -359,7 +369,7 @@ const ReadChatPage = () => {
                 await disconnectConversation();
                 const client = clientRef.current;
                 client.reset();
-                setIsClientSetup(false);
+                isClientSetup = false;
             }
             const newPage = currentPage + 1;
             setCurrentPage(newPage);
@@ -564,12 +574,9 @@ const ReadChatPage = () => {
                                 response: {
                                     "modalities": ["text", "audio"],
                                     "instructions": `
-                                        You need to pose a follow-up question based on 1. the child's latest response, 2. the evaluation of the child's response, 3. story-related information.
+                                        You need to pose a follow-up question based on 1. the latest round of conversation: 'chatbot: ${items[items.length - 2]?.content[0]?.transcript}', child: '${items[items.length - 1]?.content[0]?.transcript}', 2. the evaluation of the child's response: ${evaluation}, 3. story-related information.
                                         **Learning Objective**:
                                         - ${knowledge[currentPage]?.learning_objective}
-
-                                        **Evaluation of the child's response and suggested questioning strategy**:
-                                        - Evaluation: ${evaluation}
 
                                         **Instructions for Response**:
                                         i. Acknowledgement: If the answer is correct, praise their effort and highlight what they did well. If incorrect or off-topic, provide encouraging feedback (e.g., "That's a good try!") and gently guide them back on track. 
@@ -578,14 +585,11 @@ const ReadChatPage = () => {
                                         - For correct answers: Give a concise, engaging explanation to deepen their understanding.
                                         - For incorrect answers: Explain the correct concept in a child-friendly manner and offer hints or context to help the child grasp the idea.
 
-                                        iii. Follow-up Question: 
+                                        iii. Follow-up Question/Conclude the Conversation:: 
                                         - If the conversation has not yet reached its natural conclusion, ask a related question that builds on THE LEARNING OBJECTIVE: ${knowledge[currentPage]?.learning_objective}. 
+                                        - If you feel the learning objective has been addressed effectively (usually after asking 3 to 4 questions in total, current round number is ${items.length/2}), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! Do you have any questions about this page? If not, you can click the close button to continue reading the story."
 
-                                        iv. Conclude the Conversation:
-                                        - If you feel the learning objective has been addressed effectively (usually after asking 3 to 4 questions in total), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! Do you have any questions about this page? If not, you can click the close button to continue reading the story."
-
-                                        Remember, your goal is to foster curiosity and understanding, while ensuring the child enjoys the interaction. Adjust your language and tone to be warm, supportive, and age-appropriate.
-                                        Also, keep the conversation concise, and end the conversation after asking total 3 to 4 questions.
+                                        Remember to keep the conversation concise, and end the conversation after asking total 3 to 4 questions.
                                     `
                                 }
                             });
@@ -593,7 +597,7 @@ const ReadChatPage = () => {
                     }
                 }
                 else if (item.id !== itemToDelete || (item.content[0] && item.content[0].transcript && !item.content[0].transcript?.startsWith('<'))) {
-                    console.log('item.content[0]?.transcript', item.content[0]?.transcript);
+                    // console.log('item.content[0]?.transcript', item.content[0]?.transcript);
                     if (delta?.transcript) {
                         setChatHistory(items);
                         // check if the chat-window element exists
@@ -616,7 +620,7 @@ const ReadChatPage = () => {
                     }
                     setItems(items);
                 }
-                setIsClientSetup(true);
+                isClientSetup = true;
             });
 
             
@@ -636,7 +640,7 @@ const ReadChatPage = () => {
 
     const handleEndChat = () => {
         setIsEnding(false);
-        // setIsClientSetup(false);
+        // isClientSetup = false;
         handleNextPage();
     }
 
@@ -744,7 +748,7 @@ const ReadChatPage = () => {
             } else {
                 setupClient(instruction4Guiding);
             }
-            setIsClientSetup(true);
+            isClientSetup = true;
             console.log('client is setup!');
         } else {
             if (!isKnowledge) {
@@ -768,6 +772,7 @@ const ReadChatPage = () => {
             setIsPlaying(true);
         }
         setIsAsked(true);
+        console.log('isAsked', isAsked);
     }
 
     useEffect(() => {

@@ -19,7 +19,6 @@ import { MdClose } from "react-icons/md";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 
 let audio = new Audio();
-let isClientSetup = false;
 
 const ReadChatPage = () => {
     console.log('ReadChatPage rendered');
@@ -30,7 +29,7 @@ const ReadChatPage = () => {
     const [chatHistory, setChatHistory] = useState([]);
     const [knowledge, setKnowledge] = useState([]);
     const [isKnowledge, setIsKnowledge] = useState(false);
-    // const [isClientSetup, setIsClientSetup] = useState(false);
+    const [isClientSetup, setIsClientSetup] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -292,21 +291,22 @@ const ReadChatPage = () => {
                 } else {
                     // setIsPlaying(false);
                     if (currentPage in knowledge) {
+                        console.log('currentPage in knowledge', currentPage);
                         setIsKnowledge(true);
                         audio.pause();
                         setIsPlaying(false);
                         // check if the client is not setup for guiding
-                        if (!isClientSetup && !isAsked) {
+                        if (!clientRef.current.realtime.isConnected() && !isAsked) {
                             console.log('setting up client for guiding');
                             setupClient(instruction4Guiding);
-                            isClientSetup = true;
+                            setIsClientSetup(true);
                         } else {
                             console.log('resetting client for guiding');
                             await disconnectConversation();
                             const client = clientRef.current;
                             client.reset();
                             setupClient(instruction4Guiding);
-                            isClientSetup = true;
+                            setIsClientSetup(true);
                         }
                     } else {
                         setIsKnowledge(false);
@@ -337,13 +337,13 @@ const ReadChatPage = () => {
             setIsAsking(false);
             setIsAsked(false);
             setChatHistory([]);
-            if (isClientSetup) {
+            if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
                 // deleteConversationItem(items[0].id);
                 await disconnectConversation();
                 const client = clientRef.current;
                 client.reset();
-                isClientSetup = false;
+                setIsClientSetup(false);
             }
             const newPage = currentPage - 1;
             setCurrentPage(newPage);
@@ -363,13 +363,13 @@ const ReadChatPage = () => {
             setIsAsking(false);
             setIsAsked(false);
             setChatHistory([]);
-            if (isClientSetup) {
+            if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
                 // deleteConversationItem(items[0].id);
                 await disconnectConversation();
                 const client = clientRef.current;
                 client.reset();
-                isClientSetup = false;
+                setIsClientSetup(false);
             }
             const newPage = currentPage + 1;
             setCurrentPage(newPage);
@@ -620,7 +620,7 @@ const ReadChatPage = () => {
                     }
                     setItems(items);
                 }
-                isClientSetup = true;
+                setIsClientSetup(true);
             });
 
             
@@ -640,7 +640,7 @@ const ReadChatPage = () => {
 
     const handleEndChat = () => {
         setIsEnding(false);
-        // isClientSetup = false;
+        // setIsClientSetup(false);
         handleNextPage();
     }
 
@@ -742,13 +742,13 @@ const ReadChatPage = () => {
         setIsPlaying(false);
         setIsAsking(true);
         console.log('penguin clicked to ask question');
-        if (!isClientSetup) {
+        if (!clientRef.current.realtime.isConnected()) {
             if (!isKnowledge) {
                 setupClient(instruction4Asking);
             } else {
                 setupClient(instruction4Guiding);
             }
-            isClientSetup = true;
+            setIsClientSetup(true);
             console.log('client is setup!');
         } else {
             if (!isKnowledge) {

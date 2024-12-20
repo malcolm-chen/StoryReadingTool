@@ -9,6 +9,7 @@ import { MdOutlineFavorite } from "react-icons/md";
 import Footer from '../footer';
 
 const BookSelectPage = () => {
+    console.log('BookSelectPage rendered');
     const navigate = useNavigate();
     const location = useLocation();
     const [user, setUser] = useState(location.state?.user || 'User');

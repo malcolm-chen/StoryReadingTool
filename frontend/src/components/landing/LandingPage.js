@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { GiSpellBook } from "react-icons/gi";
 
 const LandingPage = () => {
+    console.log('LandingPage rendered');
     const [username, setUsername] = useState(""); // State to store username
     const [error, setError] = useState(""); // State to store validation error
     const [responseMessage, setResponseMessage] = useState('');

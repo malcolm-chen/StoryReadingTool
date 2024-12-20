@@ -19,6 +19,8 @@ import { MdClose } from "react-icons/md";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 
 let audio = new Audio();
+let currentPage = 0;
+let sentenceIndex = 0;
 
 const ReadChatPage = () => {
     console.log('ReadChatPage rendered');
@@ -52,6 +54,8 @@ const ReadChatPage = () => {
     const [itemToRespond, setItemToRespond] = useState(null);
     const [evaluation, setEvaluation] = useState(null);
     const penguin = './files/imgs/penguin1.svg';
+
+    currentPage = localStorage.getItem(`${title}-currentPage`) ? parseInt(localStorage.getItem(`${title}-currentPage`), 10) : 0;
     
     const wavRecorderRef = useRef(
         new WavRecorder({ sampleRate: 24000 })
@@ -63,10 +67,12 @@ const ReadChatPage = () => {
         new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766' } )
     );
     
-    const [currentPage, setCurrentPage] = useState(() => {
-        const savedPage = localStorage.getItem(`${title}-currentPage`);
-        return savedPage ? parseInt(savedPage, 10) : 0;
-    });
+    // const [currentPage, setCurrentPage] = useState(() => {
+    //     const savedPage = localStorage.getItem(`${title}-currentPage`);
+    //     console.log('savedPage', savedPage);
+    //     return savedPage ? parseInt(savedPage, 10) : 0;
+    // });
+
     const [audioPage, setAudioPage] = useState(() => {
         const savedPage = localStorage.getItem(`${title}-currentPage`);
         return savedPage ? parseInt(savedPage, 10) : 0;
@@ -271,11 +277,11 @@ const ReadChatPage = () => {
     };
 
 
-    const playPageSentences = async () => {
+    const playPageSentences = () => {
         if (pages[currentPage]?.text) {
-            let sentenceIndex = 0;
-            const playNextSentence = async () => {
-                // console.log(sentenceIndex, pages[currentPage].text.length);
+            sentenceIndex = 0;
+            const playNextSentence = () => {
+                console.log('currentPage', currentPage, 'sentenceIndex', sentenceIndex, 'pages[currentPage].text.length', pages[currentPage].text.length);
                 setAudioPage(currentPage);
                 if (sentenceIndex < pages[currentPage].text.length) {
                     setCurrentSentence(sentenceIndex);
@@ -296,17 +302,13 @@ const ReadChatPage = () => {
                         audio.pause();
                         setIsPlaying(false);
                         // check if the client is not setup for guiding
-                        if (!clientRef.current.realtime.isConnected() && !isAsked) {
+                        if (!clientRef.current.realtime.isConnected()) {
                             console.log('setting up client for guiding');
                             setupClient(instruction4Guiding);
                             setIsClientSetup(true);
                         } else {
                             console.log('resetting client for guiding');
-                            await disconnectConversation();
-                            const client = clientRef.current;
-                            client.reset();
-                            setupClient(instruction4Guiding);
-                            setIsClientSetup(true);
+                            updateClientInstruction(instruction4Guiding);
                         }
                     } else {
                         setIsKnowledge(false);
@@ -322,13 +324,14 @@ const ReadChatPage = () => {
             audio.pause();
             // setIsPlaying(false);
             if (isPlaying) {
+                console.log('playing page sentences', currentPage);
                 playPageSentences();  
             }
         }
     }, [pages, currentPage]);
 
     const handlePrevPage = async () => {
-        console.log(currentPage);
+        console.log('moving to previous page', currentPage);
         if (currentPage > 0) {
             audio.pause();
             //setIsPlaying(false);
@@ -346,7 +349,9 @@ const ReadChatPage = () => {
                 setIsClientSetup(false);
             }
             const newPage = currentPage - 1;
-            setCurrentPage(newPage);
+            //setCurrentPage(newPage);
+            currentPage = newPage;
+            sentenceIndex = 0;
             setCurrentSentence(0);
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0
@@ -354,7 +359,7 @@ const ReadChatPage = () => {
     };
 
     const handleNextPage = async () => {
-        console.log(currentPage);
+        console.log('moving to next page', currentPage);
         if (currentPage < pages.length - 1) {
             audio.pause();
             audio.currentTime = 0;
@@ -372,8 +377,10 @@ const ReadChatPage = () => {
                 setIsClientSetup(false);
             }
             const newPage = currentPage + 1;
-            setCurrentPage(newPage);
+            // setCurrentPage(newPage);
+            currentPage = newPage;
             setCurrentSentence(0);
+            sentenceIndex = 0;
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
         }
@@ -506,6 +513,7 @@ const ReadChatPage = () => {
     const updateClientInstruction = async (instruction) => {
         const client = clientRef.current;
         client.updateSession({ instructions: instruction });
+        client.realtime.send('response.create');
         console.log(instruction);
     }
 
@@ -680,6 +688,7 @@ const ReadChatPage = () => {
     });
 
     const handleImageClick = (event) => {
+        console.log('image clicked', currentPage);
         const { left, width, top, height } = event.currentTarget.getBoundingClientRect();
         const clickX = event.clientX - left;
         const clickY = event.clientY - top;
@@ -687,6 +696,7 @@ const ReadChatPage = () => {
         if (clickX < width / 2 && clickY > height / 3) {
             handlePrevPage();
         } else if (clickX > width / 2 && clickY > height / 3) {
+            console.log('moving to next page', currentPage);
             handleNextPage();
         }
     };
@@ -701,7 +711,8 @@ const ReadChatPage = () => {
         if (newPage >= 0 && newPage < pages.length) {
             audio.pause();
             setIsKnowledge(false);
-            setCurrentPage(newPage);
+            // setCurrentPage(newPage);
+            currentPage = newPage;
             setCurrentSentence(0);
             localStorage.setItem(`${title}-currentPage`, newPage);
             localStorage.setItem(`${title}-currentSentence`, 0);
@@ -772,7 +783,8 @@ const ReadChatPage = () => {
             setIsPlaying(true);
         }
         setIsAsked(true);
-        console.log('isAsked', isAsked);
+        console.log('is asking', isAsking);
+        console.log('is knowledge', isKnowledge);
     }
 
     useEffect(() => {
@@ -787,6 +799,11 @@ const ReadChatPage = () => {
     useEffect(() => {
         console.log('clientsetup changed', isClientSetup);
     }, [isClientSetup]);
+
+    // if currentPage changes, set isAsked to false
+    // useEffect(() => {
+    //     console.log('currentPage changed', currentPage);
+    // }, [currentPage]);
 
 
     return (

@@ -11,7 +11,7 @@ const ModeSelectPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
-    const [user, setUser] = useState(location.state?.user || 'User');
+    const [user, setUser] = useState(localStorage.getItem('username') || 'User');
     console.log(user);
     const [modeSet, setModeSet] = useState(false);
 

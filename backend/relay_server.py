@@ -14,6 +14,7 @@ async def relay(websocket1, websocket2):
         while True:
             message = await websocket1.recv()
             await websocket2.send(message)
+            print(f"Relaying message from {websocket1} to {websocket2}: {message}")
     except websockets.ConnectionClosed:
         # Close the other websocket when one is closed
         await websocket2.close()

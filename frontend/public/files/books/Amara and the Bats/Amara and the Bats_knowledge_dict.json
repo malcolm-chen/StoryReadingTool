@@ -1,122 +1,292 @@
 {
     "1": {
         "keyword": "wildlife",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment",
-        "learning_objective": "To understand what wildlife is and explore actions people can take to protect wildlife and reduce human impact on their environment.",
-        "first_question": "Why can't we keep a bat as a pet, even if it's super cute?"
+        "core_idea": [
+            {
+                "knowledge": "Living things need water, air, and resources from the land, and they live in places that have the things they need. Humans use natural resources for everything they do.",
+                "topic": "Natural Resources",
+                "grade": "K",
+                "discipline": "ESS"
+            }
+        ],
+        "learning_objective": "To understand what wildlife is and why wildlife cannot live with humans.",
+        "first_question_set": [
+            "What did Amara and her family do to keep the bat safe without touching it?",
+            "What did Samir and Amara's mom tell her to do?",
+            "What did Amara want to do with the bat?",
+            "Why did Amara and her family want to wait for the wildlife rescue team?"
+        ],
+        "example_nonrecall_questions": [
+            "Why can't we keep a bat as a pet, even if it's super cute?",
+            "What does the word “wildlife” mean?",
+            "Why do you think bats need to live in nature instead of inside our homes?",
+            "What are some examples of wildlife that you can think of?"
+        ]
     },
     "2": {
         "keyword": "rescue",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things. ",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment",
-        "learning_objective": "To describe the key characteristics of bats and to understand the role of wildlife rescue teams in protecting and caring for wild animals.",
-        "first_question": "What did the wildlife rescue team do with the bat?"
+        "core_idea": [
+            {
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS"
+            }
+        ],
+        "learning_objective": "To understand the role of wildlife rescue teams in protecting and caring for wild animals.",
+        "first_question_set": [
+            "What did they use to keep the bat safe?",
+            "What did Amara notice about the bat’s appearance when she saw it up close?",
+            "What did the wildlife rescue team do with the bat?"
+        ],
+        "example_nonrecall_questions": [
+            "What does the wildlife rescue team do?",
+            "After the wildlife rescue team takes the bat, what do you think they will do to take care of it?",
+            "What does the word “rescue” mean?"
+        ]
+    },
+    "3": {
+        "keyword": "nocturnal; mammal",
+        "learning_objective": "Objective 1: To understand the meaning of 'nocturnal' and identify other nocturnal wildlife. Objective 2: To understand the meaning of “mammal” and the differences between bats and other mammals",
+        "core_idea": [
+            {
+                "knowledge": "Individuals of the same kind of plant or animal are recognizable as similar but can also vary in many ways.",
+                "topic": "Variation of Traits",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "first_question_set": [
+            "What does the word “nocturnal” mean?",
+            "What makes bats different from other animals?",
+            "What are some characteristics of bats that Amara learned?"
+        ],
+        "example_nonrecall_questions": [
+            "What is a mammal?",
+            "What are some interesting facts about bats that you know?",
+            "What are some other nocturnal animals that you know?",
+            "Why are bats different from other mammals?"
+        ]
+    },
+    "4": {
+        "keyword": "echolocation",
+        "core_idea": [
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air.",
+                "topic": "Structure and Function.",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Animals have body parts that capture and convey different kinds of information needed for growth and survival. Animals respond to these inputs with behaviors that help them survive.",
+                "topic": "Information Processing",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand what echolocation is and how bats use it to find food.",
+        "first_question_set": [
+            "What kind of sound do bats make to help them find their food?",
+            "How do bats find their food in the dark?",
+            "Bats make a type of sound that we can’t even hear. What kind of sound is that?"
+        ],
+        "example_nonrecall_questions": [
+            "What does the word “echolocation” mean?",
+            "How does echolocation help bats find food?",
+            "How do bats use the echoes of their sounds to know where insects are?",
+            "What body parts do you think bats use to make and listen to sounds?"
+        ]
     },
     "5": {
-        "keyword": "nocturnal, mammal",
-        "knowledge": "There are many different kinds of living things in any area, and they exist in different places on land and in water.",
-        "topic": "Biodiversity and Humans",
-        "grade": "2",
-        "discipline": "LS",
-        "performance_expectation": "Make observations of plants and animals to compare the diversity of life in different habitats.",
-        "learning_objective": "To understand the meaning of 'nocturnal' and 'mammal,' describe the nocturnal behavior of bats, and compare bats to other animals in different habitats.",
-        "first_question": "What makes bats different from other animals?"
+        "keyword": "tongue; pollinators",
+        "learning_objective": "To understand the fact that bats use their long tongues to eat different foods and why bats are pollinators. ",
+        "core_idea": [
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air.",
+                "topic": "Structure and Function.",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Plants depend on animals for pollination or to move their seeds around.",
+                "topic": "Interdependent Relationships in Ecosystems",
+                "grade": "2",
+                "discipline": "LS"
+            }
+        ],
+        "first_question_set": [
+            "What kinds of food do bats eat?",
+            "What is special about bats’ tongues?",
+            "What bats do with their tongues?"
+        ],
+        "example_nonrecall_questions": [
+            "What does the word “pollinator” mean?",
+            "How do bats play a role of pollinator?"
+        ]
     },
     "6": {
-        "keyword": "echolocation",
-        "knowledge": "Animals have body parts that capture and convey different kinds of information needed for growth and survival. Animals respond to these inputs with behaviors that help them survive. Plants also respond to some external inputs.",
-        "topic": "Information Processing",
-        "grade": "1",
-        "discipline": "LS",
-        "performance_expectation": "Use materials to design a solution to a human problem by mimicking how plants and/or animals use their external parts to help them survive, grow, and meet their needs.",
-        "learning_objective": "To understand the meaning of 'echolocation,' describe how bats use it to find food, and recognize that bats live in various habitats around the world.",
-        "first_question": "How do bats see in the dark to find their food?"
-    },
-    "11": {
         "keyword": "habitat",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Use a model to represent the relationship between the needs of different plants or animals (including humans) and the places they live.",
-        "learning_objective": "To understand how human actions, such as building new buildings around animals' homes, can affect animals' homes, like the bats' habitat.",
-        "first_question": "Why do you think the bats are not at the park anymore? What could have happened to their homes?"
+        "learning_objective": "To understand how human’s actions can affect animals' habitats.",
+        "core_idea": [
+            {
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS",
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things."
+            },
+            {
+                "topic": "Ecosystem Dynamics, Functioning, and Resilience",
+                "grade": "2",
+                "discipline": "LS",
+                "knowledge": "When the environment changes in ways that affect a place’s physical characteristics, temperature, or availability of resources, some organisms survive and reproduce, others move to new locations, yet others move into the transformed environment, and some die."
+            },
+            {
+                "topic": "Biodiversity and Humans",
+                "grade": "4",
+                "discipline": "LS",
+                "knowledge": "Populations live in a variety of habitats, and change in those habitats affects the organisms living there."
+            }
+        ],
+        "first_question_set": [
+            "Why do you think the bats are no longer at the park?",
+            "What did the park ranger say about the bats in the park?",
+            "What happened to the land around the park?",
+            "What do Amara and her family hope to see in the park?"
+        ],
+        "example_nonrecall_questions": [
+            "How do you think building houses near the park can change bats' habitats?",
+            "What is a habitat?",
+            "Why is habitat important for wildlife?",
+            "What might happen to animals if their habitats are destroyed?"
+        ]
+    },
+    "8": {
+        "keyword": "endangered",
+        "learning_objective": "To understand what endangered animals are and how humans can help protect them and their habitats.",
+        "core_idea": [
+            {
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS"
+            },
+            {
+                "knowledge": "Ask questions, make observations, and gather information about a situation people want to change to define a simple problem that can be solved through the development of a new or improved object or tool.",
+                "topic": "Engineering Design",
+                "grade": "K",
+                "discipline": "ETS"
+            }
+        ],
+        "first_question_set": [
+            "What did Amara find in her magazine?",
+            "What did Amara read about other young people protecting endangered wildlife?"
+        ],
+        "example_nonrecall_questions": [
+            "If you were Amara, what would you do to help bring the bats back to the park?",
+            "What does the word “endangered” mean?",
+            "What animals can you name that are endangered?"
+        ]
+    },
+    "10": {
+        "keyword": "nature reserve",
+        "learning_objective": "To learn what a nature reserve is and how it helps protect wildlife and their habitats.",
+        "core_idea": [
+            {
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS"
+            },
+            {
+                "knowledge": "When the environment changes in ways that affect a place’s physical characteristics, temperature, or availability of resources, some organisms survive and reproduce, others move to new locations, yet others move into the transformed environment, and some die.",
+                "topic": "Ecosystem Dynamics, Functioning, and Resilience",
+                "grade": "2",
+                "discipline": "LS"
+            }
+        ],
+        "first_question_set": [
+            "What do Amara and her friends want to build in the park for bats?",
+            "What ideas did Jasper and Lucy come up with to help the animals?",
+            "Why did Amara feel inspired to help the bats and other animals?"
+        ],
+        "example_nonrecall_questions": [
+            "What do you think a nature reserve is?",
+            "How do you think building a nature reserve will help bats?"
+        ]
+    },
+    "13": {
+        "keyword": "sanctuary",
+        "learning_objective": "To understand what sanctuary is and what a bat-friendly sanctuary is.",
+        "core_idea": [
+            {
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS"
+            },
+            {
+                "knowledge": "When the environment changes in ways that affect a place’s physical characteristics, temperature, or availability of resources, some organisms survive and reproduce, others move to new locations, yet others move into the transformed environment, and some die.",
+                "topic": "Ecosystem Dynamics, Functioning, and Resilience",
+                "grade": "2",
+                "discipline": "LS"
+            }
+        ],
+        "first_question_set": [
+            "What did Amara’s friends and neighbors do to make a bat-friendly sanctuary?",
+            "What is a bat-friendly sanctuary?",
+            "Why do Amara’s friends pile up dead leaves and logs?"
+        ],
+        "example_nonrecall_questions": [
+            "If you could design a bat-friendly sanctuary, what would it look like?",
+            "What would you include in a sanctuary to make it a good place for bats to live?"
+        ]
     },
     "14": {
-        "keyword": "endangered",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment.",
-        "learning_objective": "To understand what endangered animals are and recognize that humans can take action to protect endangered species and their habitats.",
-        "first_question": "If you were Amara, what would you do to help bring the bats back to the park?"
-    },
-    "16": {
-        "keyword": "roost",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment.",
-        "learning_objective": "To understand what the word 'roost' is and how human actions or solutions, like building bat houses, can help protect bat populations and roosts.",
-        "first_question": "After Amara finished the magazine, what did Amara decide to do?"
-    },
-    "23": {
-        "keyword": "reserve",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment.",
-        "learning_objective": "To understand how individuals and communities can work together to protect wildlife, such as bats, by taking actions like supporting habitat protection and creating safe spaces for animals.",
-        "first_question": "How can we help bats like Amara does?"
-    },
-    "24": {
-        "keyword": "sanctuary",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment.",
-        "learning_objective": "To understand what sanctuary is, what kind of sanctuary is friendly for bats, and how plants, water sources, and community actions can support wildlife protection and conservation efforts.",
-        "first_question": "Why is it important for the habitat to be ready for the bats?"
-    },
-    "26": {
         "keyword": "rescue",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment.",
-        "learning_objective": "To recognize the role of people in protecting wildlife and understand that the impact of actions or changes do not happen immediately.",
-        "first_question": "Who puts up the bat’s house?"
+        "learning_objective": "To recognize the role of people in protecting wildlife.",
+        "core_idea": [
+            {
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS"
+            }
+        ],
+        "first_question_set": [
+            "Who puts up the bat’s house?",
+            "Where did the park ranger place the bat house?",
+            "What does Amara need to do next after the bat houses are set up?"
+        ],
+        "example_nonrecall_questions": [
+            "What would happen after the park ranger set up bats’ houses?",
+            "Do you think bats will come back? Why?"
+        ]
     },
-    "28": {
-        "keyword": "roost",
-        "knowledge": "Plants depend on water and light to grow. Plants depend on animals for pollination or to move their seeds around.",
-        "topic": "Interdependent Relationships in Ecosystems",
-        "grade": "K",
-        "discipline": "LS",
-        "performance_expectation": "Use a model to represent the relationship between the needs of different plants or animals (including humans) and the places they live.",
-        "learning_objective": "To understand that the effects of actions or changes do not happen immediately.",
-        "first_question": "How did Amara feel when the bats didn’t come to the bat houses?"
-    },
-    "32": {
+    "17": {
         "keyword": "home",
-        "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
-        "topic": "Human Impacts on Earth Systems",
-        "grade": "K",
-        "discipline": "ESS",
-        "performance_expectation": "Communicate solutions that will reduce the impact of humans on the land, water, air, and/or other living things in the local environment.",
-        "learning_objective": "To understand how human actions or efforts can lead to positive outcomes and to recognize characters’ feelings of achievement and happiness when their goals are realized.",
-        "first_question": "How did Amara feel when she saw the bats flying in the park?"
+        "learning_objective": "To understand how human actions can positively impact and protect wildlife habitats.",
+        "core_idea": [
+            {
+                "knowledge": "Things that people do to live comfortably can affect the world around them. But they can make choices that reduce their impacts on the land, water, air, and other living things.",
+                "topic": "Human Impacts on Earth Systems",
+                "grade": "K",
+                "discipline": "ESS"
+            },
+            {
+                "knowledge": "When the environment changes in ways that affect a place’s physical characteristics, temperature, or availability of resources, some organisms survive and reproduce, others move to new locations, yet others move into the transformed environment, and some die.",
+                "topic": "Ecosystem Dynamics, Functioning, and Resilience",
+                "grade": "2",
+                "discipline": "LS"
+            }
+        ],
+        "first_question_set": [
+            "What did Amara see flying in the sky?",
+            "How did Amara feel when she saw the bats flying in the park?"
+        ],
+        "example_nonrecall_questions": [
+            "Why do you think Amara felt like she was \"home\" when the bats returned?",
+            "What can we do to protect habitats for endangered animals?",
+            "How do you feel when you learn that the bats have returned?"
+        ]
     }
 }

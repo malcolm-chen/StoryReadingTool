@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Typography, Box, Button, Input } from '@mui/joy';
 import { FloatingLabel, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,14 @@ const LandingPage = () => {
     const [responseMessage, setResponseMessage] = useState('');
     const [password, setPassword] = useState(""); // State to store password
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check if the user is already logged in
+        const token = localStorage.getItem('userToken');
+        if (token) {
+            navigate('/select');
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,6 +41,8 @@ const LandingPage = () => {
             });
             if (response.ok) {
                 setError("");
+                localStorage.setItem('userToken', response.token);
+                localStorage.setItem('username', username);
                 navigate('/select', { state: { user: username } });
             } else {
                 setError("Password is incorrect.");

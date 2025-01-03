@@ -328,6 +328,7 @@ const ReadChatPage = () => {
             setIsAsking(false);
             setIsAsked(false);
             setIsMinimizedChat(false);
+            setIsExpandedChat(false);
             setChatHistory([]);
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
@@ -357,6 +358,7 @@ const ReadChatPage = () => {
             setIsAsking(false);
             setIsAsked(false);
             setIsMinimizedChat(false);
+            setIsExpandedChat(false);
             setChatHistory([]);
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
@@ -784,6 +786,7 @@ const ReadChatPage = () => {
     
     const handleMinimizeChat = async () => {
         setIsMinimizedChat(!isMinimizedChat);
+        setIsExpandedChat(false);
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
     }
@@ -966,6 +969,9 @@ const ReadChatPage = () => {
                         , , 
                         <IconButton id='expand-btn' variant='plain' 
                                 onClick={handleExpandChat}
+                                onMouseOver={() => {
+                                    document.getElementById('expand-btn').style.backgroundColor = 'rgba(0,0,0,0)';
+                                }}
                                 sx={{
                                     position: 'absolute',
                                     top: '8px',
@@ -977,6 +983,9 @@ const ReadChatPage = () => {
                         </IconButton>
                         <IconButton id='minimize-btn' variant='plain' 
                                 onClick={handleMinimizeChat}
+                                onMouseOver={() => {
+                                    document.getElementById('minimize-btn').style.backgroundColor = 'rgba(0,0,0,0)';
+                                }}
                                 sx={{
                                     position: 'absolute',
                                     top: '8px',
@@ -984,10 +993,15 @@ const ReadChatPage = () => {
                                     zIndex: 1,
                                 }}
                             >
-                            <FaMinusCircle size={30} color='#7AA2E3' />
+                            {/* always set the backgroud to transparent */}
+                            <FaMinusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }}/>
                         </IconButton>
-                        <IconButton
+                        <IconButton 
+                            id='close-btn'
                             onClick={handleCloseChat}
+                            onMouseOver={() => {
+                                document.getElementById('close-btn').style.backgroundColor = 'rgba(0,0,0,0)';
+                            }}
                             sx={{
                                 position: 'absolute',
                                 top: '8px',

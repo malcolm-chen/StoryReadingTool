@@ -13,6 +13,8 @@ import { Modal, ModalDialog, ModalClose } from '@mui/joy';
 import { AiOutlineShrink, AiOutlineExpand } from "react-icons/ai";
 import { FaRegClosedCaptioning } from "react-icons/fa6";
 import { FaPlay, FaPause } from "react-icons/fa";
+import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-icons/fa";
+import { IoMdCloseCircle } from "react-icons/io";
 import { FaMicrophone } from "react-icons/fa6";
 import { FaCirclePlay } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
@@ -42,6 +44,7 @@ const ReadChatPage = () => {
     const [interests, setInterests] = useState(location.state?.interest || '');
     const [showCaption, setShowCaption] = useState(true);
     const [isExpandedChat, setIsExpandedChat] = useState(false);
+    const [isMinimizedChat, setIsMinimizedChat] = useState(false);
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [audioSpeed, setAudioSpeed] = useState(1);
@@ -324,6 +327,7 @@ const ReadChatPage = () => {
             setIsKnowledge(false);
             setIsAsking(false);
             setIsAsked(false);
+            setIsMinimizedChat(false);
             setChatHistory([]);
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
@@ -352,6 +356,7 @@ const ReadChatPage = () => {
             setIsKnowledge(false);
             setIsAsking(false);
             setIsAsked(false);
+            setIsMinimizedChat(false);
             setChatHistory([]);
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
@@ -453,7 +458,7 @@ const ReadChatPage = () => {
     // update the instruction4Guiding when the currentPageRef.current changes   
     function getInstruction4Guiding() {
         const instruction4Guiding = `
-            You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
+            You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
             
          **Story Information**:
         - Story Title: ${title}
@@ -776,6 +781,12 @@ const ReadChatPage = () => {
         const chatContainer = document.getElementById('chat-container');
         chatContainer.style.height = isExpandedChat ? '50%' : '80%';
     }
+    
+    const handleMinimizeChat = async () => {
+        setIsMinimizedChat(!isMinimizedChat);
+        const wavStreamPlayer = wavStreamPlayerRef.current;
+        await wavStreamPlayer.interrupt();
+    }
 
     const handleAutoPageToggle = () => {
         setAutoPage((prev) => !prev);
@@ -791,9 +802,14 @@ const ReadChatPage = () => {
     }, [audioSpeed]);
 
     const handlePenguinClick = () => {
+
         audioRef.current.pause();
         setIsPlaying(false);
         setIsAsking(true);
+        if (isMinimizedChat) {
+            setIsMinimizedChat(false);
+            return;
+        }
         console.log('penguin clicked to ask question');
         if (!clientRef.current.realtime.isConnected()) {
             if (!isKnowledge) {
@@ -896,12 +912,6 @@ const ReadChatPage = () => {
                             </IconButton>
                         </div>
                         <img src={pages[currentPageRef.current]?.image} alt={`Page ${currentPageRef.current + 1}`}/>
-                        {showCaption && <h4 id="caption" sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                            {/* <Button onClick={togglePlayPause} variant="contained" color="primary">
-                                {isPlaying ? <FaPause /> : <FaPlay />}
-                            </Button> */}
-                            {pages[currentPageRef.current]?.text[sentenceIndexRef.current]}
-                        </h4>}
                     </Box>
 
                     <IconButton
@@ -914,29 +924,30 @@ const ReadChatPage = () => {
                         <MdArrowCircleRight size={60} color='#7AA2E3'/>
                     </IconButton>
                 </Box>            
-                <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
+                {/* <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
                     <Box onClick={handleProgressBarClick} sx={{ cursor: 'pointer', width: '100%' }}>
                         <LinearProgress color="neutral" size="lg" determinate value={(currentPageRef.current + 1) / pages.length * 100} />
                     </Box>
                     <h4 style={{ marginLeft: '16px', fontSize: '20px', color: 'rgba(0,0,0,0.5)' }}>Page <span style={{ color: 'rgba(0,0,0,1)' }}>{currentPageRef.current + 1}</span> of {pages.length}</h4>
-                </Box>
+                </Box> */}
             </div>
-            <div id='interaction-box'>
-                {/* hide the part of img exceeding the interaction box */}
-                <img src='./files/imgs/penguin-bg.svg' alt='penguin' style={{ width: '500px', position: 'absolute', bottom: '0', left: '0', overflow: 'hidden', zIndex: -1 }}></img>
-                {(!isKnowledge || !isAsking) && 
-                    // add an animation effect, let the message box flow up and down for 5 seconds  
-                    <div className='penguin-message' onClick={handlePenguinClick} >
-                        {/* add a triangle at the right of the message box, as a message tail */}
-                        <div className='message-tail'></div>
-                        { isKnowledge ? 'I want to talk something about this page!' : `Hey ${user}, click me to ask anything you want about the story! 😃`}
-                    </div>
+            <div id='bottom-box'>
+                {showCaption && 
+                    <div id='caption-box'>
+                        {/* keep the caption at the center of the caption-box */}
+                    <h4 id="caption">
+                        {/* <Button onClick={togglePlayPause} variant="contained" color="primary">
+                            {isPlaying ? <FaPause /> : <FaPlay />}
+                        </Button> */}
+                        {pages[currentPageRef.current]?.text[sentenceIndexRef.current]}
+                    </h4>
+                </div>
                 }
                 <div id='penguin-box' onClick={handlePenguinClick}>
-                    <img src='./files/imgs/penguin.svg' alt='penguin' style={{ width: '128px' }}></img>
+                        <img src='./files/imgs/penguin.svg' alt='penguin' style={{ width: '128px' }}></img>
                 </div>
             </div>
-            {(isAsking || isKnowledge) && (
+            {(isAsking || isKnowledge) && !isMinimizedChat && (
                     <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (
@@ -952,6 +963,7 @@ const ReadChatPage = () => {
                                 />
                             </div>
                         )}
+                        , , 
                         <IconButton id='expand-btn' variant='plain' 
                                 onClick={handleExpandChat}
                                 sx={{
@@ -961,19 +973,30 @@ const ReadChatPage = () => {
                                     zIndex: 1,
                                 }}
                             >
-                            {isExpandedChat ? <AiOutlineShrink size={40} color='#7AA2E3' /> : <AiOutlineExpand size={40} color='#7AA2E3' />}
+                            {isExpandedChat ? <FaChevronCircleDown size={30} color='#7AA2E3' /> : <FaChevronCircleUp size={30} color='#7AA2E3' />}
+                        </IconButton>
+                        <IconButton id='minimize-btn' variant='plain' 
+                                onClick={handleMinimizeChat}
+                                sx={{
+                                    position: 'absolute',
+                                    top: '8px',
+                                    left: '45px',
+                                    zIndex: 1,
+                                }}
+                            >
+                            <FaMinusCircle size={30} color='#7AA2E3' />
                         </IconButton>
                         <IconButton
                             onClick={handleCloseChat}
                             sx={{
                                 position: 'absolute',
                                 top: '8px',
-                                right: '8px',
+                                left: '80px',
                                 zIndex: 1
                             }}
                         >
                             {/* add a close icon */}
-                            <MdClose size={40} color='#7AA2E3' />
+                            <IoMdCloseCircle size={36} color='#7AA2E3' />
                         </IconButton>
                     <Box id='chat-window'>
                         
@@ -1010,7 +1033,7 @@ const ReadChatPage = () => {
                                                     right: '8px', 
                                                     bottom: '8px', 
                                                 }}>
-                                                    <FaCirclePlay size={25} color='#7AA2E3' />
+                                                    <FaCirclePlay size={25} color='#2A2278' />
                                                 </IconButton>
                                             )}
                                         </Box>
@@ -1020,26 +1043,42 @@ const ReadChatPage = () => {
                             )))}
                     </Box>
                     {canPushToTalk && !isEnding && (
-                        <button id='chat-input' 
-                            disabled={!isConnected || !canPushToTalk}
-                            onMouseDown={startRecording}
-                            onTouchStart={startRecording}
-                            onMouseUp={stopRecording}
-                            onTouchEnd={stopRecording}
-                            onContextMenu={(e) => e.preventDefault()}
-                            style={{
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: isRecording ? '#F6BF45' : '#1ECDD1',
-                                zIndex: 100
-                            }}
-                        >
-                            <FaMicrophone size={40} color='white'/>
-
-                        </button>
+                        <div id='recording-box'>
+                            {/* only show these boxes when recording */}
+                            {isRecording && (
+                                <>
+                                    <div id='recording-box-1' />
+                                    <div id='recording-box-2' />
+                                </>
+                            )}
+                            <button id='chat-input' 
+                                disabled={!isConnected || !canPushToTalk}
+                                onMouseDown={startRecording}
+                                onTouchStart={startRecording}
+                                onMouseUp={stopRecording}
+                                onTouchEnd={stopRecording}
+                                onContextMenu={(e) => e.preventDefault()}
+                                style={{
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: '#F4A011',
+                                    position: 'relative',
+                                    zIndex: 100
+                                }}
+                            >
+                                {/* <FaMicrophone size={40} color='white'/> */}
+                                {isRecording ? 
+                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb' }}>Talking...</h4>
+                                : <div>
+                                        <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
+                                        <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
+                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb' }}>Push to talk!</h4>
+                                </div>}
+                            </button>
+                        </div>
                     )}
                     {isEnding && (
                         <Box id='chat-input'>
@@ -1050,7 +1089,10 @@ const ReadChatPage = () => {
                                 <h4 id='voice-input-text'>Let's start reading and chatting!</h4>
                             </Box>
                         </Box>
-                    )}          
+                    )} 
+                    <div id='moon-chat-box'>
+                        <img src='./files/imgs/moon.svg' alt='moon' style={{ position: 'absolute', bottom: '0', right: '0', zIndex: -1 }} />
+                    </div>
                 </Box>
             )}
             </div>

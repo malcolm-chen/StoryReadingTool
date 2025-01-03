@@ -55,47 +55,54 @@ const LandingPage = () => {
     };
 
     return (
-        <Container className="login-container">
+        <div className="login-container">
             <div className="logo-container">
-                <img src='./files/imgs/penguin-login.svg' alt='logo' style={{ width: '800px' }} />
+                <img src='./files/imgs/penguin-login.svg' alt='logo' style={{ height: '30vh' }} />
             </div>
             <Box id='login-box'>
                 <Form id='login-form' onSubmit={handleSubmit}>
-                    <h4 style={{ textAlign: 'left', display: 'block', width: '100%' }}>What's your name?</h4>
+                    <h4 style={{ textAlign: 'center', display: 'block', width: '100%', color: '#E8EAF0' }}>What's your name?</h4>
+                    {/* Dynamically adjust the font size of placeholder based on the height of the input */}
                     <Input
                         type="text"
                         placeholder="Your Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)} // Update username state
                         id='login-input'
-                        style={{ borderRadius: '35px', padding: '0' }}
+                        style={{ borderRadius: '20px', padding: '0', width: '50vw', height: '5vh'}}
                     />
                     
                     {/* Display error message if validation fails */}
                     {<span style={{ height: '36px'}}></span>}
 
-                    <h4 style={{ textAlign: 'left', display: 'block', width: '100%' }}>What's your password?</h4>
+                    <h4 style={{ textAlign: 'center', display: 'block', width: '100%', color: '#E8EAF0' }}>What's your password?</h4>
                     <Input
                         type="text"
                         placeholder="Your Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)} // Update password state
                         id='login-input'
-                        style={{ borderRadius: '35px', padding: '0' }}
+                        style={{ borderRadius: '20px', padding: '0', width: '50vw', height: '5vh' }}
                     />
                     {<span className="error" style={{ height: '36px'}}>{error}</span>}
 
                     <Button id='login-btn' className='mybtn' variant="solid" type="submit">
-                        <div style={{ width: '80%', height: '15px', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '10px', borderRadius: '30px' }}></div>
-                        <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '50px', height: '50px', position: 'absolute', top: '2px', right: '5px', borderRadius: '50%' }} />
+                        <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
+                        <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
                         Get Started!
                     </Button>
                 </Form>
             </Box>
+            <div className = "penguin-logo">
+                <img src = './files/imgs/penguin-bg.svg' alt='penguin' />
+            </div>
+            <div className="moon">
+                <img src = './files/imgs/moon.svg' alt='moon' />
+            </div>
             {/* <div className="star">
                 <img src = './files/imgs/star.svg' alt='star' />
             </div> */}
-        </Container>
+        </div>
     );
 };
 

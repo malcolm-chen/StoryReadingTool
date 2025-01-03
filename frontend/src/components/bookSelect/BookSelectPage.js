@@ -25,7 +25,6 @@ const BookSelectPage = () => {
         setBookList(
             [
                 {'title': 'Amara and the Bats', 'time': '15min', 'progress': '0%'},
-                {'title': 'Oscar and the Cricket', 'time': '15min', 'progress': '0%'}
             ]
         );
     }, []);
@@ -45,7 +44,10 @@ const BookSelectPage = () => {
         <Box className="background-container background-container-library">
             <Box className='main-content'>
                 <Box className='instruction-box' id='instruction-box-library'>
-                    <h2 id='page-title'><img src='./files/imgs/penguin.svg' alt='logo' style={{ width: '60px', marginRight: '10px' }} /> My Library</h2>
+                    <h2 id='page-title'><img src='./files/imgs/penguin.svg' alt='logo' style={{ width: '90px', marginRight: '10px' }} /> My Library</h2>
+                    <div className='library-star'>
+                        <img src='./files/imgs/star.svg' alt='star' style={{ position: 'absolute', top: '0', right: '0', width: '30px', marginRight: '10px' }} />
+                    </div>
                     <h4 className='instruction'>
                         Reading Now
                     </h4>
@@ -202,6 +204,9 @@ const BookSelectPage = () => {
             {/* <div className='sun'>
                 <img src = './files/imgs/sun.svg' alt='sun' />
             </div> */}
+            <div className='moon-library'>
+                <img src = './files/imgs/moon-library.svg' alt='moon' />
+            </div>
             <Footer user={user} curSelected={curSelected} setCurSelected={setCurSelected}/>
         </Box>
     );

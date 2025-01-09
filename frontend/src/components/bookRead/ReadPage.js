@@ -647,6 +647,7 @@ const ReadChatPage = () => {
 
         **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only include one question sentence.
+        - If your response include a question, you can't conclude the conversation. You need to address the question first.
         `;
         console.log(instruction4FollowUp);
         return instruction4FollowUp;

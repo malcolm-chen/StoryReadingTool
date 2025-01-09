@@ -623,11 +623,11 @@ const ReadChatPage = () => {
 
         **Situations for Not Posing a Follow-up Question**:
         - You do not need to pose a follow-up question if:
-        1. you think the learning objective has been addressed effectively (usually after 3 to 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
+        1. you think the learning objective has been addressed effectively (usually after 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
         2. the child failed to answer the first question correctly and you rephrased the question into a multiple-choice question, or
-        3. the child repeatedly answers incorrectly, or
+        3. the child answers incorrectly for multiple times, or
         4. you already asked three different questions in total.
-        In these cases, refer to **Instructions for Conclusion**.
+        In these cases, refer to **Instructions for Conclusion**. You do not need to end the conversation early, like only having two rounds of conversation.
         
         **Instructions for Pose a Follow-up Question**:
         - If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.

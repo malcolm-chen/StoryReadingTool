@@ -33,6 +33,7 @@ const ReadChatPage = () => {
     const [chatHistory, setChatHistory] = useState([]);
     const [isKnowledge, setIsKnowledge] = useState(false);
     const [isClientSetup, setIsClientSetup] = useState(false);
+    const [isFirstTime, setIsFirstTime] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -71,6 +72,7 @@ const ReadChatPage = () => {
     );
 
     const audioRef = useRef(new Audio());
+    const replayAudioRef = useRef(new Audio());
     const storyTextRef = useRef([]);
     const currentPageRef = useRef(localStorage.getItem(`${title}-currentPage`) ? parseInt(localStorage.getItem(`${title}-currentPage`), 10) : 0);
     const sentenceIndexRef = useRef(0);
@@ -141,12 +143,28 @@ const ReadChatPage = () => {
             const askedQuestions = await response.json();
             console.log('asked questions', askedQuestions);
             askedQuestionsRef.current = askedQuestions;
+            if (askedQuestions.length === 0) {
+                setIsFirstTime(true);
+            }
+            // setIsFirstTime(true);
         }
         loadStory();
         loadDictionary();
         loadAskedQuestions();
         audioRef.current.play();
     }, []);
+
+    useEffect(() => {
+        if (isFirstTime) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+            setTimeout(() => {
+                setIsFirstTime(false);
+                audioRef.current.play();
+                setIsPlaying(true);
+            }, 5000);
+        }
+    }, [isFirstTime]);
 
     /**
      * Connect to conversation:
@@ -267,7 +285,7 @@ const ReadChatPage = () => {
         if (pages[currentPageRef.current]?.text) {
             sentenceIndexRef.current = 0;
             const audio = audioRef.current;
-            const playNextSentence = () => {
+            const playNextSentence = async () => {
                 setAudioPage(currentPageRef.current);
                 if (sentenceIndexRef.current < pages[currentPageRef.current].text.length) {
                     setCurrentSentence(sentenceIndexRef.current);
@@ -278,8 +296,12 @@ const ReadChatPage = () => {
                         sentenceIndexRef.current += 1;
                         playNextSentence();
                     };
-                    setIsPlaying(true);
-                    audio.play();
+                    try {
+                        await audio.play();
+                        setIsPlaying(true);
+                    } catch (error) {
+                        console.error('Error playing audio:', error);
+                    }
                 } else {
                     // setIsPlaying(false);
                     if (currentPageRef.current in knowledgeRef.current) {
@@ -290,11 +312,11 @@ const ReadChatPage = () => {
                         // check if the client is not setup for guiding
                         if (!clientRef.current.realtime.isConnected()) {
                             console.log('setting up client for guiding');
-                            setupClient(getInstruction4Guiding());
+                            setupClient(await getInstruction4Guiding());
                             setIsClientSetup(true);
                         } else {
                             console.log('resetting client for guiding');
-                            updateClientInstruction(getInstruction4Guiding());
+                            updateClientInstruction(await getInstruction4Guiding());
                         }
                     } else {
                         setIsKnowledge(false);
@@ -309,9 +331,9 @@ const ReadChatPage = () => {
     useEffect(() => {
         console.log('playPageSentences', currentPageRef.current, sentenceIndexRef.current, knowledgeRef.current.length);
         if (pages.length > 0) {
-            audioRef.current.pause();
+            // audioRef.current.pause();
             // setIsPlaying(false);
-            if (isPlaying) {
+            if (isPlaying && !isFirstTime) {
                 console.log('playing page sentences', currentPageRef.current);
                 playPageSentences();  
             }
@@ -350,40 +372,45 @@ const ReadChatPage = () => {
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
-        if (currentPageRef.current < pages.length - 1) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-            // setIsPlaying(false);
-            setIsKnowledge(false);
-            setIsAsking(false);
-            setIsAsked(false);
-            setIsMinimizedChat(false);
-            setIsExpandedChat(false);
-            setChatHistory([]);
-            if (clientRef.current.realtime.isConnected()) {
-                console.log('disconnecting conversation');
-                // deleteConversationItem(items[0].id);
-                await disconnectConversation();
-                const client = clientRef.current;
-                client.reset();
-                setIsClientSetup(false);
-            }
-            const newPage = currentPageRef.current + 1;
-            // setCurrentPage(newPage);
-            currentPageRef.current = newPage;
-            setCurrentSentence(0);
-            sentenceIndexRef.current = 0;
-            localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
-            localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        // setIsPlaying(false);
+        setIsKnowledge(false);
+        setIsAsking(false);
+        setIsAsked(false);
+        setIsMinimizedChat(false);
+        setIsExpandedChat(false);
+        setChatHistory([]);
+        if (clientRef.current.realtime.isConnected()) {
+            console.log('disconnecting conversation');
+            // deleteConversationItem(items[0].id);
+            await disconnectConversation();
+            const client = clientRef.current;
+            client.reset();
+            setIsClientSetup(false);
         }
+        const newPage = ( currentPageRef.current + 1 ) % pages.length;
+        // setCurrentPage(newPage);
+        currentPageRef.current = newPage;
+        setCurrentSentence(0);
+        sentenceIndexRef.current = 0;
+        localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
+        localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
     };
 
     const getFirstQuestion = async () => {
         const firstQuestionSet = knowledgeRef.current[currentPageRef.current]?.first_question_set;
+        console.log('firstQuestionSet', firstQuestionSet);
+        console.log('asked question', askedQuestionsRef.current[currentPageRef.current]);
+        if (firstQuestionSet?.length === askedQuestionsRef.current[currentPageRef.current]?.length) {
+            console.log('all questions have been asked, now asking: ', firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)]);
+            return firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)];
+        }
         if (Array.isArray(firstQuestionSet)) {
             for (const question of firstQuestionSet) {
                 if (!askedQuestionsRef.current[currentPageRef.current]?.includes(question)) {
                     // send to backend to save the question
+                    console.log('saving question', question);
                     const response = await fetch(`${apiUrl}/api/save_asked_question`, {
                         method: 'POST',
                         headers: {
@@ -400,8 +427,6 @@ const ReadChatPage = () => {
                     return question;
                 }
             }
-            // If all questions have been asked, return a random one
-            return firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)];
         }
         return "No questions available"; // Default message if firstQuestionSet is not an array
     }
@@ -409,7 +434,7 @@ const ReadChatPage = () => {
 
     function getInstruction4Asking() {
         const instruction4Asking = `
-            You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
+        You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
 
         Instructions:
         - Start by asking 'Hey ${user}, what do you want to know about this page?'
@@ -431,44 +456,47 @@ const ReadChatPage = () => {
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
-            **Instructions for Evaluation**:
-            You need to evaluate the child's response based on the following information:
-            - the conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}, 
-            - the child's latest response
-            - story context: ${pages[currentPageRef.current]?.text.join(' ')}
-            Remember to only evaluate the child's response for the latest question.
+        **Instructions for Evaluation**:
+        You need to evaluate the child’s response based on the following inputs:
+        - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
+        - Child’s Latest Response: The most recent input from the child.
+        - Story Context: ${pages[currentPageRef.current]?.text.join(' ')}
+        Focus only on evaluating the child’s response to the latest question.
 
-            Follow these steps to evaluate the child's response:
-            1. Check if the response contains any meaningful content:
-            - If the response is empty, or too short, or sent by mistake, mark it as "invalid".
-            2. If the response is valid, evaluate it against these criteria:
-            - Correct: The response is accurate (or partially accurate) and relevant to the question.
-            - Incorrect: The response is inaccurate and shows no understanding of the question (e.g. "I don't know", "I don't remember", "I don't know the answer"). 
-            - Off-topic: The response is unrelated to the question or the story.
-            
-            **Response Format**:
-            Precede each evaluation with the tag <eval>. Examples:
-            - <eval>invalid
-            - <eval>correct
-            - <eval>incorrect
-            - <eval>off-topic
+        **Steps for Evaluation**:
+        Step 1: Check Response Validity
+        If the response is empty, too short, or sent by mistake, mark it as "invalid".
+        Step 2: Evaluate Valid Responses
+        For responses that contain meaningful content, use the following criteria:
+        - Correct: The response is accurate (or partially accurate) and directly relevant to the question.
+        - Partially Correct: The response shows partial accuracy and relevance. For example, in a multiple-choice question, selecting one correct option qualifies as partially correct.
+        - Incorrect: The response is inaccurate and shows no understanding of the question (e.g., "I don’t know," "I don’t remember," or irrelevant guesses).
+        - Off-topic: The response is unrelated to the question or the story context.
+                    
+        **Response Format**:
+        Precede each evaluation with the tag <eval>. Examples include:
+        - <eval>invalid
+        - <eval>correct
+        - <eval>partially correct
+        - <eval>incorrect
+        - <eval>off-topic
         `;
         console.log(instruction4Evaluation);
         return instruction4Evaluation;
     }
 
     // update the instruction4Guiding when the currentPageRef.current changes   
-    function getInstruction4Guiding() {
+    async function getInstruction4Guiding() {
         const instruction4Guiding = `
-            You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
             
-         **Story Information**:
+        **Story Information**:
         - Story Title: ${title}
         - Story Text: ${pages[currentPageRef.current]?.text.join(' ')}
         - Concept Word: ${knowledgeRef.current[currentPageRef.current]?.keyword}
         - Learning Objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}
-        - Core Idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea}
-        - First Question: ${getFirstQuestion()}
+        - Core Idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}
+        - First Question: ${await getFirstQuestion()}
 
         **Instructions for the Conversation**:
             1. Initiate Conversation:
@@ -493,6 +521,7 @@ const ReadChatPage = () => {
         - Avoid assuming or making up the child’s response. If you do not get response, just ask again.
         - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.
 
+        You should learn from the following examples to mimic the teacher's style of teaching.
         **In-Context Learning Examples**:
         [Example 1]
         Teacher's first question: What is Amara’s favorite animal?
@@ -557,32 +586,67 @@ const ReadChatPage = () => {
             {Follow-up question}: Do you know what beady eyes are?
         Child: like the bat’s eyes
         Teacher:
-            {Acknowledgement}: Yes bat’s eyes are beady
+            {Acknowledgement}: Yes bat’s eyes are beady.
             {Explanation}: Beady means small, shiny, and round, just like the bat’s eyes.
         `;
+        console.log(instruction4Guiding);
         return instruction4Guiding;
     }
 
     const getInstruction4FollowUp = (items, evaluation) => {
         console.log('evaluation', evaluation);
         const instruction4FollowUp = `
-            You need to pose a follow-up question based on the following information: 
-            1. conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-            2. the evaluation of the child's response: ${evaluation};
-            3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        You need to pose a follow-up question based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
-            Follow the following instructions:
-            1. If the evaluation of the child's response is 'invalid', reply with a friendly line like: "I didn't hear your answer, can you say it again?"
-            2. If the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", or, "Let's think about it together!", or "That's a good try!"), provide a hint/concise explanation, and then rephrase the original question into a multiple-choice question, and ask the child to choose the correct answer.
-            3. If the evaluation of the child's response is 'correct', you should first acknowledge their correct answer (e.g., "Well done!", "That's correct!", "Great job!"), then provide a concise explanation to deepen their understanding, and finally determine if you should pose a follow-up question or conclude the conversation. Remember to keep your response simple and under 25 words.
-            
-            **Instructions for Pose a Follow-up Question**:
-            You only need to pose a follow-up question if the evaluation of the child's response is 'correct'. Otherwise, you should stick to the original question.
-            Your follow-up question should be related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
-            Here are some examples of follow-up questions:
-            - ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
+        Follow the following instructions:
+        Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
 
-            - If you feel the learning objective has been addressed effectively (usually after asking 3 to 4 questions in total, and this is the ${items.length/2} round of conversation), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! You can click the close button and let's continue reading the story."
+        **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using words that are too judgmental, like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - You need to use different ways to acknowledge the child's response. Do not repeat the same acknowledgement as in the conversation history.
+        Here are different ways to acknowledge the child's response:
+        1. If the evaluation of the child's response is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
+        2. If the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
+        3. If the evaluation of the child's response is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
+        4. If the evaluation of the child's response is 'correct', you should first acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
+        5. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
+        
+        **Instructions for Explanation**:
+        - If the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
+        - If the evaluation of the child's response is 'incorrect', briefly explain why what the child has chosen is not right (without explicitly telling them they did wrong) 
+        - If the evaluation of the child's response is 'partially correct', hint the child to think to get the correct answer (without explicitly telling the correct answer)
+
+        **Situations for Not Posing a Follow-up Question**:
+        - You do not need to pose a follow-up question if:
+        1. you think the learning objective has been addressed effectively (usually after 3 to 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
+        2. the child failed to answer the first question correctly and you rephrased the question into a multiple-choice question, or
+        3. the child repeatedly answers incorrectly, or
+        4. you already asked three different questions in total.
+        In these cases, refer to **Instructions for Conclusion**.
+        
+        **Instructions for Pose a Follow-up Question**:
+        - If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
+        Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+        ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
+
+        - If the evaluation of the child's response is 'partially correct' or 'incorrect' to the previous question, and you haven't rephrase the previous question into a multiple-choice question, rephrase the previous question into a multiple-choice question.
+        The rephrased question should ask about the same thing as the previous question, but in a multiple-choice format. For the options of the multiple-choice question, avoid using “A, B, C” to make it sound more natural.
+        e.g., What did Amara’s mom and brother do? Did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        
+        - If the evaluation of the child's response is 'partially correct' or 'incorrect' to the last question and it's already rephrased into a multiple-choice question, do not rephrase the question or ask the question in the same way again. You should hint the child to think about the correct answer (do not explicitly tell the correct answer), and ask the question in a easier way.
+
+        **Instructions for Conclusion**:
+        - If you are not asking a question, and you feel the learning objective has been addressed effectively (usually after 3 to 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! You can click the close button and let's continue reading the story." (Use different conclusions based on the example I provided)
+        - If the child repeatedly answers incorrectly, you should provide the correct answer, then transition to a conclusion like "You can click the close button and let's continue reading the story." (Use different conclusions based on the example I provided)
+        - Keep the conclusion part concise, under 15 words.
+
+        **Instructions for Whole Response**:
+        - When organizing all the elements above to form a whole response, make sure the whole response only include one question sentence.
         `;
         console.log(instruction4FollowUp);
         return instruction4FollowUp;
@@ -602,7 +666,6 @@ const ReadChatPage = () => {
             const wavStreamPlayer = wavStreamPlayerRef.current;
             const client = clientRef.current;
             client.updateSession({ instructions: instruction });
-            
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
             // if (client.tools.length == 0) {
@@ -721,6 +784,27 @@ const ReadChatPage = () => {
         setShowCaption(!showCaption);
     }
 
+    // useEffect(() => {
+    //     console.log('showCaption changed', showCaption);
+    //     if (!showCaption) {
+    //         console.log('showCaption is false');
+    //         // set the max-height of the book-container to calc(100% - 100px)
+    //         const bookContainer = document.getElementById('book-container');
+    //         bookContainer.style.maxHeight = 'calc(100% - 30px)';
+    //         // set the max-height of the bottom-box to 0
+    //         const bottomBox = document.getElementById('bottom-box');
+    //         bottomBox.style.flexBasis = '30px';
+    //     } else {
+    //         console.log('showCaption is true');
+    //         // set the max-height of the book-container to 100%
+    //         const bookContainer = document.getElementById('book-container');
+    //         bookContainer.style.maxHeight = 'calc(100% - 130px)';
+    //         // set the flex-basis of the bottom-box to 130px
+    //         const bottomBox = document.getElementById('bottom-box');
+    //         bottomBox.style.flexBasis = '130px';
+    //     }
+    // }, [showCaption]);
+
     const swipeHandlers = useSwipeable({
         onSwipedLeft: () => {
             if (currentPageRef.current < pages.length - 1) {
@@ -768,9 +852,14 @@ const ReadChatPage = () => {
         }
     };
 
-    const handleReplay = (index) => {
-        console.log(index, chatHistory);
-        const replayAudio = new Audio(chatHistory[index].formatted.file.url);
+    const handleReplay = async (index) => {
+        const wavStreamPlayer = wavStreamPlayerRef.current;
+        await wavStreamPlayer.interrupt();
+        const replayAudio = replayAudioRef.current;
+        replayAudio.src = chatHistory[index].formatted.file.url;
+        // pause the replayAudio
+        replayAudio.pause();
+        replayAudio.currentTime = 0;
         replayAudio.play();
         setIsPlaying(true);
         replayAudio.onended = () => {
@@ -804,7 +893,7 @@ const ReadChatPage = () => {
         audioRef.current.playbackRate = audioSpeed;
     }, [audioSpeed]);
 
-    const handlePenguinClick = () => {
+    const handlePenguinClick = async () => {
 
         audioRef.current.pause();
         setIsPlaying(false);
@@ -818,7 +907,7 @@ const ReadChatPage = () => {
             if (!isKnowledge) {
                 setupClient(getInstruction4Asking());
             } else {
-                setupClient(getInstruction4Guiding());
+                setupClient(await getInstruction4Guiding());
             }
             setIsClientSetup(true);
             console.log('client is setup!');
@@ -826,9 +915,28 @@ const ReadChatPage = () => {
             if (!isKnowledge) {
                 updateClientInstruction(getInstruction4Asking());
             } else {
-                updateClientInstruction(getInstruction4Guiding());
+                updateClientInstruction(await getInstruction4Guiding());
             }
         }
+    }
+
+    const processChatHistory = (chatHistory) => {
+        const newChatHistory = [];
+        let index = 0;
+        for (const item of chatHistory) {
+            // const formData = new FormData();
+            // formData.append('audio', item.formatted.blob, `${user}-${title}-${currentPageRef.current}-${index}.mp3`);
+            const newItem = {
+                id: item.id,
+                role: item.role,
+                content: item.content[0].transcript,
+                audio: item.formatted.audio
+            }
+            newChatHistory.push(newItem);
+            index++;
+        }
+        console.log('newChatHistory', newChatHistory);
+        return newChatHistory;
     }
 
     const handleCloseChat = async () => {
@@ -849,23 +957,31 @@ const ReadChatPage = () => {
         }
         setIsAsked(true);
         // send the chat history to backend
-        const chatHistory = clientRef.current.conversation.getItems();
+        console.log('chatHistory to save', chatHistory);
+        const newChatHistory = processChatHistory(chatHistory);
         try {
+            const data = {
+                chatHistory: newChatHistory,
+                user: user,
+                title: title,
+                page: currentPageRef.current
+            }
+            const formData = new FormData();
+            formData.append('data', JSON.stringify(data));
             const response = await fetch(`${apiUrl}/api/chat_history`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    chatHistory: chatHistory,
-                    user: user,
-                    title: title,
-                    page: currentPageRef.current
-                }),
+                body: formData
             });
         } catch (error) {
             console.error('Error sending chat history to backend', error);
         }
+    }
+
+    const handleCloseMessage = () => {
+        // hide the message box
+        setIsFirstTime(false);
+        audioRef.current.play();
+        setIsPlaying(true);
     }
 
     useEffect(() => {
@@ -921,7 +1037,6 @@ const ReadChatPage = () => {
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
-                        disabled={currentPageRef.current === pages.length - 1}
                         sx={{ opacity: 0 }}
                         >
                         <MdArrowCircleRight size={60} color='#7AA2E3'/>
@@ -947,8 +1062,20 @@ const ReadChatPage = () => {
                 </div>
                 }
                 <div id='penguin-box' onClick={handlePenguinClick}>
-                        <img src='./files/imgs/penguin.svg' alt='penguin' style={{ width: '128px' }}></img>
+                    <img src='./files/imgs/penguin.svg' alt='penguin' style={{ width: '128px' }}></img>
+                    
                 </div>
+                {/* the message should appear for 5 seconds and then disappear */}
+                {isFirstTime && (
+                    <div className='penguin-message' >
+                        {/* add a triangle at the right of the message box, as a message tail */}
+                        <div className='message-tail'></div>
+                        { `Hey ${user}, I'm your reading mate. You can click me to ask anything about the story! 😃`}
+                        <button id='close-message' onClick={handleCloseMessage}>
+                            <h4 style={{ color: 'white', fontSize: '20px', fontFamily: 'Cherry Bomb', zIndex: 2 }}>Got it!</h4>
+                        </button>
+                    </div>
+                )}
             </div>
             {(isAsking || isKnowledge) && !isMinimizedChat && (
                     <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
@@ -1038,10 +1165,12 @@ const ReadChatPage = () => {
                                     <Box id="chatbot-chat">
                                         <Image id='chatbot-avatar' src='./files/imgs/penguin.svg'></Image>
                                         <Box id="msg-bubble" style={{ position: 'relative' }} onClick={() => handleReplay(index)}>
-                                            <h5 level='body-lg' style={{margin: '0px', marginRight: '30px'}}>
-                                                {msg.content[0].transcript}
-                                            </h5>
-                                            {msg.status === 'completed' && (
+                                            {!msg.content[0].transcript.startsWith('<') && (
+                                                <h5 level='body-lg' style={{margin: '0px', marginRight: '30px'}}>
+                                                    {msg.content[0].transcript}
+                                                </h5>
+                                            )}
+                                            {msg.status === 'completed' && !msg.content[0].transcript.startsWith('<') && (
                                                 <IconButton variant='plain' style={{ 
                                                     position: 'absolute', 
                                                     right: '8px', 
@@ -1094,16 +1223,6 @@ const ReadChatPage = () => {
                             </button>
                         </div>
                     )}
-                    {isEnding && (
-                        <Box id='chat-input'>
-                            <Box id='chat-end' onClick={handleEndChat}>
-                                <IconButton id='to-chatread-btn' >
-                                    <GiSpellBook size={40} color='#7AA2E3' />
-                                </IconButton>
-                                <h4 id='voice-input-text'>Let's start reading and chatting!</h4>
-                            </Box>
-                        </Box>
-                    )} 
                     <div id='moon-chat-box'>
                         <img src='./files/imgs/moon.svg' alt='moon' style={{ position: 'absolute', bottom: '0', right: '0', zIndex: -1 }} />
                     </div>

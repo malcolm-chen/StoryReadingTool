@@ -475,7 +475,7 @@
 // add an animation effect, let the message box flow up and down for 5 seconds  
 .penguin-message {
   border-radius: 20px;
-  background: #9CF3F5;
+  background: #e6e8f5;
   padding: 24px;
   display: flex;
   // left align the text
@@ -483,7 +483,7 @@
   font-size: 25px;
   position: absolute;
   right: 200px;
-  max-width: 500px;
+  max-width: 450px;
   color: #003E40;
   font-family: 'BM Jua';
   animation: float 5s infinite;
@@ -499,7 +499,7 @@
   height: 30px;
   border-top: 20px solid transparent;
   border-bottom: 20px solid transparent;
-  border-left: 20px solid #9CF3F5;
+  border-left: 20px solid #e6e8f5;
 }
 
 #penguin-box {
@@ -813,3 +813,16 @@
   animation: loading 2s linear infinite;
 }
 
+#close-message {
+  position: absolute;
+  background-color: #e6e8f5;
+  padding: 8px;
+  right: 16px;
+  bottom: 12px;
+  background-color: #F4A011!important;
+  font-family: 'Cherry Bomb'!important;
+  color: white!important;
+  font-size: 20px!important;
+  border-radius: 35px!important;
+  border: 0px!important;
+}

@@ -1,8 +1,13 @@
 import pymongo
 import sys
 import os
+import gridfs
 from dotenv import load_dotenv
+import json
+import requests
 load_dotenv()
+
+
 
 try:
     client = pymongo.MongoClient(os.getenv("MONGO_URI"))
@@ -28,10 +33,16 @@ db = client["StoryBook"]
 # # use a collection named "users"
 users = db["User"]
 
-# print all users
-for user in users.find():
-    print(user)
+def get_file_size():
+    # get the file size of the first file in the fs
+    fs = gridfs.GridFS(client.get_database("StoryBook"))
+    file_id = fs.find_one()._id
+    file_size = fs.find_one({'_id': file_id}).length / 1024 / 1024
+    return file_size
 
+# print all users
+# for user in users.find():
+#     print(user["username"])
 
 # insert new users based on:
 # username: string
@@ -58,21 +69,32 @@ user_dict = {
     "Gigi": "123",
     "lero": "123",
     "yingxu": "123",
+    "xuechen": "123",
     "test": "123"
 }
 
-# delete all users
-users.delete_many({})
 
-for username, password in user_dict.items():
-    try:
-        users.insert_one({
-            "username": username, 
-            "password": password,
-            "current_book": None,
-            "current_page": None,
-            "chat_history": {},
-            "asked_questions": {}
-        })
-    except Exception as e:
-        print(f"Error inserting user {username}: {e}")
+def reset_users():
+    # delete all users
+    users.delete_many({})
+    # delete all files in the fs
+    fs = gridfs.GridFS(client.get_database("StoryBook"))
+    for file in fs.find():
+        fs.delete(file._id)
+    # delete fs.chunks
+    client.get_database("StoryBook")['fs.chunks'].delete_many({})
+
+    for username, password in user_dict.items():
+        try:
+            users.insert_one({
+                "username": username, 
+                "password": password,
+                "current_book": None,
+                "current_page": None,
+                "chat_history": {},
+                "asked_questions": {}
+            })
+        except Exception as e:
+            print(f"Error inserting user {username}: {e}")
+
+reset_users()

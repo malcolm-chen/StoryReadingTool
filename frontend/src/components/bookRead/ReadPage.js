@@ -608,7 +608,7 @@ const ReadChatPage = () => {
         **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using words that are too judgmental, like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - You need to use different ways to acknowledge the child's response. Do not repeat the same acknowledgement as in the conversation history.
+        - You need to ensure the variety of your acknowledgement. Do not repeat the same acknowledgement as in the conversation history.
         Here are different ways to acknowledge the child's response:
         1. If the evaluation of the child's response is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
         2. If the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
@@ -638,7 +638,7 @@ const ReadChatPage = () => {
         The rephrased question should ask about the same thing as the previous question, but in a multiple-choice format. For the options of the multiple-choice question, avoid using “A, B, C” to make it sound more natural.
         e.g., What did Amara’s mom and brother do? Did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
         
-        - If the evaluation of the child's response is 'partially correct' or 'incorrect' to the last question and it's already rephrased into a multiple-choice question, do not rephrase the question or ask the question in the same way again. You should hint the child to think about the correct answer (do not explicitly tell the correct answer), and ask the question in a easier way.
+        - If the evaluation of the child's response is 'partially correct' or 'incorrect' to the last question and it's already rephrased into a multiple-choice question, do not rephrase the question or ask the question in the same way again. Also, do not pose a new question. You should focus on hinting the child to think about the correct answer (do not explicitly tell the correct answer), and ask the question in a easier way.
 
         **Instructions for Conclusion**:
         - If you are not asking a question, and you feel the learning objective has been addressed effectively (usually after 3 to 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! You can click the close button and let's continue reading the story." (Use different conclusions based on the example I provided)

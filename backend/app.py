@@ -16,6 +16,7 @@ import numpy as np
 load_dotenv()
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
 CORS(app, resources={r"/*": {"origins": os.getenv("REACT_APP_URL")}})
 
 OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"

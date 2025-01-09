@@ -12,10 +12,11 @@ import sys
 from pydub import AudioSegment
 from bson.binary import Binary
 import numpy as np
-app = Flask(__name__)
-CORS(app)
 
 load_dotenv()
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": os.getenv("REACT_APP_URL")}})
 
 OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -34,7 +35,7 @@ except pymongo.errors.ConfigurationError:
 # use a database named "myDatabase"
 db = client.StoryBook
 users = db.User
-fs = GridFS(db)
+# fs = GridFS(db)
 
 def load_json(filename):
     with open(filename, 'r') as file:

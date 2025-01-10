@@ -97,4 +97,23 @@ def reset_users():
         except Exception as e:
             print(f"Error inserting user {username}: {e}")
 
-reset_users()
+def reset_the_user(username):
+    users.delete_one({"username": username})
+    fs = gridfs.GridFS(client.get_database("StoryBook"))
+    # Find all files matching the username pattern
+    files = fs.find({"filename": {"$regex": f"{username}_"}})
+    
+    # Delete each file individually
+    for file in files:
+        fs.delete(file._id)
+
+    users.insert_one({
+        "username": username, 
+        "password": "123",
+        "current_book": None,
+        "current_page": None,
+        "chat_history": {},
+        "asked_questions": {}
+    })
+
+# reset_the_user("Jiaju")

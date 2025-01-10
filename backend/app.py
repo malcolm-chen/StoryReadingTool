@@ -12,12 +12,13 @@ import sys
 from pydub import AudioSegment
 from bson.binary import Binary
 import numpy as np
-
+from datetime import datetime
 load_dotenv()
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
 CORS(app, resources={r"/*": {"origins": os.getenv("REACT_APP_URL")}})
+# CORS(app)
 
 OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -36,7 +37,7 @@ except pymongo.errors.ConfigurationError:
 # use a database named "myDatabase"
 db = client.StoryBook
 users = db.User
-# fs = GridFS(db)
+fs = GridFS(db)
 
 def load_json(filename):
     with open(filename, 'r') as file:
@@ -71,7 +72,7 @@ def get_asked_questions():
     title = data['title']
     page = str(data['page'])
     # set the current book to the title, and current page to the page
-    # print(f'{user} is reading {title} on page {page}')
+    print(f'{user} is reading {title} on page {page}')
     users.update_one({'username': user}, {'$set': {'current_book': title, 'current_page': page}})
     # if the title is not in the asked_questions, add it
     current_asked_questions = users.find_one({'username': user})['asked_questions']
@@ -112,31 +113,44 @@ def chat_history():
     page = str(data.get('page'))
     chat_history = data.get('chatHistory')
     new_chat_history = []
+    
     for item in chat_history:
-        if item.get('audio'):
-            audio_data = np.array(list(item.get('audio').values()), dtype=np.int16)
-            audio = AudioSegment.from_raw(io.BytesIO(audio_data.tobytes()), format="raw", sample_width=2, channels=1, frame_rate=24000)
-            mp3_io = io.BytesIO()
-            audio.export(mp3_io, format="mp3")
-            mp3_io.seek(0)
         new_item = {
             'id': item.get('id'),
             'role': item.get('role'),
             'content': item.get('content'),
-            'audio': Binary(mp3_io.read())
         }
+        
+        # Handle audio data if present
+        if item.get('audio'):
+            audio_data = np.array(list(item.get('audio').values()), dtype=np.int16)
+            audio = AudioSegment.from_raw(io.BytesIO(audio_data.tobytes()), 
+                                        format="raw", 
+                                        sample_width=2, 
+                                        channels=1, 
+                                        frame_rate=24000)
+            mp3_io = io.BytesIO()
+            audio.export(mp3_io, format="mp3")
+            mp3_io.seek(0)
+            # Store audio as base64 string instead of Binary
+            new_item['audio'] = mp3_io.read().hex()
+        
         new_chat_history.append(new_item)
-    # chat_history_json = json.dumps(new_chat_history)
 
-    # timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    # file_id = fs.put(chat_history_json.encode('utf-8'), filename=f"{user}_{title}_{page}_{timestamp}_chat_history.json")
+    # Convert to JSON string before storing
+    chat_history_json = json.dumps(new_chat_history)
+    
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    file_id = fs.put(chat_history_json.encode('utf-8'), 
+                     filename=f"{user}_{title}_{page}_{timestamp}_chat_history.json")
+    
     current_chat_history = users.find_one({'username': user})['chat_history']
     if title not in current_chat_history:
         current_chat_history[title] = {}
     if page not in current_chat_history[title]:
         current_chat_history[title][page] = []
-    # current_chat_history[title][page].append(file_id)
-    current_chat_history[title][page].append(new_chat_history)
+    current_chat_history[title][page].append(file_id)
+    
     users.update_one({'username': user}, {'$set': {'chat_history': current_chat_history}})
     return jsonify({"success": True})
 

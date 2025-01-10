@@ -602,52 +602,60 @@ const ReadChatPage = () => {
         2. the evaluation of the child's response: ${evaluation};
         3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
-        Follow the following instructions:
-        Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
+Follow the following instructions:
+Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
 
         **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
-        - You need to avoid using words that are too judgmental, like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - You need to ensure the variety of your acknowledgement. Do not repeat the same acknowledgement as in the conversation history.
-        Here are different ways to acknowledge the child's response:
-        1. If the evaluation of the child's response is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
-        2. If the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
-        3. If the evaluation of the child's response is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
-        4. If the evaluation of the child's response is 'correct', you should first acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
-        5. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Here are different situations for acknowledgement based on the child's response:
+            1. If the evaluation is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
+            2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
+            3. If the evaluation is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
+            4. If the evaluation is 'correct', you should first acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
+            5. If the evaluation is 'question-posed', you should acknowledge their question (e.g., “Good question!”, “Oh it’s an interesting question!”)
+            6. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
         
         **Instructions for Explanation**:
-        - If the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
-        - If the evaluation of the child's response is 'incorrect', briefly explain why what the child has chosen is not right (without explicitly telling them they did wrong) 
-        - If the evaluation of the child's response is 'partially correct', hint the child to think to get the correct answer (without explicitly telling the correct answer)
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Here are different situations for explanation based on the child's response:
+            1. If the evaluation is 'correct', provide a concise explanation to deepen their understanding.
+            2. If the evaluation is 'incorrect', briefly explain why what the child has chosen is not right (without explicitly telling them they did wrong) 
+            3. If the evaluation is 'partially correct', hint the child to think to get the correct answer (without explicitly telling the correct answer)
+            4. If the evaluation is ‘question-posed’, answer the child’s question using simple words.
 
         **Situations for Not Posing a Follow-up Question**:
         - You do not need to pose a follow-up question if:
-        1. you think the learning objective has been addressed effectively (usually after 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
-        2. the child failed to answer the first question correctly and you rephrased the question into a multiple-choice question, or
-        3. the child answers incorrectly for multiple times, or
-        4. you already asked three different questions in total.
-        In these cases, refer to **Instructions for Conclusion**. You do not need to end the conversation early, like only having two rounds of conversation.
+            1. You think the learning objective has been addressed effectively (usually after 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
+            2. You are addressing the first question: the child failed to answer the first question correctly and you rephrased the first question into a multiple-choice question, or
+            3. The child answers incorrectly two times in a row, or
+            4. You already asked three different questions in total, or 
+            5. There are more than four rounds of questions.
+        In these cases, you can end the conversation (refer to **Instructions for Conclusion**). 
         
         **Instructions for Pose a Follow-up Question**:
-        - If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
-        Here are some examples of follow-up questions for your reference, you don't need to use all of them:
-        ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
-
-        - If the evaluation of the child's response is 'partially correct' or 'incorrect' to the previous question, and you haven't rephrase the previous question into a multiple-choice question, rephrase the previous question into a multiple-choice question.
-        The rephrased question should ask about the same thing as the previous question, but in a multiple-choice format. For the options of the multiple-choice question, avoid using “A, B, C” to make it sound more natural.
-        e.g., What did Amara’s mom and brother do? Did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
-        
-        - If the evaluation of the child's response is 'partially correct' or 'incorrect' to the last question and it's already rephrased into a multiple-choice question, do not rephrase the question or ask the question in the same way again. Also, do not pose a new question. You should focus on hinting the child to think about the correct answer (do not explicitly tell the correct answer), and ask the question in a easier way.
+         - If you are posing a follow-up question, you do not need to conclude the conversation.
+         - Here are the only situations you need to pose a follow-up question based on the child's response:
+            1. If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
+            Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+            ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
+            2. If the evaluation of the child's response is 'partially correct' or 'incorrect' to the previous question:
+                i. If this is the first time the child answers incorrectly (you haven't rephrased the previous question into a multiple-choice question), rephrase the previous question into a multiple-choice question. The rephrased question should ask about the same thing as the previous question, but in a multiple-choice format. For the options of the multiple-choice question, avoid using “A, B, C” to make it sound more natural. (e.g., What did Amara’s mom and brother do? Did they ignore the bat, play with the bat, or wait for a wildlife rescue team?)
+                ii.  If the child answers incorrectly more than one time (it means you already rephrased into a multiple-choice question), do not rephrase the question or ask the question in the same way again. Do not pose a new question. You should provide the correct answer and end the conversation (refer to **Instructions for Conclusion**).
+            3. If the evaluation is 'question-posed', and you have not asked three different questions in total, pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective} after the explanation.
 
         **Instructions for Conclusion**:
-        - If you are not asking a question, and you feel the learning objective has been addressed effectively (usually after 3 to 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), transition to a conclusion after providing your feedback. Use a friendly closing statement like: "It was fun chatting with you! You can click the close button and let's continue reading the story." (Use different conclusions based on the example I provided)
-        - If the child repeatedly answers incorrectly, you should provide the correct answer, then transition to a conclusion like "You can click the close button and let's continue reading the story." (Use different conclusions based on the example I provided)
+        - You cannot conclude the conversation if you’re posing a follow-up question.
+        - If you are not asking a question, after the explanation, transition to a conclusion. 
+        - If the child repeatedly answers incorrectly, you should provide the correct answer, then transition to a conclusion.
         - Keep the conclusion part concise, under 15 words.
+        - Here is an example: "It was fun chatting with you! You can click the close button and let's continue reading the story." (Make sure to use different conclusions based on the examples.)
 
         **Instructions for Whole Response**:
-        - When organizing all the elements above to form a whole response, make sure the whole response only include one question sentence.
-        - If your response include a question, you can't conclude the conversation. You need to address the question first.
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - If your response includes a question, you can't conclude the conversation. You need to address the question first.
         `;
         console.log(instruction4FollowUp);
         return instruction4FollowUp;

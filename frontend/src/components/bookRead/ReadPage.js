@@ -955,9 +955,11 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         if (isKnowledge) {
             setIsKnowledge(false);
             setTimeout(() => {
-                setIsPlaying(true);
                 // audioRef.current.play();
-                handleNextPage();
+                if (currentPageRef.current < pages.length - 1) {
+                    setIsPlaying(true);
+                    handleNextPage();
+                }
             }, 500);
         }
         else {

@@ -501,6 +501,7 @@ const ReadChatPage = () => {
         **Instructions for the Conversation**:
             1. Initiate Conversation:
                 Begin the interaction by posing the first question, which will guide to the concept word.
+                You should use different ways to open the conversation. For example: “Hmm, this part of the story is so interesting! + first question”; “Hey xxx, share with me what you think + first question”; “xxx, let’s chat about what you just read! + first question”; etc. 
             2. During the Conversation (Three Turns in All):
                 a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
                 b. Evaluate Response: Before responding, evaluate the child’s answer, which should fall into one of three categories: Correct/Incorrect/Off topic

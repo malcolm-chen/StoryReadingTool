@@ -19,6 +19,7 @@ export class WavStreamPlayer {
     this.analyser = null;
     this.trackSampleOffsets = {};
     this.interruptedTrackIds = {};
+    this.onended = null;
   }
 
   /**
@@ -81,6 +82,9 @@ export class WavStreamPlayer {
       if (event === 'stop') {
         streamNode.disconnect();
         this.stream = null;
+        if (typeof this.onended === 'function') {
+          this.onended();
+        }
       } else if (event === 'offset') {
         const { requestId, trackId, offset } = e.data;
         const currentTime = offset / this.sampleRate;
@@ -91,6 +95,10 @@ export class WavStreamPlayer {
     streamNode.connect(this.analyser);
     this.stream = streamNode;
     return true;
+  }
+
+  isPlaying() {
+    return this.stream ? true : false;
   }
 
   /**

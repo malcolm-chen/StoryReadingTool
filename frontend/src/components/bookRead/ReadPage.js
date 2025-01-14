@@ -17,15 +17,13 @@ import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-ico
 import { IoMdCloseCircle } from "react-icons/io";
 import { FaMicrophone } from "react-icons/fa6";
 import { FaCirclePlay } from "react-icons/fa6";
-import { MdClose } from "react-icons/md";
+import { RiSpeedUpFill } from "react-icons/ri";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
-
 // let currentPage = 0;
 // let sentenceIndex = 0;
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const ReadChatPage = () => {
-    console.log('ReadChatPage rendered');
     const location = useLocation();
     const navigate = useNavigate();
     const user = localStorage.getItem('username') || 'User';
@@ -38,6 +36,7 @@ const ReadChatPage = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [canPushToTalk, setCanPushToTalk] = useState(true);
+    const [isConversationEnded, setIsConversationEnded] = useState(false);
     const [realtimeEvents, setRealtimeEvents] = useState([]);
     const [items, setItems] = useState([]);
     const [memoryKv, setMemoryKv] = useState({});
@@ -46,15 +45,19 @@ const ReadChatPage = () => {
     const [showCaption, setShowCaption] = useState(true);
     const [isExpandedChat, setIsExpandedChat] = useState(false);
     const [isMinimizedChat, setIsMinimizedChat] = useState(false);
+    const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
-    const [audioSpeed, setAudioSpeed] = useState(1);
     const [isPlaying, setIsPlaying] = useState(true);
     const [isAsking, setIsAsking] = useState(false);
     const [isAsked, setIsAsked] = useState(false);
+    const [showSpeedSlider, setShowSpeedSlider] = useState(false);
     const recorderControls = useVoiceVisualizer();
     const [itemToDelete, setItemToDelete] = useState(null);
     const [itemToRespond, setItemToRespond] = useState(null);
+    const [timer, setTimer] = useState(0);
+    const [answerRecord, setAnswerRecord] = useState([]);
+    const timerRef = useRef(null);
     // const [evaluation, setEvaluation] = useState(null);
     
     const penguin = './files/imgs/penguin1.svg';
@@ -78,6 +81,8 @@ const ReadChatPage = () => {
     const sentenceIndexRef = useRef(0);
     const askedQuestionsRef = useRef({});
     const knowledgeRef = useRef([]);
+    const isWaitingForResponseRef = useRef(false);
+    const userRespondedRef = useRef(false);
     
     // const [currentPage, setCurrentPage] = useState(() => {
     //     const savedPage = localStorage.getItem(`${title}-currentPage`);
@@ -152,6 +157,7 @@ const ReadChatPage = () => {
         loadDictionary();
         loadAskedQuestions();
         audioRef.current.play();
+        audioRef.current.playbackRate = audioSpeed;
     }, []);
 
     useEffect(() => {
@@ -161,6 +167,7 @@ const ReadChatPage = () => {
             setTimeout(() => {
                 setIsFirstTime(false);
                 audioRef.current.play();
+                audioRef.current.playbackRate = audioSpeed;
                 setIsPlaying(true);
             }, 5000);
         }
@@ -227,6 +234,10 @@ const ReadChatPage = () => {
      */
     const startRecording = async () => {
         setIsRecording(true);
+        userRespondedRef.current = true;
+        isWaitingForResponseRef.current = false;
+        if (timerRef.current) clearInterval(timerRef.current);
+        
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
         const wavStreamPlayer = wavStreamPlayerRef.current;
@@ -276,6 +287,7 @@ const ReadChatPage = () => {
                 setAudioPage(currentPageRef.current);
             }
             audioRef.current.play();
+            audioRef.current.playbackRate = audioSpeed;
         }
         setIsPlaying(!isPlaying);
     };
@@ -298,6 +310,7 @@ const ReadChatPage = () => {
                     };
                     try {
                         await audio.play();
+                        audio.playbackRate = audioSpeed;
                         setIsPlaying(true);
                     } catch (error) {
                         console.error('Error playing audio:', error);
@@ -309,6 +322,8 @@ const ReadChatPage = () => {
                         setIsKnowledge(true);
                         audio.pause();
                         setIsPlaying(false);
+                        setIsConversationEnded(false);
+                        setAnswerRecord([]);
                         // check if the client is not setup for guiding
                         if (!clientRef.current.realtime.isConnected()) {
                             console.log('setting up client for guiding');
@@ -352,6 +367,7 @@ const ReadChatPage = () => {
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
             setChatHistory([]);
+            isWaitingForResponseRef.current = false;
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
                 // deleteConversationItem(items[0].id);
@@ -381,6 +397,7 @@ const ReadChatPage = () => {
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
         setChatHistory([]);
+        isWaitingForResponseRef.current = false;
         if (clientRef.current.realtime.isConnected()) {
             console.log('disconnecting conversation');
             // deleteConversationItem(items[0].id);
@@ -440,6 +457,7 @@ const ReadChatPage = () => {
         - Start by asking 'Hey ${user}, what do you want to know about this page?'
         - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
         - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
 
         **Important Reminders**:
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
@@ -457,11 +475,11 @@ const ReadChatPage = () => {
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
         **Instructions for Evaluation**:
-        You need to evaluate the child’s response based on the following inputs:
+        You need to evaluate the child's response based on the following inputs:
         - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
-        - Child’s Latest Response: The most recent input from the child.
+        - Child's Latest Response: The most recent input from the child.
         - Story Context: ${pages[currentPageRef.current]?.text.join(' ')}
-        Focus only on evaluating the child’s response to the latest question.
+        Focus only on evaluating the child's response to the latest question.
 
         **Steps for Evaluation**:
         Step 1: Check Response Validity
@@ -470,7 +488,8 @@ const ReadChatPage = () => {
         For responses that contain meaningful content, use the following criteria:
         - Correct: The response is accurate (or partially accurate) and directly relevant to the question.
         - Partially Correct: The response shows partial accuracy and relevance. For example, in a multiple-choice question, selecting one correct option qualifies as partially correct.
-        - Incorrect: The response is inaccurate and shows no understanding of the question (e.g., "I don’t know," "I don’t remember," or irrelevant guesses).
+        - Incorrect: The response is inaccurate and shows no understanding of the question (e.g., "I don't know," "I don't remember," or irrelevant guesses).
+        - Child Asks Question: As long as the child asks a question, mark it as "child asks question".
         - Off-topic: The response is unrelated to the question or the story context.
                     
         **Response Format**:
@@ -479,17 +498,20 @@ const ReadChatPage = () => {
         - <eval>correct
         - <eval>partially correct
         - <eval>incorrect
+        - <eval>child asks question
         - <eval>off-topic
         `;
         console.log(instruction4Evaluation);
         return instruction4Evaluation;
     }
 
+
     // update the instruction4Guiding when the currentPageRef.current changes   
     async function getInstruction4Guiding() {
         const instruction4Guiding = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
-            
+        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        
         **Story Information**:
         - Story Title: ${title}
         - Story Text: ${pages[currentPageRef.current]?.text.join(' ')}
@@ -501,101 +523,311 @@ const ReadChatPage = () => {
         **Instructions for the Conversation**:
             1. Initiate Conversation:
                 Begin the interaction by posing the first question, which will guide to the concept word.
-                You should use different ways to open the conversation. For example: “Hmm, this part of the story is so interesting! + first question”; “Hey xxx, share with me what you think + first question”; “xxx, let’s chat about what you just read! + first question”; etc. 
+                You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting! + first question"; "Hey xxx, share with me what you think + first question"; "xxx, let's chat about what you just read! + first question"; etc. 
             2. During the Conversation (Three Turns in All):
                 a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
-                b. Evaluate Response: Before responding, evaluate the child’s answer, which should fall into one of three categories: Correct/Incorrect/Off topic
+                b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Partially Correct/Incorrect/Off topic/Child Asks Question
                 c. Respond:
                     i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers. If the response is off topic, gently steer the conversation back to the original topic.
                     ii. Explanation:
                         For correct answers, provide a concise explanation to deepen understanding.
-                        For incorrect answers, scaffold further to guide the child’s thinking.
+                        For incorrect/partially correct answers, scaffold further to guide the child's thinking.
+                        For off-topic answers, gently steer the conversation back to the original topic.
+                        For child asks question, answer the question with easy-to-understand words.
+                        For invalid answers, ask the child to say it again.
                     iii. Follow-up question: if the conversation is not ended, pose a related question based on previous question to continue the discussion or transition to the end of the conversation.
             3. End Conversation:
                 After asking 3 to 4 questions in total, ask if the child has any questions. If the child needs scaffolding, you can use more rounds.
-                If they don’t have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
+                If they don't have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
 
         **Response Guidelines**:
         - Maintain a friendly, conversational tone suitable for a 6-8-year-old child.
         - Keep sentences simple, engaging, and under 25 words.
-        - Use English exclusively for questions and responses.
-        - Avoid assuming or making up the child’s response. If you do not get response, just ask again.
-        - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.
-
-        You should learn from the following examples to mimic the teacher's style of teaching.
-        **In-Context Learning Examples**:
-        [Example 1]
-        Teacher's first question: What is Amara’s favorite animal?
-        Child: Bats
-        Teacher: 
-            {Acknowledgement}: Yes, that’s correct. 
-            {Explanation}: Bats are Amara’s favorite animals!
-            {Follow-up question}: What is one thing you know about bats?
-        Child: They can fold their wings
-        Teacher:
-            {Acknowledgement}: Wow, that is a great observation!
-            {Explanation}: Like you said, bats can fold their wings in different situations.
-            {Follow-up question}: When do you think bats fold their wings? 
-        Child: Sleep
-        Teacher:
-            {Acknowledgement}: Great job! That’s what I am thinking about too!
-            {Explanation}: Bats fold their wings when they sleep, but guess what? They also fold them when it rains to stay dry, just a rain jacket! Isn’t that so interesting?
-
-        [Example 2]
-        Teacher's first question: How did Amara and her family make sure the bat is safe without touching it?
-        Child: Another person can catch it safely
-        Teacher:
-            {Acknowledgement}: Yeah, good thinking!
-            {Explanation}: Amara and her family wait for the other person to catch it, so that the bat won't get hurt.
-            {Follow-up question}: Who is the person they are waiting for?
-        Child: The person who gets pets can look after them
-        Teacher:
-            {Acknowledgement}: Ah! Interesting idea! 
-            {Explanation}: Let’s talk about what to call the person who takes care of pets. Think about how you call the person who helps in fire emergencies a firefighter
-            {Follow-up question}: What do we call that person who helps catch and take care of the bat?
-        Child: I don’t remember
-        Teacher:
-            {Acknowledgement}: That’s okay!
-            {Explanation}: The people who help animals like the bat are called a “wildlife rescuer”. They are trained to help wild animals like bats stay safe.
-            {Follow-up question}: Can we keep bats as regular pets like dogs and cats?
-        Child: No
-        Teacher:
-            {Acknowledgement}: I bet!  
-            {Explanation}: Bats aren’t pets like dogs and cats because they are wild animals and they need to live in nature.
-
-        [Example 3]
-        Teacher's first question: What did the wildlife rescue team do with the bat?
-        Child: Kept it safe
-        Teacher:
-            {Acknowledgement}: Excellent! You are really paying attention to the story details!
-            {Explanation}: The wildlife rescue team is making sure the bat is safe and helping them go back to nature. 
-            {Follow-up question}: Let’s make a closer observation. What did they use to keep the bat safe?
-        Child: A big jar so it can fly around
-        Teacher:
-            {Acknowledgement}: Aha! You jumped ahead of me a little bit, but that’s okay. 
-            {Explanation}: Before the bat got into the jar, the wildlife rescuer first used a towel to gently catch the bat and then placed it in the jar. 
-            {Follow-up question}: What did Amara notice about the bat’s appearance when she saw it up close? 
-        Child: Different than a dog and a cat
-        Teacher:
-            {Acknowledgement}: You’re on the right track! 
-            {Explanation}: Bats look different from dogs and cats because bats have wings, while dogs and cats do not.
-            {Follow-up question}: Let’s take a closer look at this bat’s picture. How did Amara describe the bat’s face?
-        Child: I think it’s kind of fluffy
-        Teacher:
-            {Acknowledgement}: Exactly! 
-            {Explanation}: The bat has a fluffy face
-            {Follow-up question}: Do you know what beady eyes are?
-        Child: like the bat’s eyes
-        Teacher:
-            {Acknowledgement}: Yes bat’s eyes are beady.
-            {Explanation}: Beady means small, shiny, and round, just like the bat’s eyes.
+        - Avoid assuming or making up the child's response. Just wait for the child's response for each turn.
+        - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.   
         `;
         console.log(instruction4Guiding);
         return instruction4Guiding;
     }
 
+    const getInstruction4Correct = (items, evaluation) => {
+        const instruction4Correct = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question or conclusion.
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
+
+    **Situations for Not Posing a Follow-up Question**:
+        - You do not need to pose a follow-up question if:
+        1. You think the learning objective has been addressed effectively (usually after 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
+        2. You already asked three different questions in total, or 
+        3. There are more than four rounds of questions.
+        In these cases, refer to **Instructions for Conclusion**. You do not need to end the conversation early, like only having two rounds of conversation.
+
+    **Instructions for Pose a Follow-up Question**:
+         - If you are posing a follow-up question, you do not need to conclude the conversation.
+         - The follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
+        Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+        ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
+
+    **Instructions for Conclusion**:
+        - Do not use question marks in the conclusion.
+        - You cannot conclude the conversation if you're posing a follow-up question.
+        - If you are not asking a question, after the explanation, transition to a conclusion. 
+        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+       
+    **Instructions for Whole Response**:
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - If your response includes a question, you can't conclude the conversation. You need to address the question first.
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+        console.log(instruction4Correct);
+        return instruction4Correct;
+    }
+
+    const getInstruction4PartialCorrect = (items, evaluation) => {
+        const count = answerRecord.filter(answer => answer === 'partially correct').length;
+        if (count < 2) {
+            // pose a follow-up question
+            const instruction4PartialCorrect = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!").
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Check the chat history to determine if this is the first partially correct response. If this is the first time the child answers partially correct, hint the child to think to get the correct answer without explicitly telling the correct answer.
+        
+    **Instructions for Pose a Follow-up Question**:
+        - If you are posing a follow-up question, you do not need to conclude the conversation.
+        - Rephrase the ORIGINAL last-posed question into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        - If you are rephrasing the question, do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
+    
+     **Instructions for Whole Response**:
+        - It is important to make sure you rephrase the question into a multiple-choice question if the child answers incorrectly/partially correctly for the first time. Do not conclude the conversation early.
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - If your response includes a question, you can't conclude the conversation. You need to address the question first.
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+            console.log(instruction4PartialCorrect);
+            return instruction4PartialCorrect;
+        } else {
+            // pose a conclusion
+            const instruction4PartialCorrect = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!").
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - The child's answer is not fully correct for ${count} rounds, do not hint, explain the answer here with easy-to-understand words.
+
+    **Situations for Not Posing a Follow-up Question**:
+        - Check the chat history of the last posed question. If the child answers incorrectly (exclude invalid responses, questions asked by the child, and off-topic responses) for two times in a row, transition to a conclusion instead of posing another question. Refer to **Instructions for Conclusion**. 
+
+    **Instructions for Conclusion**:
+        - Do not use question marks in the conclusion.
+        - If you are not asking a question, after the explanation, transition to a conclusion. 
+        - Keep the conclusion part concise, under 15 words.
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+
+    **Instructions for Whole Response**:
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+            console.log(instruction4PartialCorrect);
+            return instruction4PartialCorrect;
+        }
+    }
+
+    const getInstruction4Incorrect = (items, evaluation) => {
+        console.log('answerRecord', answerRecord);
+        const count = answerRecord.filter(answer => answer === 'incorrect').length;
+        if (count < 2) {
+            const instruction4Incorrect = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that's okay.")
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Provide a hint rather than the correct answer.
+
+    **Instructions for Pose a Follow-up Question**:
+        - If you are posing a follow-up question, you do not need to conclude the conversation.
+        - Rephrase the ORIGINAL last-posed question into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        - If you are rephrasing the question, do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
+
+    **Instructions for Whole Response**:
+        - It is important to make sure you rephrase the question into a multiple-choice question if the child answers incorrectly for the first time. Do not conclude the conversation early.
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - If your response includes a question, you can't conclude the conversation. You need to address the question first.
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+            console.log(instruction4Incorrect);
+            return instruction4Incorrect;
+        } else {
+            // pose a conclusion
+            const instruction4Incorrect = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that's okay.")
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Explain the answer clearly using child-friendly language.
+
+    **Instructions for Conclusion**:
+        - Do not use question marks in the conclusion.
+        - If you are not asking a question, after the explanation, transition to a conclusion. 
+        - Keep the conclusion part concise, under 15 words.
+        - Here is an example: "It was fun chatting with you!Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+
+    **Instructions for Whole Response**:
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+            console.log(instruction4Incorrect);
+            return instruction4Incorrect;
+        }
+    }
+
+    const getInstruction4ChildQuestion = (items, evaluation) => {
+        const instruction4ChildQuestion = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question or conclusion.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the child posed a question, you should first provide encouraging feedback (e.g., Good thinking!", "Oh it's an interesting question!").
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Since the child poses a question, answer the question with easy-to-understand words.
+
+    **Situations for Not Posing a Follow-up Question**:
+        - You do not need to pose a follow-up question if:
+        1. You think the learning objective has been addressed effectively (usually after 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
+        2. You already asked three different questions in total, or 
+        3. There are more than four rounds of questions.
+        In these cases, refer to **Instructions for Conclusion**. You do not need to end the conversation early, like only having two rounds of conversation.
+
+    **Instructions for Pose a Follow-up Question**:
+         - If you are posing a follow-up question, you do not need to conclude the conversation.
+         - The follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
+        Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+        ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
+
+    **Instructions for Conclusion**:
+        - Do not use question marks in the conclusion.
+        - You cannot conclude the conversation if you're posing a follow-up question.
+        - If you are not asking a question, after the explanation, transition to a conclusion. 
+        - Keep the conclusion part concise, under 15 words.
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+
+    **Instructions for Whole Response**:
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - If your response includes a question, you can't conclude the conversation. You need to address the question first.
+        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+        console.log(instruction4ChildQuestion);
+        return instruction4ChildQuestion;
+    }
+
+    const getInstruction4Invalid = (items, evaluation) => {
+        const instruction4Invalid = `
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+        Since the evaluation of the child's response is 'invalid', you should respond with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
+        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+        console.log(instruction4Invalid);
+        return instruction4Invalid;
+    }
+
+    const getInstruction4OffTopic = (items, evaluation) => {
+        const instruction4OffTopic = `
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child’s latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+        Start by acknowledging the child’s response (e.g., “Interesting idea!”). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
+        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+        console.log(instruction4OffTopic);
+        return instruction4OffTopic;
+    }
+
     const getInstruction4FollowUp = (items, evaluation) => {
-        console.log('evaluation', evaluation);
         const instruction4FollowUp = `
         You need to pose a follow-up question based on the following information: 
         1. conversation history: 
@@ -603,8 +835,8 @@ const ReadChatPage = () => {
         2. the evaluation of the child's response: ${evaluation};
         3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
-Follow the following instructions:
-Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
+        Follow the following instructions:
+        Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
 
         **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
@@ -648,11 +880,12 @@ Your response should contain three parts: acknowledgement, explanation, and foll
             3. If the evaluation is 'question-posed', and you have not asked three different questions in total, pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective} after the explanation.
 
         **Instructions for Conclusion**:
+        - Do not use question marks in the conclusion.
         - You cannot conclude the conversation if you’re posing a follow-up question.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
         - If the child repeatedly answers incorrectly, you should provide the correct answer, then transition to a conclusion.
         - Keep the conclusion part concise, under 15 words.
-        - Here is an example: "It was fun chatting with you! You can click the close button and let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
 
         **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -662,12 +895,59 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         return instruction4FollowUp;
     }
 
+    const getInstruction4NoResponse = () => {
+        const instruction4NoResponse = `
+        Ignore the chat history. Ask this exact question: "I didn't hear your answer, are you still there?"
+        Make sure to ask this exact question ONCE, and do not ask or talk about anything else.
+        `;
+        console.log(instruction4NoResponse);
+        return instruction4NoResponse;
+    }
+
     const updateClientInstruction = async (instruction) => {
         const client = clientRef.current;
         client.updateSession({ instructions: instruction });
         client.realtime.send('response.create');
         console.log(instruction);
     }
+
+    const startResponseTimer = () => {
+        // update the response timer every 1 second
+        console.log('startResponseTimer');
+        userRespondedRef.current = false;
+        isWaitingForResponseRef.current = true;
+        setTimer(0); // 计时器从 0 开始
+        if (timerRef.current) clearInterval(timerRef.current); 
+
+        timerRef.current = setInterval(() => {
+        setTimer((prev) => prev + 1); // 每秒递增
+        }, 1000);
+    }
+
+    useEffect(() => {
+        if (timer >= 10 && !userRespondedRef.current && isKnowledge) {
+          console.log('User did not respond in 10 seconds. Sending another message...');
+          console.log('isWaitingForResponse', isWaitingForResponseRef.current);
+          const client = clientRef.current;
+          // if the client is connected, send a message
+          if (isClientSetup && isWaitingForResponseRef.current) {
+            client.realtime.send('response.create', {
+                response: {
+                    "modalities": ["text", "audio"],
+                    "instructions": getInstruction4NoResponse()
+                }
+            });
+          }
+          if (timerRef.current) clearInterval(timerRef.current); // 停止计时器
+        }
+    }, [timer, userRespondedRef.current]);
+    // clear the timer when page changes
+
+    useEffect(() => {
+        return () => {
+          if (timerRef.current) clearInterval(timerRef.current);
+        };
+      }, []);
 
     const setupClient = async (instruction) => {
         (async () => {
@@ -678,25 +958,6 @@ Your response should contain three parts: acknowledgement, explanation, and foll
             client.updateSession({ instructions: instruction });
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
-            // if (client.tools.length == 0) {
-            //     client.addTool({
-            //         "name": "answer_evaluation",
-            //         "description": "After the child answers the question, and before you provide feedback, evaluate the answer",
-            //         "parameters": {
-            //             "type": "object",
-            //             "properties": {
-            //                 "child_response": {
-            //                     "type": "string",
-            //                     "description": "the child's answer",
-            //                 }
-            //             },
-            //             "required": ["child_response"]
-            //         }
-            //     },
-            //     async ({child_response}) => {
-            //         console.log(child_response);
-            //     });
-            // }
             // client.updateSession({
             //     turn_detection: { type: 'server_vad' }, // or 'server_vad'
             //     input_audio_transcription: { model: 'whisper-1' },
@@ -708,6 +969,10 @@ Your response should contain three parts: acknowledgement, explanation, and foll
                 const { trackId, offset } = trackSampleOffset;
                 await client.cancelResponse(trackId, offset);
                 }
+                userRespondedRef.current = true;
+                isWaitingForResponseRef.current = false;
+                if (timerRef.current) clearInterval(timerRef.current);
+                setTimer(0);
             });
             client.on('conversation.item.appended', (item) => {
                 console.log('conversation.item.appended');
@@ -715,9 +980,11 @@ Your response should contain three parts: acknowledgement, explanation, and foll
             });
             client.on('conversation.updated', async ({ item, delta }) => {
                 const items = client.conversation.getItems();
-                // console.log(item, item.content[0]?.transcript);
+                // set timer to 0
+                setTimer(0);
+                if(timerRef.current) clearInterval(timerRef.current);
                 // if the item starts with <test>, delete it
-                if (item.content[0]?.transcript?.startsWith('<')) {
+                if (item?.content[0]?.transcript?.startsWith('<')) {
                     // keep the item id, and when the item status is completed, delete it
                     setItemToDelete(item.id);
                     console.log('evaluation result', item.content[0]?.transcript);
@@ -727,23 +994,84 @@ Your response should contain three parts: acknowledgement, explanation, and foll
                         await client.realtime.send('conversation.item.delete', {
                             item_id: item.id
                         });
+                        answerRecord[Math.floor(items.length / 2) - 1] = item.content[0]?.transcript.replace('<eval>', '').trim();
                         // if this is the first completed item for the item id, send a response
                         if (item.id !== itemToRespond && item.role === 'assistant' && items[items.length - 1]?.status === 'completed') {
+                            console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
                             setItemToRespond(item.id);
                             // send this instruction after the item is completed
                             setTimeout(async () => {
-                                await client.realtime.send('response.create', {
-                                    response: {
-                                        "modalities": ["text", "audio"],
-                                        "instructions": getInstruction4FollowUp(items, item.content[0]?.transcript.replace('<eval>', '').trim())
-                                    }
-                                });
+                                switch (item.content[0]?.transcript.replace('<eval>', '').trim()) {
+                                    case 'correct':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4Correct(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                    case 'partially correct':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4PartialCorrect(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                    case 'incorrect':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4Incorrect(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                    case 'off-topic':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4OffTopic(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                    case 'question-posed':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4ChildQuestion(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                    case 'invalid':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4Invalid(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                    default:
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4FollowUp(items, item.content[0]?.transcript.replace('<eval>', '').trim())
+                                            }
+                                        });
+                                        userRespondedRef.current = false;
+                                        break;
+                                }
                             }, 1000);
                         }
                     }
                 }
                 else if (item.id !== itemToDelete || (!item.content[0]?.transcript?.startsWith('<'))) {
-                    console.log('logging this item: ', item.content[0]?.transcript);
+                    // console.log('logging this item: ', item.content[0]?.transcript);
                     if (delta?.transcript) {
                         setChatHistory(items);
                         // check if the chat-window element exists
@@ -756,6 +1084,7 @@ Your response should contain three parts: acknowledgement, explanation, and foll
                         wavStreamPlayer.add16BitPCM(delta.audio, item.id);
                     }
                     if (item.status === 'completed' && item.formatted.audio?.length) {
+                        console.log('current item', item);
                         const wavFile = await WavRecorder.decode(
                             item.formatted.audio,
                             24000,
@@ -763,6 +1092,30 @@ Your response should contain three parts: acknowledgement, explanation, and foll
                         );
                         item.formatted.file = wavFile;
                         setChatHistory(items);
+                        const chatWindow = document.getElementById('chat-window');
+                        if (chatWindow) {
+                            chatWindow.scrollTop = chatWindow.scrollHeight;
+                        }
+                        if (item.role === 'assistant') {
+                            // if the last item does not end with a question mark, it means the conversation is ended
+                            if (!items[items.length - 1]?.content[0]?.transcript?.endsWith('?')) {
+                                while (wavStreamPlayer.isPlaying()) {
+                                    await new Promise(resolve => setTimeout(resolve, 100));
+                                }
+                                setIsConversationEnded(true);
+                            } else {
+                                // every time after the assistant's response (except the response asking for the child's answer), set a timer to check if there is a user's response. If there is no user's response after 15 seconds, ask question again.
+                                // if the user interrupted the conversation, do not set the timer
+                                console.log('isWaitingForResponseRef.current', isWaitingForResponseRef.current);
+                                console.log('userRespondedRef.current', userRespondedRef.current);
+                                if (!isWaitingForResponseRef.current) {
+                                    while (wavStreamPlayer.isPlaying()) {
+                                        await new Promise(resolve => setTimeout(resolve, 100));
+                                    }
+                                    startResponseTimer();
+                                }
+                            }
+                        }
                     }
                     setItems(items);
                 }
@@ -784,50 +1137,33 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         })();
     };
 
-    const handleEndChat = () => {
-        setIsEnding(false);
-        // setIsClientSetup(false);
-        handleNextPage();
-    }
+    useEffect(() => {
+        if (isConversationEnded) {
+            handleCloseChat();
+        }
+    }, [isConversationEnded]);
 
     const handleCaptionToggle = () => {
         setShowCaption(!showCaption);
     }
 
-    // useEffect(() => {
-    //     console.log('showCaption changed', showCaption);
-    //     if (!showCaption) {
-    //         console.log('showCaption is false');
-    //         // set the max-height of the book-container to calc(100% - 100px)
-    //         const bookContainer = document.getElementById('book-container');
-    //         bookContainer.style.maxHeight = 'calc(100% - 30px)';
-    //         // set the max-height of the bottom-box to 0
-    //         const bottomBox = document.getElementById('bottom-box');
-    //         bottomBox.style.flexBasis = '30px';
-    //     } else {
-    //         console.log('showCaption is true');
-    //         // set the max-height of the book-container to 100%
-    //         const bookContainer = document.getElementById('book-container');
-    //         bookContainer.style.maxHeight = 'calc(100% - 130px)';
-    //         // set the flex-basis of the bottom-box to 130px
-    //         const bottomBox = document.getElementById('bottom-box');
-    //         bottomBox.style.flexBasis = '130px';
-    //     }
-    // }, [showCaption]);
-
     const swipeHandlers = useSwipeable({
-        onSwipedLeft: () => {
-            if (currentPageRef.current < pages.length - 1) {
-                handleNextPage();
+        onSwipedLeft: (eventData) => {
+            if (!eventData.event.target.closest('#speed-btn-box')) {
+                if (currentPageRef.current < pages.length - 1) {
+                    handleNextPage();
+                }
             }
         },
-        onSwipedRight: () => {
-            if (currentPageRef.current > 0) {
-                handlePrevPage();
+        onSwipedRight: (eventData) => {
+            if (!eventData.event.target.closest('#speed-btn-box')) {
+                if (currentPageRef.current > 0) {
+                    handlePrevPage();
+                }
             }
         },
         preventDefaultTouchmoveEvent: true,
-        trackMouse: true
+        trackMouse: true,
     });
 
     const handleImageClick = (event) => {
@@ -836,11 +1172,12 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         const clickX = event.clientX - left;
         const clickY = event.clientY - top;
     
-        if (clickX < width / 2 && clickY > height / 3) {
+        if (clickX < width / 2) {
             handlePrevPage();
-        } else if (clickX > width / 2 && clickY > height / 3) {
-            console.log('moving to next page', currentPageRef.current);
-            handleNextPage();
+        } else if (clickX > width / 2) {
+            if (!event.target.closest('#speed-btn-box') && !event.target.closest('#caption-btn-box') && !event.target.closest('#play-btn-box')) {
+                handleNextPage();
+            }
         }
     };
 
@@ -894,13 +1231,20 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         setAutoPage((prev) => !prev);
     };
 
-    const handleAudioSpeedChange = (event, newValue) => {
+    const toggleSpeedClick = () => {
+        setShowSpeedSlider(!showSpeedSlider);
+    };
+
+    const handleSpeedChange = (event, newValue) => {
+        console.log('speed changed', newValue);
         setAudioSpeed(newValue);
     };
 
-
     useEffect(() => {
-        audioRef.current.playbackRate = audioSpeed;
+        if (audioRef.current) {
+            audioRef.current.playbackRate = audioSpeed;
+        }
+        localStorage.setItem(`${title}-audioSpeed`, audioSpeed);
     }, [audioSpeed]);
 
     const handlePenguinClick = async () => {
@@ -931,27 +1275,44 @@ Your response should contain three parts: acknowledgement, explanation, and foll
     }
 
     const processChatHistory = (chatHistory) => {
-        const newChatHistory = [];
-        let index = 0;
-        for (const item of chatHistory) {
-            // const formData = new FormData();
-            // formData.append('audio', item.formatted.blob, `${user}-${title}-${currentPageRef.current}-${index}.mp3`);
-            const newItem = {
+        const formData = new FormData();
+        // add the user, title, page to the formData
+        formData.append('user', user);
+        formData.append('title', title);
+        formData.append('page', currentPageRef.current);
+        chatHistory.forEach((item, index) => {
+            const prefix = `item_${index}`;
+            const itemDict = {
                 id: item.id,
                 role: item.role,
                 content: item.content[0].transcript,
-                audio: item.formatted.audio
             }
-            newChatHistory.push(newItem);
-            index++;
-        }
-        console.log('newChatHistory', newChatHistory);
-        return newChatHistory;
+            formData.append(`${prefix}_dict`, JSON.stringify(itemDict));
+            if (item.role === 'user' && item.formatted?.file?.blob) {
+                formData.append(`${prefix}_audioBlob`, item.formatted.file.blob, `${user}-${title}-Page_${currentPageRef.current}-ID_${index}.mp3`);
+            }
+        });
+        console.log('formData', formData);
+        return formData;
     }
 
     const handleCloseChat = async () => {
+        console.log('handleCloseChat');
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
+        setIsAsked(true);
+        // send the chat history to backend
+        console.log('chatHistory to save', chatHistory);
+        const formData = processChatHistory(chatHistory);
+        try {
+            const response = await fetch(`${apiUrl}/api/chat_history`, {
+                method: 'POST',
+                body: formData
+            });
+            console.log('response', response);
+        } catch (error) {
+            console.error('Error sending chat history to backend', error);
+        }
         if (isKnowledge) {
             setIsKnowledge(false);
             setTimeout(() => {
@@ -965,27 +1326,8 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         else {
             setIsAsking(false);
             audioRef.current.play();
+            audioRef.current.playbackRate = audioSpeed;
             setIsPlaying(true);
-        }
-        setIsAsked(true);
-        // send the chat history to backend
-        console.log('chatHistory to save', chatHistory);
-        const newChatHistory = processChatHistory(chatHistory);
-        try {
-            const data = {
-                chatHistory: newChatHistory,
-                user: user,
-                title: title,
-                page: currentPageRef.current
-            }
-            const formData = new FormData();
-            formData.append('data', JSON.stringify(data));
-            const response = await fetch(`${apiUrl}/api/chat_history`, {
-                method: 'POST',
-                body: formData
-            });
-        } catch (error) {
-            console.error('Error sending chat history to backend', error);
         }
     }
 
@@ -993,6 +1335,7 @@ Your response should contain three parts: acknowledgement, explanation, and foll
         // hide the message box
         setIsFirstTime(false);
         audioRef.current.play();
+        audioRef.current.playbackRate = audioSpeed;
         setIsPlaying(true);
     }
 
@@ -1033,14 +1376,34 @@ Your response should contain three parts: acknowledgement, explanation, and foll
 
                     <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
                         <div id='caption-btn-box'>
-                            <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 1, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
+                            <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 <FaRegClosedCaptioning />
                             </IconButton>
                         </div>
                         <div id='play-btn-box'>
-                            <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 1, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
+                            <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 {isPlaying ? <FaPause /> : <FaPlay />}
                             </IconButton>
+                        </div>
+                        <div id='speed-btn-box'>
+                            <IconButton id='speed-btn' variant='plain' onClick={toggleSpeedClick} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
+                                <RiSpeedUpFill />
+                            </IconButton>
+                            {showSpeedSlider && (
+                                <Slider
+                                    value={audioSpeed}
+                                    onChange={handleSpeedChange}
+                                    min={0.5}
+                                    max={1.5}
+                                    step={0.01}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: '54px',
+                                        width: '64px',
+                                        zIndex: 100
+                                    }}
+                                />
+                            )}
                         </div>
                         <img src={pages[currentPageRef.current]?.image} alt={`Page ${currentPageRef.current + 1}`}/>
                     </Box>
@@ -1151,6 +1514,7 @@ Your response should contain three parts: acknowledgement, explanation, and foll
                             {/* add a close icon */}
                             <IoMdCloseCircle size={36} color='#7AA2E3' />
                         </IconButton>
+                       
                     <Box id='chat-window'>
                         
                         {chatHistory.length == 0 && (

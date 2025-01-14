@@ -106,44 +106,31 @@ def save_asked_question():
 
 @app.route('/api/chat_history', methods=['POST'])
 def chat_history():
-    data = request.form.get('data')
-    data = json.loads(data)
-    user = data.get('user')
-    title = data.get('title')
-    page = str(data.get('page'))
-    chat_history = data.get('chatHistory')
+    formData = request.form
+    files = request.files
+    # print('formData', formData)
+    # print('files', files)
+    # get the user, title, page from the formData
+    user = formData.get('user')
+    title = formData.get('title')
+    page = str(formData.get('page'))
     new_chat_history = []
+    for item in formData:
+        if item.startswith('item_'):
+            new_item = json.loads(formData[item])
+            new_item['audio'] = None
+            new_chat_history.append(new_item)
+    for file_key in files:
+        file = files[file_key]
+        if file.filename.endswith('.mp3'):
+            file_id = fs.put(file.read(), filename=file.filename)
+            item_index = file_key.split('_')[1]
+            new_chat_history[int(item_index)]['audio'] = str(file_id)
     
-    for item in chat_history:
-        new_item = {
-            'id': item.get('id'),
-            'role': item.get('role'),
-            'content': item.get('content'),
-        }
-        
-        # Handle audio data if present
-        if item.get('audio'):
-            audio_data = np.array(list(item.get('audio').values()), dtype=np.int16)
-            audio = AudioSegment.from_raw(io.BytesIO(audio_data.tobytes()), 
-                                        format="raw", 
-                                        sample_width=2, 
-                                        channels=1, 
-                                        frame_rate=24000)
-            mp3_io = io.BytesIO()
-            audio.export(mp3_io, format="mp3")
-            mp3_io.seek(0)
-            # Store audio as base64 string instead of Binary
-            new_item['audio'] = mp3_io.read().hex()
-        
-        new_chat_history.append(new_item)
-
-    # Convert to JSON string before storing
-    chat_history_json = json.dumps(new_chat_history)
-    
+    print('new_chat_history', new_chat_history)
+    chat_history_json = json.dumps(new_chat_history, default=str)
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    file_id = fs.put(chat_history_json.encode('utf-8'), 
-                     filename=f"{user}_{title}_{page}_{timestamp}_chat_history.json")
-    
+    file_id = fs.put(chat_history_json.encode('utf-8'), filename=f"{user}-{title}-Page_{page}-{timestamp}_chat_history.json")
     current_chat_history = users.find_one({'username': user})['chat_history']
     if title not in current_chat_history:
         current_chat_history[title] = {}

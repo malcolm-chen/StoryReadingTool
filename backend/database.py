@@ -117,3 +117,27 @@ def reset_the_user(username):
     })
 
 # reset_the_user("Jiaju")
+
+def add_users(user_dict):
+    for username, password in user_dict.items():
+        users.insert_one({
+            "username": username, 
+            "password": password,
+            "current_book": None,
+            "current_page": None,
+            "chat_history": {},
+            "asked_questions": {}
+        })
+
+user_dict_2 = {
+    "user1": "123",
+    "user2": "123",
+    "user3": "123", 
+    "user4": "123",
+    "user5": "123",
+    "user6": "123",
+    "user7": "123",
+    "user8": "123",
+    "user9": "123",
+    "user10": "123",
+}

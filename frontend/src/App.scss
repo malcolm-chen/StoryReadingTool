@@ -548,7 +548,7 @@
   width: 64px;
   height: 64px;
   position: absolute;
-  top: 128px;
+  top: 112px;
   right: 32px;
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
@@ -563,7 +563,23 @@
   width: 64px;
   height: 64px;
   position: absolute;
-  top: 32px;
+  top: 24px;
+  right: 32px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+#speed-btn-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  top: 200px;
   right: 32px;
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);

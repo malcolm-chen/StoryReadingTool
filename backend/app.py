@@ -20,7 +20,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 CORS(app, resources={r"/*": {"origins": os.getenv("REACT_APP_URL")}})
 # CORS(app)
 
-OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"
+OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 

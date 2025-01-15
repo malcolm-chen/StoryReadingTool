@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"
+OPENAI_WS_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 async def relay(websocket1, websocket2):

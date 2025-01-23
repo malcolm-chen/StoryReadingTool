@@ -147,8 +147,11 @@ const ReadChatPage = () => {
             });
             const askedQuestions = await response.json();
             console.log('asked questions', askedQuestions);
-            askedQuestionsRef.current = askedQuestions;
-            if (askedQuestions.length === 0) {
+            askedQuestionsRef.current = Object.values(askedQuestions);
+            console.log('askedQuestionsRef.current', askedQuestionsRef.current);
+            // check if askedQuestions is empty, or each list in askedQuestions is empty
+            if (askedQuestionsRef.current.length === 0 || (askedQuestionsRef.current.every(list => list.length === 0))) {
+                console.log('setting isFirstTime to true');
                 setIsFirstTime(true);
             }
             // setIsFirstTime(true);
@@ -333,7 +336,17 @@ const ReadChatPage = () => {
                             console.log('resetting client for guiding');
                             updateClientInstruction(await getInstruction4Guiding());
                         }
-                    } else {
+                    } else if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') { 
+                        setIsKnowledge(false);
+
+                        // wait for 2 seconds, if the user does not click the next page button, move to the next page
+                        setTimeout(() => {
+                            if (!clientRef.current.realtime.isConnected()) {
+                                handleNextPage();
+                            }
+                        }, 3000);
+                    }
+                    else {
                         setIsKnowledge(false);
                         handleNextPage();
                     }
@@ -448,8 +461,89 @@ const ReadChatPage = () => {
         return "No questions available"; // Default message if firstQuestionSet is not an array
     }
 
+    function getInstruction4Frogs() {
+        const instruction4Frogs = `
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook about frogs. 
+        This page illustrates different types of frogs. Your task is to answer the child's questions about the frogs.
+        
+        Here are the frogs information on this page:
+        - Arum Frog: 
+            information to identify the frog: the light yellow frog on the left side of the page
+            location: Southern Africa, 
+            fact about this frog: This frog is ivory when the ivory swamp lilies are in bloom. The rest of the year it is brown with silvery stripes along its sides.
+        - Blue Poison Dart Frog: 
+            information to identify the frog: the blue frog on the top of the page
+            location: Surinam, 
+            fact about this frog: The male carries the eggs and tadpoles on his back until they are well developed.
+        - Common Gray Tree Frog: 
+            information to identify the frog: the big gray frog on the left page
+            location: North America, 
+            fact about this frog: This frog changes color according to its mood. It may be gray, green, or brown.
+        - Glass Frog: 
+            information to identify the frog: the yellow frog on the top of the page
+            location: Costa Rica, 
+            fact about this frog: These frogs are transparent underneath.
+        - White’s Tree Frog: 
+            information to identify the frog: the big green frog on the left page
+            location: Australia, 
+            fact about this frog: This frog is often found in people’s bathrooms.
+        - Darwin's Frog: 
+            information to identify the frog: the big green frog on the right page
+            location: Chile, 
+            fact about this frog: This frog is floats upside down in the water to imitate a fallen leaf.
+        - Poison Dart Frog: 
+            information to identify the frog: the small yellow frog on the right page
+            location: Colombia, 
+            fact about this frog: This is the most poisonous frog in the world.
+        - Painted Reed Frog: 
+            information to identify the frog: the red frog covered in stripes on the right page
+            location: Tanzania to South Africa, 
+            fact about this frog: During warm months hundreds of these frogs call with a series of shrill whistles.
+        - Tomato Frog: 
+            information to identify the frog: the big red frog on the right page
+            location: Madagascar, 
+            fact about this frog: The tomato frog spends most of the year in hiding, but comes out during spring rains.
+        - Asian Horned Frog: 
+            information to identify the frog: the big brown frog on the right page
+            location: Southern Asia, 
+            fact about this frog: This frog looks like a brown leaf on the forest floor.
+        
+        **Instructions for the Conversation**:
+        When the child asks about a frog, you need to provide the frog's name, its location, and a fact about it. Introduce the frog in a interesting and engaging way.
+        - Start by asking 'Hey ${user}, what do you want to know about this page?' Do not say anything else.
+        - If you cannot identify which frog on this page the child is asking about, you can ask 'Which frog are you asking about?', and add some features for them to choose, like 'The light yellow frog on the left or the yellow one on the top?'
+        - Only introduce one frog at a time. Keep your response concise and under 25 words.
+        - Do not use questions like 'Do you know that?', 'Can you spot it?'. 
+        - Unless you are ending the conversation, ends each round of conversation with a friendly line like 'Is there anything else you want to know about this page?' (the last sentence need to be a question)
+        - You should not ask questions unless you are asking 'Is there anything else you want to know about this page?'
+        - If the child does not have any questions, you can say 'It was fun chatting with you! Let's keep reading.'
+        `;
+        return instruction4Frogs;
+    }
 
     function getInstruction4Asking() {
+        if (askedQuestionsRef.current.length === 0 || askedQuestionsRef.current.every(list => list.length === 0)) {
+            const instruction4Asking = `
+            You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
+
+            Instructions:
+            - Start by asking 'Hey ${user}, what do you want to know about this page? You can press AND hold the big yellow button to talk.'
+            - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
+            - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
+            - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+
+            **Important Reminders**:
+            - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
+            - Do not make up the child's response, if you do not get response, just ask again.
+            - Do not ask questions.
+            - Only recognize the child's answer in English.
+
+            Essential Details:
+                - **Story Title**: ${title}
+                - **Story Text for Current Page**: ${pages[currentPageRef.current]?.text.join(' ')}
+            `;
+            return instruction4Asking;
+        }
         const instruction4Asking = `
         You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
 
@@ -508,6 +602,57 @@ const ReadChatPage = () => {
 
     // update the instruction4Guiding when the currentPageRef.current changes   
     async function getInstruction4Guiding() {
+        let isOnlyOneQuestion = true;
+        let sum = 0;
+        for (const list of askedQuestionsRef.current) {
+            if (list.length > 1 || sum > 1) {
+                isOnlyOneQuestion = false;
+                break;
+            } else {
+                sum += list.length;
+            }
+        }
+        if (isOnlyOneQuestion) {
+            const instruction4Asking = `
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
+        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        
+        **Story Information**:
+        - Story Title: ${title}
+        - Story Text: ${pages[currentPageRef.current]?.text.join(' ')}
+        - Concept Word: ${knowledgeRef.current[currentPageRef.current]?.keyword}
+        - Learning Objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}
+        - Core Idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}
+        - First Question: ${await getFirstQuestion()}
+
+        **Instructions for the Conversation**:
+            1. Initiate Conversation:
+                Begin the interaction by posing the first question, which will guide to the concept word.
+                You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting! + first question + You can press AND hold the big yellow button to talk."; "Hey xxx, share with me what you think + first question + You can press AND hold the big yellow button to talk."; "xxx, let's chat about what you just read! + first question + You can press AND hold the big yellow button to talk."; etc. 
+            **During the Conversation (Three Turns in All)**:
+                a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
+                b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Partially Correct/Incorrect/Off topic/Child Asks Question
+                c. Respond:
+                    i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers. If the response is off topic, gently steer the conversation back to the original topic.
+                    ii. Explanation:
+                        For correct answers, provide a concise explanation to deepen understanding.
+                        For incorrect/partially correct answers, scaffold further to guide the child's thinking.
+                        For off-topic answers, gently steer the conversation back to the original topic.
+                        For child asks question, answer the question with easy-to-understand words.
+                        For invalid answers, ask the child to say it again.
+                    iii. Follow-up question: if the conversation is not ended, pose a related question based on previous question to continue the discussion or transition to the end of the conversation.
+            3. End Conversation:
+                After asking 3 to 4 questions in total, ask if the child has any questions. If the child needs scaffolding, you can use more rounds.
+                If they don't have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
+
+        **Response Guidelines**:
+        - Maintain a friendly, conversational tone suitable for a 6-8-year-old child.
+        - Keep sentences simple, engaging, and under 25 words.
+        - Avoid assuming or making up the child's response. Just wait for the child's response for each turn.
+        - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.   
+        `;
+            return instruction4Asking;
+        }
         const instruction4Guiding = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
         Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -995,6 +1140,7 @@ const ReadChatPage = () => {
                             item_id: item.id
                         });
                         answerRecord[Math.floor(items.length / 2) - 1] = item.content[0]?.transcript.replace('<eval>', '').trim();
+                        console.log('answerRecord', answerRecord);
                         // if this is the first completed item for the item id, send a response
                         if (item.id !== itemToRespond && item.role === 'assistant' && items[items.length - 1]?.status === 'completed') {
                             console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
@@ -1098,7 +1244,8 @@ const ReadChatPage = () => {
                         }
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
-                            if (!items[items.length - 1]?.content[0]?.transcript?.endsWith('?')) {
+                            if (!items[items.length - 1]?.content[0]?.transcript?.endsWith('?') && !items[items.length - 1]?.content[0]?.transcript?.endsWith('talk.')) {
+                                console.log('conversation ended');
                                 while (wavStreamPlayer.isPlaying()) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
                                 }
@@ -1259,7 +1406,11 @@ const ReadChatPage = () => {
         console.log('penguin clicked to ask question');
         if (!clientRef.current.realtime.isConnected()) {
             if (!isKnowledge) {
-                setupClient(getInstruction4Asking());
+                if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') {
+                    setupClient(getInstruction4Frogs());
+                } else {
+                    setupClient(getInstruction4Asking());
+                }
             } else {
                 setupClient(await getInstruction4Guiding());
             }
@@ -1267,7 +1418,11 @@ const ReadChatPage = () => {
             console.log('client is setup!');
         } else {
             if (!isKnowledge) {
-                updateClientInstruction(getInstruction4Asking());
+                if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') {
+                    updateClientInstruction(getInstruction4Frogs());
+                } else {
+                    updateClientInstruction(getInstruction4Asking());
+                }
             } else {
                 updateClientInstruction(await getInstruction4Guiding());
             }
@@ -1325,9 +1480,14 @@ const ReadChatPage = () => {
         }
         else {
             setIsAsking(false);
-            audioRef.current.play();
-            audioRef.current.playbackRate = audioSpeed;
-            setIsPlaying(true);
+            if (sentenceIndexRef.current === pages[currentPageRef.current]?.text.length) {
+                setIsPlaying(true);
+                handleNextPage();
+            } else {
+                audioRef.current.play();
+                audioRef.current.playbackRate = audioSpeed;
+                setIsPlaying(true);
+            }
         }
     }
 
@@ -1370,11 +1530,9 @@ const ReadChatPage = () => {
                         onClick={handlePrevPage}
                         disabled={currentPageRef.current === 0}
                         sx={{ opacity: 0 }}
-                    >
-                        <MdArrowCircleLeft size={60} color='#7AA2E3'/>
-                    </IconButton>
-
-                    <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
+                        >
+                            <MdArrowCircleLeft size={60} color='#7AA2E3'/>
+                        </IconButton>
                         <div id='caption-btn-box'>
                             <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 <FaRegClosedCaptioning />
@@ -1389,22 +1547,34 @@ const ReadChatPage = () => {
                             <IconButton id='speed-btn' variant='plain' onClick={toggleSpeedClick} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 <RiSpeedUpFill />
                             </IconButton>
-                            {showSpeedSlider && (
+                        </div>
+                        {showSpeedSlider && (
+                            <div id='speed-slider-box'>
                                 <Slider
                                     value={audioSpeed}
                                     onChange={handleSpeedChange}
                                     min={0.5}
                                     max={1.5}
-                                    step={0.01}
+                                    step={0.5}
+                                    marks={[{ value: 0.5, label: 'slow' }, { value: 1, label: 'normal' }, { value: 1.5, label: 'fast' }]}
+                                    // set label size to 12px
                                     sx={{
-                                        position: 'absolute',
-                                        top: '54px',
-                                        width: '64px',
+                                        width: '120px',
+                                        height: '30px',
+                                        '--Slider-trackSize': '12px',
+                                        "--Slider-markSize": "8px",
+                                        '& .MuiSlider-markLabel': {
+                                            fontSize: '16px',
+                                            color: '#3F150B',
+                                            fontFamily: 'BM Jua',
+                                        },
                                         zIndex: 100
                                     }}
                                 />
-                            )}
-                        </div>
+                            </div>
+                        )}
+
+                    <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
                         <img src={pages[currentPageRef.current]?.image} alt={`Page ${currentPageRef.current + 1}`}/>
                     </Box>
 
@@ -1594,7 +1764,7 @@ const ReadChatPage = () => {
                                 : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb' }}>Push to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb' }}>Hold to talk!</h4>
                                 </div>}
                             </button>
                         </div>

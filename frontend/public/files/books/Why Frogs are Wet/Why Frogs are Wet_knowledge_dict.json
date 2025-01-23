@@ -1,0 +1,258 @@
+{
+    "1": {
+        "keyword": "Forefather",
+        "core_idea": [
+            {
+                "knowledge": "Individuals of the same kind of plant or animal are recognizable as similar but can also vary in many ways.",
+                "topic": "Variation of Traits",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand the meaning of 'forefather' and learn about the living things that existed before frogs.",
+        "first_question_set": [
+            "Who are the forefathers of frogs?",
+            "What are some characteristics of the forefathers of frogs?"
+        ],
+        "example_nonrecall_questions": [
+            "What does “forefather” mean?",
+            "How are the forefathers of frogs different from or similar to regular fish?"
+        ]
+    },
+    "2": {
+        "keyword": "Amphibian",
+        "core_idea": [
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air.",
+                "topic": "Structure and Function",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand what \"amphibian\" means and why frogs are classified as amphibians.",
+        "first_question_set": [
+            "What does the word “Amphibian” mean?",
+            "In what ways do frogs breathe?",
+            "Why do frogs have a double life?",
+            "What kind of skin do frogs have?"
+        ],
+        "example_nonrecall_questions": [
+            "What other amphibians do you know?",
+            "What other living things do you know that have two ways of breathing?",
+            "What other living things do you know that can breathe through their skin?",
+            "Why do you think frogs have wet skin?"
+        ]
+    },
+    "3": {
+        "keyword": "skin; lung",
+        "core_idea": [
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air.",
+                "topic": "Structure and Function",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Plants and animals have both internal and external structures that serve various functions in growth, survival, behavior, and reproduction.",
+                "topic": "Structure and Function",
+                "grade": "4",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "All animals need food in order to live and grow. They obtain their food from plants or from other animals. Plants need water and light to live and grow.",
+                "topic": "Organization for Matter and Energy Flow in Organisms",
+                "grade": "K",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To learn how frogs breathe with both their lungs and skin and why they need wet skin to stay alive.",
+        "first_question_set": [
+            "When can frogs breathe through their skin?",
+            "Why can't frogs only use their lungs to breathe?",
+            "What happens to frogs if their skin gets dry?",
+            "What do frogs do with their old skin?"
+        ],
+        "example_nonrecall_questions": [
+            "Why do frogs need both lungs and skin to breathe?",
+            "How do frogs use their wet skin to breathe?",
+            "What other animals shed their skin as well?",
+            "Why do you think frogs shed their skin?"
+        ]
+    },
+    "4": {
+        "keyword": "Hibernate; hibernation",
+        "core_idea": [
+            {
+                "knowledge": "When the environment changes in ways that affect a place's physical characteristics, temperature, or availability of resources, some organisms survive and reproduce, others move to new locations, yet others move into the transformed environment, and some die. ",
+                "topic": "Ecosystem Dynamics, Functioning, and Resilience",
+                "grade": "3",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "For any particular environment, some kinds of organisms survive well, some survive less well, and some cannot survive at all.",
+                "topic": "Adaptation",
+                "grade": "3",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air.",
+                "topic": "Structure and Function",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To learn what \"hibernate\" means and why some animals need to hibernate.",
+        "first_question_set": [
+            "What does the word “hibernation” mean?",
+            "What do frogs do when they hibernate?",
+            "What do frogs do after hibernation?",
+            "In which season do frogs wake up from hibernation?"
+        ],
+        "example_nonrecall_questions": [
+            "Why do you think frogs need to hibernate?",
+            "What other animals do you know that hibernate?"
+        ]
+    },
+    "5": {
+        "keyword": "tadpole; polliwogs",
+        "core_idea": [
+            {
+                "knowledge": "Adult plants and animals can have young. In many kinds of animals, parents and the offspring themselves engage in behaviors that help the offspring to survive.",
+                "topic": "Growth and Development of Organisms ",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Individuals of the same kind of plant or animal are recognizable as similar but can also vary in many ways.",
+                "topic": "Variation of Traits",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand what \"tadpoles\" and \"pollywogs\" are and how they become frogs.",
+        "first_question_set": [
+            "What are frog babies called?",
+            "What is a tadpole?",
+            "What is a polliwog?"
+        ],
+        "example_nonrecall_questions": [
+            "Are tadpoles and frogs the same? Why or why not?",
+            "How do polliwogs turn into frogs?"
+        ]
+    },
+    "8": {
+        "keyword": "mate",
+        "core_idea": [
+            {
+                "knowledge": "Animals have body parts that capture and convey different kinds of information needed for growth and survival. Animals respond to these inputs with behaviors that help them survive. Plants also respond to some external inputs.",
+                "topic": "Information Processing",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Plants and animals have both internal and external structures that serve various functions in growth, survival, behavior, and reproduction.",
+                "topic": "Structure and Function",
+                "grade": "4",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand what mates are and how frogs look for them.",
+        "first_question_set": [
+            "What do frogs use their voices for?",
+            "What kinds of voices do frogs make?",
+            "What do frogs' throats look like when they sing?"
+        ],
+        "example_nonrecall_questions": [
+            "Why do you think frogs hunt for mates?",
+            "Why do you think frogs use a high-speech sound to find mates?"
+        ]
+    },
+    "9": {
+        "keyword": "enemies",
+        "core_idea": [
+            {
+                "knowledge": "Sometimes the differences in characteristics between individuals of the same species provide advantages in surviving, finding mates, and reproducing.",
+                "topic": "Natural Selection",
+                "grade": "3",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Adaptation by natural selection acting over generations is one important process by which species change over time in response to changes in environmental conditions. Traits that support successful survival and reproduction in the new environment become more common; those that do not become less common. Thus, the distribution of traits in a population changes.",
+                "topic": "Adaptation",
+                "grade": "MS",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air. Plants also have different parts (roots, stems, leaves, flowers, fruits) that help them survive and grow.",
+                "topic": "Structure and Function",
+                "grade": "1",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand the word \"enemies\" and learn that jumping fast helps frogs avoid getting caught by their enemies.",
+        "first_question_set": [
+            "What does the word \"enemies\" mean?",
+            "When do frogs jump?",
+            "How far can frogs jump at once?",
+            "What are frogs good at?"
+        ],
+        "example_nonrecall_questions": [
+            "Why do you think frogs jump so fast?",
+            "What other animals do you know that jump very fast, like frogs?",
+            "What would happen to frogs if they didn't jump fast to escape their enemies?"
+        ]
+    },
+    "10": {
+        "keyword": "bulging",
+        "core_idea": [
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air. Plants also have different parts (roots, stems, leaves, flowers, fruits) that help them survive and grow.",
+                "topic": "Structure and Function",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Sometimes the differences in characteristics between individuals of the same species provide advantages in surviving, finding mates, and reproducing.",
+                "topic": "Natural Selection",
+                "grade": "3",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand the characteristics of frogs' eyes and compare them to the eyes of other creatures.",
+        "first_question_set": [
+            "What do bulging eyes look like?",
+            "What are the characteristics of a frog's eyes?"
+        ],
+        "example_nonrecall_questions": [
+            "Why do you think frogs have bulging eyes?",
+            "What other animals do you know that also have bulging eyes?",
+            "What can frogs' eyes do that human eyes cannot?"
+        ]
+    },
+    "12": {
+        "keyword": "sticky",
+        "core_idea": [
+            {
+                "knowledge": "All organisms have external parts. Different animals use their body parts in different ways to see, hear, grasp objects, protect themselves, move from place to place, and seek, find, and take in food, water and air. Plants also have different parts (roots, stems, leaves, flowers, fruits) that help them survive and grow.",
+                "topic": "Structure and Function",
+                "grade": "1",
+                "discipline": "LS"
+            },
+            {
+                "knowledge": "Sometimes the differences in characteristics between individuals of the same species provide advantages in surviving, finding mates, and reproducing.",
+                "topic": "Natural Selection",
+                "grade": "3",
+                "discipline": "LS"
+            }
+        ],
+        "learning_objective": "To understand the characteristics of frogs' tongues and how they use them to catch food.",
+        "first_question_set": [
+            "What's special about a frog's tongue? ",
+            "How does a frog's sticky tongue help it catch food?"
+        ],
+        "example_nonrecall_questions": [
+            "How are frogs' tongues different from human tongues?",
+            "Why do you think frogs' tongues have a sticky surface?"
+        ]
+    }
+}

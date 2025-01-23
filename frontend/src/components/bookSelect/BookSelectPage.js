@@ -24,7 +24,8 @@ const BookSelectPage = () => {
     useEffect(() => {
         setBookList(
             [
-                {'title': 'Amara and the Bats', 'time': '15min', 'progress': '0%'},
+                // {'title': 'Amara and the Bats', 'time': '15min', 'progress': '0%'},
+                {'title': 'Why Frogs are Wet', 'time': '15min', 'progress': '0%'},
             ]
         );
     }, []);
@@ -58,7 +59,7 @@ const BookSelectPage = () => {
                             {bookList.map((book, index) => (
                                 <Card className="bookCardFrame" onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer', "--Card-radius": "30px" }}>
                                     <CardCover>
-                                        <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='AmaraAndTheBats' />
+                                        <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='book cover image' />
                                     </CardCover>
                                     <IconButton variant="soft" sx={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
                                         {isFavorite(book.title) &&

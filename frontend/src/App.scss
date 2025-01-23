@@ -487,12 +487,13 @@
   color: #003E40;
   font-family: 'BM Jua';
   animation: float 5s infinite;
+  bottom: 10px;
 }
 
 .message-tail {
   // the triangle is not working
   position: absolute;
-  right: -40px;
+  right: -38px;
   top: 50%;
   transform: translateY(-50%);
   width: 40px;
@@ -567,6 +568,20 @@
   right: 32px;
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+#speed-slider-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  width: 150px;
+  height: 30px;
+  top: 220px;
+  position: absolute;
+  right: 88px;
   z-index: 2;
 }
 

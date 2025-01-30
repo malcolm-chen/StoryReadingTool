@@ -28,7 +28,7 @@ const ReadChatPage = () => {
     const navigate = useNavigate();
     const user = localStorage.getItem('username') || 'User';
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
-    const [chatHistory, setChatHistory] = useState([]);
+    // const [chatHistory, setChatHistory] = useState([]);
     const [isKnowledge, setIsKnowledge] = useState(false);
     const [isClientSetup, setIsClientSetup] = useState(false);
     const [isFirstTime, setIsFirstTime] = useState(false);
@@ -45,7 +45,7 @@ const ReadChatPage = () => {
     const [showCaption, setShowCaption] = useState(true);
     const [isExpandedChat, setIsExpandedChat] = useState(false);
     const [isMinimizedChat, setIsMinimizedChat] = useState(false);
-    const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
+    const [audioSpeed, setAudioSpeed] = useState(1);
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -83,6 +83,11 @@ const ReadChatPage = () => {
     const knowledgeRef = useRef([]);
     const isWaitingForResponseRef = useRef(false);
     const userRespondedRef = useRef(false);
+    const chatHistoryRef = useRef([]);
+
+    useEffect(() => {
+        console.log('chatHistoryRef', chatHistoryRef.current);
+    }, [chatHistoryRef.current]);
     
     // const [currentPage, setCurrentPage] = useState(() => {
     //     const savedPage = localStorage.getItem(`${title}-currentPage`);
@@ -123,10 +128,12 @@ const ReadChatPage = () => {
                 const storyText = await response.json();
                 storyTextRef.current = storyText;
                 const loadedPages = Array.from({ length: storyText.length }, (_, index) => ({
-                    image: `files/books/${title}/pages/page${index + 1}.png`,
+                    image: `files/books/${title}/pages/page${index}.png`,
                     text: storyText[index]
                 }));
                 setPages(loadedPages);
+                // initialize chatHistoryRef
+                chatHistoryRef.current = Array.from({ length: loadedPages.length }, () => []);
             } catch (error) {
                 console.error('Error loading story:', error);
             }
@@ -366,7 +373,7 @@ const ReadChatPage = () => {
                 playPageSentences();  
             }
         }
-    }, [pages, currentPageRef.current]);
+    }, [pages]);
 
     const handlePrevPage = async () => {
         console.log('moving to previous page', currentPageRef.current);
@@ -379,7 +386,7 @@ const ReadChatPage = () => {
             setIsAsked(false);
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
-            setChatHistory([]);
+            // setChatHistory([]);
             isWaitingForResponseRef.current = false;
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
@@ -396,6 +403,7 @@ const ReadChatPage = () => {
             setCurrentSentence(0);
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0
+            playPageSentences();  
         }
     };
 
@@ -409,7 +417,7 @@ const ReadChatPage = () => {
         setIsAsked(false);
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
-        setChatHistory([]);
+        // setChatHistory([]);
         isWaitingForResponseRef.current = false;
         if (clientRef.current.realtime.isConnected()) {
             console.log('disconnecting conversation');
@@ -426,6 +434,7 @@ const ReadChatPage = () => {
         sentenceIndexRef.current = 0;
         localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
         localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
+        playPageSentences();  
     };
 
     const getFirstQuestion = async () => {
@@ -724,8 +733,8 @@ const ReadChatPage = () => {
 
     **Instructions for Pose a Follow-up Question**:
          - If you are posing a follow-up question, you do not need to conclude the conversation.
-         - The follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
-        Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+         - The follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}, and the core idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}.
+        Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
         ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
 
     **Instructions for Conclusion**:
@@ -745,7 +754,7 @@ const ReadChatPage = () => {
 
     const getInstruction4PartialCorrect = (items, evaluation) => {
         const count = answerRecord.filter(answer => answer === 'partially correct').length;
-        if (count < 2) {
+        if (count <= 2) {
             // pose a follow-up question
             const instruction4PartialCorrect = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -769,7 +778,7 @@ const ReadChatPage = () => {
         
     **Instructions for Pose a Follow-up Question**:
         - If you are posing a follow-up question, you do not need to conclude the conversation.
-        - Rephrase the ORIGINAL last-posed question into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        - Rephrase the ORIGINAL, most recent, last-posed question (which the child answers partially correctly) into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
         - If you are rephrasing the question, do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
     
      **Instructions for Whole Response**:
@@ -822,7 +831,7 @@ const ReadChatPage = () => {
     const getInstruction4Incorrect = (items, evaluation) => {
         console.log('answerRecord', answerRecord);
         const count = answerRecord.filter(answer => answer === 'incorrect').length;
-        if (count < 2) {
+        if (count <= 2) {
             const instruction4Incorrect = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         1. conversation history: 
@@ -845,7 +854,7 @@ const ReadChatPage = () => {
 
     **Instructions for Pose a Follow-up Question**:
         - If you are posing a follow-up question, you do not need to conclude the conversation.
-        - Rephrase the ORIGINAL last-posed question into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        - Rephrase the ORIGINAL, most recent, last-posed question (which the child answers incorrectly) into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
         - If you are rephrasing the question, do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
 
     **Instructions for Whole Response**:
@@ -923,7 +932,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
          - If you are posing a follow-up question, you do not need to conclude the conversation.
          - The follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
-        Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+        Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
         ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
 
     **Instructions for Conclusion**:
@@ -1017,7 +1026,7 @@ const ReadChatPage = () => {
          - If you are posing a follow-up question, you do not need to conclude the conversation.
          - Here are the only situations you need to pose a follow-up question based on the child's response:
             1. If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
-            Here are some examples of follow-up questions for your reference, you don't need to use all of them:
+            Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
             ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
             2. If the evaluation of the child's response is 'partially correct' or 'incorrect' to the previous question:
                 i. If this is the first time the child answers incorrectly (you haven't rephrased the previous question into a multiple-choice question), rephrase the previous question into a multiple-choice question. The rephrased question should ask about the same thing as the previous question, but in a multiple-choice format. For the options of the multiple-choice question, avoid using “A, B, C” to make it sound more natural. (e.g., What did Amara’s mom and brother do? Did they ignore the bat, play with the bat, or wait for a wildlife rescue team?)
@@ -1219,7 +1228,8 @@ const ReadChatPage = () => {
                 else if (item.id !== itemToDelete || (!item.content[0]?.transcript?.startsWith('<'))) {
                     // console.log('logging this item: ', item.content[0]?.transcript);
                     if (delta?.transcript) {
-                        setChatHistory(items);
+                        // setChatHistory(items);
+                        chatHistoryRef.current[currentPageRef.current] = items;
                         // check if the chat-window element exists
                         const chatWindow = document.getElementById('chat-window');
                         if (chatWindow) {
@@ -1237,7 +1247,9 @@ const ReadChatPage = () => {
                             24000
                         );
                         item.formatted.file = wavFile;
-                        setChatHistory(items);
+                        // setChatHistory(items);
+                        chatHistoryRef.current[currentPageRef.current] = items;
+                        
                         const chatWindow = document.getElementById('chat-window');
                         if (chatWindow) {
                             chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -1350,7 +1362,7 @@ const ReadChatPage = () => {
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
         const replayAudio = replayAudioRef.current;
-        replayAudio.src = chatHistory[index].formatted.file.url;
+        replayAudio.src = chatHistoryRef.current[currentPageRef.current][index].formatted.file.url;
         // pause the replayAudio
         replayAudio.pause();
         replayAudio.currentTime = 0;
@@ -1457,8 +1469,8 @@ const ReadChatPage = () => {
         await wavStreamPlayer.interrupt();
         setIsAsked(true);
         // send the chat history to backend
-        console.log('chatHistory to save', chatHistory);
-        const formData = processChatHistory(chatHistory);
+        // console.log('chatHistory to save', chatHistory);
+        const formData = processChatHistory(chatHistoryRef.current[currentPageRef.current]);
         try {
             const response = await fetch(`${apiUrl}/api/chat_history`, {
                 method: 'POST',
@@ -1687,12 +1699,12 @@ const ReadChatPage = () => {
                        
                     <Box id='chat-window'>
                         
-                        {chatHistory.length == 0 && (
+                        {chatHistoryRef.current[currentPageRef.current].length == 0 && (
                             <Box id='loading-box'>
                                 <AiOutlineLoading id='loading-icon' size={40} color='#7AA2E3' />
                             </Box>
                         )}
-                        {chatHistory.filter(msg => msg.type === 'message').map((msg, index) => (
+                        {chatHistoryRef.current[currentPageRef.current].filter(msg => msg.type === 'message').map((msg, index) => (
                             msg.content[0].transcript !== '' && (
                             <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                 {msg.role === 'user' ? (

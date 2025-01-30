@@ -39,13 +39,14 @@ const LandingPage = () => {
                 password: password,
               }), 
             });
-            if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
                 setError("");
-                localStorage.setItem('userToken', response.token);
+                localStorage.setItem('userToken', data.token);
                 localStorage.setItem('username', username);
                 navigate('/select', { state: { user: username } });
             } else {
-                setError("Password is incorrect.");
+                setError(data.message);
                 return;
             }
           } catch (error) {

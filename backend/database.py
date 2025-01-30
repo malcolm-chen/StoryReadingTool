@@ -70,7 +70,17 @@ user_dict = {
     "lero": "123",
     "yingxu": "123",
     "xuechen": "123",
-    "test": "123"
+    "test": "123",
+    "user1": "123",
+    "user2": "123",
+    "user3": "123", 
+    "user4": "123",
+    "user5": "123",
+    "user6": "123",
+    "user7": "123",
+    "user8": "123",
+    "user9": "123",
+    "user10": "123"
 }
 
 
@@ -96,6 +106,8 @@ def reset_users():
             })
         except Exception as e:
             print(f"Error inserting user {username}: {e}")
+
+# reset_users()
 
 def reset_the_user(username):
     users.delete_one({"username": username})
@@ -128,16 +140,3 @@ def add_users(user_dict):
             "chat_history": {},
             "asked_questions": {}
         })
-
-user_dict_2 = {
-    "user1": "123",
-    "user2": "123",
-    "user3": "123", 
-    "user4": "123",
-    "user5": "123",
-    "user6": "123",
-    "user7": "123",
-    "user8": "123",
-    "user9": "123",
-    "user10": "123",
-}

@@ -107,6 +107,32 @@ const ReadChatPage = () => {
 
     const [pages, setPages] = useState([]);
 
+    const loadAskedQuestions = async () => {
+        // fetch the asked questions from the database
+        console.log('loading asked questions');
+        const response = await fetch(`${apiUrl}/api/get_asked_questions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user: user,
+                title: title,
+                page: currentPageRef.current
+            })
+        });
+        const askedQuestions = await response.json();
+        console.log('asked questions', askedQuestions);
+        askedQuestionsRef.current = Object.values(askedQuestions);
+        console.log('askedQuestionsRef.current', askedQuestionsRef.current);
+        // check if askedQuestions is empty, or each list in askedQuestions is empty
+        if (askedQuestionsRef.current.length === 0 || (askedQuestionsRef.current.every(list => list.length === 0))) {
+            console.log('setting isFirstTime to true');
+            setIsFirstTime(true);
+        }
+        // setIsFirstTime(true);
+    }
+
     useEffect(() => {
         const loadDictionary = async () => {
             try {
@@ -138,31 +164,6 @@ const ReadChatPage = () => {
                 console.error('Error loading story:', error);
             }
         };
-        const loadAskedQuestions = async () => {
-            // fetch the asked questions from the database
-            console.log('loading asked questions');
-            const response = await fetch(`${apiUrl}/api/get_asked_questions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user: user,
-                    title: title,
-                    page: currentPageRef.current
-                })
-            });
-            const askedQuestions = await response.json();
-            console.log('asked questions', askedQuestions);
-            askedQuestionsRef.current = Object.values(askedQuestions);
-            console.log('askedQuestionsRef.current', askedQuestionsRef.current);
-            // check if askedQuestions is empty, or each list in askedQuestions is empty
-            if (askedQuestionsRef.current.length === 0 || (askedQuestionsRef.current.every(list => list.length === 0))) {
-                console.log('setting isFirstTime to true');
-                setIsFirstTime(true);
-            }
-            // setIsFirstTime(true);
-        }
         loadStory();
         loadDictionary();
         loadAskedQuestions();
@@ -441,7 +442,7 @@ const ReadChatPage = () => {
         const firstQuestionSet = knowledgeRef.current[currentPageRef.current]?.first_question_set;
         console.log('firstQuestionSet', firstQuestionSet);
         console.log('asked question', askedQuestionsRef.current[currentPageRef.current]);
-        if (firstQuestionSet?.length === askedQuestionsRef.current[currentPageRef.current]?.length) {
+        if (firstQuestionSet?.length <= askedQuestionsRef.current[currentPageRef.current]?.length) {
             console.log('all questions have been asked, now asking: ', firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)]);
             return firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)];
         }
@@ -530,8 +531,19 @@ const ReadChatPage = () => {
         return instruction4Frogs;
     }
 
-    function getInstruction4Asking() {
-        if (askedQuestionsRef.current.length === 0 || askedQuestionsRef.current.every(list => list.length === 0)) {
+    async function getInstruction4Asking() {
+        let isOnlyOneQuestion = true;
+        let sum = 0;
+        await loadAskedQuestions();
+        for (const list of askedQuestionsRef.current) {
+            if (list.length > 1 || sum > 1) {
+                isOnlyOneQuestion = false;
+                break;
+            } else {
+                sum += list.length;
+            }
+        }
+        if (isOnlyOneQuestion) {
             const instruction4Asking = `
             You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
 
@@ -539,7 +551,7 @@ const ReadChatPage = () => {
             - Start by asking 'Hey ${user}, what do you want to know about this page? You can press AND hold the big yellow button to talk.'
             - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
             - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
-            - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+            - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
 
             **Important Reminders**:
             - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
@@ -560,7 +572,7 @@ const ReadChatPage = () => {
         - Start by asking 'Hey ${user}, what do you want to know about this page?'
         - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
         - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
 
         **Important Reminders**:
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
@@ -613,8 +625,10 @@ const ReadChatPage = () => {
     async function getInstruction4Guiding() {
         let isOnlyOneQuestion = true;
         let sum = 0;
+        await loadAskedQuestions();
+        console.log('askedQuestions!!!', askedQuestionsRef.current);
         for (const list of askedQuestionsRef.current) {
-            if (list.length > 1 || sum > 1) {
+            if (list.length >= 1 || sum >= 1) {
                 isOnlyOneQuestion = false;
                 break;
             } else {
@@ -624,7 +638,7 @@ const ReadChatPage = () => {
         if (isOnlyOneQuestion) {
             const instruction4Asking = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
-        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         
         **Story Information**:
         - Story Title: ${title}
@@ -664,7 +678,7 @@ const ReadChatPage = () => {
         }
         const instruction4Guiding = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
-        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         
         **Story Information**:
         - Story Title: ${title}
@@ -746,7 +760,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - If your response includes a question, you can't conclude the conversation. You need to address the question first.
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4Correct);
         return instruction4Correct;
@@ -785,7 +799,7 @@ const ReadChatPage = () => {
         - It is important to make sure you rephrase the question into a multiple-choice question if the child answers incorrectly/partially correctly for the first time. Do not conclude the conversation early.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - If your response includes a question, you can't conclude the conversation. You need to address the question first.
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
             console.log(instruction4PartialCorrect);
             return instruction4PartialCorrect;
@@ -821,7 +835,7 @@ const ReadChatPage = () => {
         - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
 
     **Instructions for Whole Response**:
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
             console.log(instruction4PartialCorrect);
             return instruction4PartialCorrect;
@@ -861,7 +875,7 @@ const ReadChatPage = () => {
         - It is important to make sure you rephrase the question into a multiple-choice question if the child answers incorrectly for the first time. Do not conclude the conversation early.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - If your response includes a question, you can't conclude the conversation. You need to address the question first.
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
             console.log(instruction4Incorrect);
             return instruction4Incorrect;
@@ -894,7 +908,7 @@ const ReadChatPage = () => {
         - Here is an example: "It was fun chatting with you!Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
 
     **Instructions for Whole Response**:
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
             console.log(instruction4Incorrect);
             return instruction4Incorrect;
@@ -945,7 +959,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - If your response includes a question, you can't conclude the conversation. You need to address the question first.
-        - Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4ChildQuestion);
         return instruction4ChildQuestion;
@@ -960,7 +974,7 @@ const ReadChatPage = () => {
         3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
         Since the evaluation of the child's response is 'invalid', you should respond with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
-        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4Invalid);
         return instruction4Invalid;
@@ -975,7 +989,7 @@ const ReadChatPage = () => {
         3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
         Start by acknowledging the child’s response (e.g., “Interesting idea!”). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
-        Speak ${audioSpeed < 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4OffTopic);
         return instruction4OffTopic;

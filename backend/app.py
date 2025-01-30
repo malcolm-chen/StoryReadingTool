@@ -52,13 +52,30 @@ def get_users():
     data = request.get_json()
     username = data['username']
     password = data['password']
-    print('username is logged in', username)
-    isValid = users.find_one({'username': username, 'password': password})
-    if isValid:
-        token = "user-logged-in"
-        return jsonify({"success": True, "token": token})
+    # check if the user exists
+    isUser = users.find_one({'username': username})
+    if isUser:
+        isValid = users.find_one({'username': username, 'password': password})
+        if isValid:
+            token = "user-logged-in"
+            return jsonify({"success": True, "token": token})
+        else:
+            return jsonify({"success": False, "message": "Password is incorrect."})
     else:
-        return jsonify({"success": False, "message": "Invalid credentials"})
+        try:
+            users.insert_one({
+                "username": username, 
+                "password": password,
+                "current_book": None,
+                "current_page": None,
+                "chat_history": {},
+                "asked_questions": {}
+            })
+            token = "user-logged-in"
+            return jsonify({"success": True, "token": token})
+        except Exception as e:
+            print(f"Error inserting user {username}: {e}")
+            return jsonify({"success": False, "message": "Please try another username."})
 
 @app.route('/audio/<filename>')
 def get_audio(filename):

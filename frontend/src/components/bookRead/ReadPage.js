@@ -1170,7 +1170,9 @@ const ReadChatPage = () => {
                             setItemToRespond(item.id);
                             // send this instruction after the item is completed
                             setTimeout(async () => {
-                                switch (item.content[0]?.transcript.replace('<eval>', '').trim()) {
+                                // if the string has </eval>, remove it
+                                const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                                switch (evaluation) {
                                     case 'correct':
                                         await client.realtime.send('response.create', {
                                             response: {
@@ -1207,7 +1209,7 @@ const ReadChatPage = () => {
                                         });
                                         userRespondedRef.current = false;
                                         break;
-                                    case 'question-posed':
+                                    case 'child asks question':
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],

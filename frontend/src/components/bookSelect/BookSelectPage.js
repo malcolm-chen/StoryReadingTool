@@ -30,6 +30,12 @@ const BookSelectPage = () => {
         );
     }, []);
 
+    useEffect(() => {
+        if (user === null) {
+            navigate('/');
+        }
+    }, [user]);
+
     const isFavorite = (bookTitle) => favorites.includes(bookTitle);
 
     const handleOpenBook = (bookTitle) => {

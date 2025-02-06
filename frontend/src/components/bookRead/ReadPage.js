@@ -57,6 +57,7 @@ const ReadChatPage = () => {
     const [itemToRespond, setItemToRespond] = useState(null);
     const [timer, setTimer] = useState(0);
     const [answerRecord, setAnswerRecord] = useState([]);
+    const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
     const timerRef = useRef(null);
     // const [evaluation, setEvaluation] = useState(null);
     
@@ -88,6 +89,12 @@ const ReadChatPage = () => {
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
     }, [chatHistoryRef.current]);
+
+    useEffect(() => {
+        if (user === null) {
+            navigate('/');
+        }
+    }, [user]);
     
     // const [currentPage, setCurrentPage] = useState(() => {
     //     const savedPage = localStorage.getItem(`${title}-currentPage`);
@@ -335,6 +342,7 @@ const ReadChatPage = () => {
                         setIsPlaying(false);
                         setIsConversationEnded(false);
                         setAnswerRecord([]);
+                        setCurrentPageChatHistory([]);
                         // check if the client is not setup for guiding
                         if (!clientRef.current.realtime.isConnected()) {
                             console.log('setting up client for guiding');
@@ -1172,6 +1180,7 @@ const ReadChatPage = () => {
                             setTimeout(async () => {
                                 // if the string has </eval>, remove it
                                 const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                                console.log('evaluation', evaluation);
                                 switch (evaluation) {
                                     case 'correct':
                                         await client.realtime.send('response.create', {
@@ -1245,7 +1254,8 @@ const ReadChatPage = () => {
                     // console.log('logging this item: ', item.content[0]?.transcript);
                     if (delta?.transcript) {
                         // setChatHistory(items);
-                        chatHistoryRef.current[currentPageRef.current] = items;
+                        setCurrentPageChatHistory(items);
+                        // chatHistoryRef.current[currentPageRef.current] = items;
                         // check if the chat-window element exists
                         const chatWindow = document.getElementById('chat-window');
                         if (chatWindow) {
@@ -1264,7 +1274,8 @@ const ReadChatPage = () => {
                         );
                         item.formatted.file = wavFile;
                         // setChatHistory(items);
-                        chatHistoryRef.current[currentPageRef.current] = items;
+                        setCurrentPageChatHistory(items);
+                        //chatHistoryRef.current[currentPageRef.current] = items;
                         
                         const chatWindow = document.getElementById('chat-window');
                         if (chatWindow) {
@@ -1272,7 +1283,7 @@ const ReadChatPage = () => {
                         }
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
-                            if (!items[items.length - 1]?.content[0]?.transcript?.endsWith('?') && !items[items.length - 1]?.content[0]?.transcript?.endsWith('talk.')) {
+                            if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.endsWith('talk.')) {
                                 console.log('conversation ended');
                                 while (wavStreamPlayer.isPlaying()) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
@@ -1435,9 +1446,9 @@ const ReadChatPage = () => {
         if (!clientRef.current.realtime.isConnected()) {
             if (!isKnowledge) {
                 if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') {
-                    setupClient(getInstruction4Frogs());
+                    setupClient(await getInstruction4Frogs());
                 } else {
-                    setupClient(getInstruction4Asking());
+                    setupClient(await getInstruction4Asking());
                 }
             } else {
                 setupClient(await getInstruction4Guiding());
@@ -1447,9 +1458,9 @@ const ReadChatPage = () => {
         } else {
             if (!isKnowledge) {
                 if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') {
-                    updateClientInstruction(getInstruction4Frogs());
+                    updateClientInstruction(await getInstruction4Frogs());
                 } else {
-                    updateClientInstruction(getInstruction4Asking());
+                    updateClientInstruction(await getInstruction4Asking());
                 }
             } else {
                 updateClientInstruction(await getInstruction4Guiding());
@@ -1486,7 +1497,7 @@ const ReadChatPage = () => {
         setIsAsked(true);
         // send the chat history to backend
         // console.log('chatHistory to save', chatHistory);
-        const formData = processChatHistory(chatHistoryRef.current[currentPageRef.current]);
+        const formData = processChatHistory(currentPageChatHistory);
         try {
             const response = await fetch(`${apiUrl}/api/chat_history`, {
                 method: 'POST',
@@ -1498,6 +1509,7 @@ const ReadChatPage = () => {
         }
         if (isKnowledge) {
             setIsKnowledge(false);
+            chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             setTimeout(() => {
                 // audioRef.current.play();
                 if (currentPageRef.current < pages.length - 1) {
@@ -1508,6 +1520,7 @@ const ReadChatPage = () => {
         }
         else {
             setIsAsking(false);
+            chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             if (sentenceIndexRef.current === pages[currentPageRef.current]?.text.length) {
                 setIsPlaying(true);
                 handleNextPage();
@@ -1595,6 +1608,7 @@ const ReadChatPage = () => {
                                             fontSize: '16px',
                                             color: '#3F150B',
                                             fontFamily: 'BM Jua',
+                                            textStroke: '1px #FFFFFF'
                                         },
                                         zIndex: 100
                                     }}
@@ -1715,12 +1729,12 @@ const ReadChatPage = () => {
                        
                     <Box id='chat-window'>
                         
-                        {chatHistoryRef.current[currentPageRef.current].length == 0 && (
+                        {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].length == 0 && (
                             <Box id='loading-box'>
                                 <AiOutlineLoading id='loading-icon' size={40} color='#7AA2E3' />
                             </Box>
                         )}
-                        {chatHistoryRef.current[currentPageRef.current].filter(msg => msg.type === 'message').map((msg, index) => (
+                        {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].filter(msg => msg.type === 'message').map((msg, index) => (
                             msg.content[0].transcript !== '' && (
                             <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                 {msg.role === 'user' ? (

@@ -36,6 +36,8 @@ const BookSelectPage = () => {
         }
     }, [user]);
 
+    console.log('user', user);
+
     const isFavorite = (bookTitle) => favorites.includes(bookTitle);
 
     const handleOpenBook = (bookTitle) => {

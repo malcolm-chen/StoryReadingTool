@@ -90,6 +90,7 @@ const ReadChatPage = () => {
         console.log('chatHistoryRef', chatHistoryRef.current);
     }, [chatHistoryRef.current]);
 
+
     useEffect(() => {
         if (user === null) {
             navigate('/');

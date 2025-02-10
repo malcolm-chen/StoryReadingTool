@@ -26,7 +26,7 @@ const apiUrl = process.env.REACT_APP_API_URL;
 const ReadChatPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const user = localStorage.getItem('username') || 'User';
+    const user = localStorage.getItem('username') || '';
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
     // const [chatHistory, setChatHistory] = useState([]);
     const [isKnowledge, setIsKnowledge] = useState(false);
@@ -45,11 +45,10 @@ const ReadChatPage = () => {
     const [showCaption, setShowCaption] = useState(true);
     const [isExpandedChat, setIsExpandedChat] = useState(false);
     const [isMinimizedChat, setIsMinimizedChat] = useState(false);
-    const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
-    // const [isAsking, setIsAsking] = useState(false);
+    const [isAsking, setIsAsking] = useState(false);
     const [isAsked, setIsAsked] = useState(false);
     const [showSpeedSlider, setShowSpeedSlider] = useState(false);
     const recorderControls = useVoiceVisualizer();
@@ -77,6 +76,7 @@ const ReadChatPage = () => {
 
     const audioRef = useRef(new Audio());
     const replayAudioRef = useRef(new Audio());
+    const audioSpeedRef = useRef(1);
     const storyTextRef = useRef([]);
     const currentPageRef = useRef(localStorage.getItem(`${title}-currentPage`) ? parseInt(localStorage.getItem(`${title}-currentPage`), 10) : 0);
     const sentenceIndexRef = useRef(0);
@@ -85,7 +85,6 @@ const ReadChatPage = () => {
     const isWaitingForResponseRef = useRef(false);
     const userRespondedRef = useRef(false);
     const chatHistoryRef = useRef([]);
-    const isAskingRef = useRef(false);
 
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
@@ -93,37 +92,11 @@ const ReadChatPage = () => {
 
 
     useEffect(() => {
-        if (user === null) {
+        if (user === null || user === '') {
             navigate('/');
         }
     }, [user]);
-
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                console.log('space key pressed');
-                if (clientRef.current.realtime.isConnected() && !isRecording) {
-                    startRecording();
-                }
-            }
-        };
-        const handleKeyUp = (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                console.log('space key released');
-                if (clientRef.current.realtime.isConnected() && isRecording) {
-                    stopRecording();
-                }
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
-        };
-    }, [isRecording]);
+    
     // const [currentPage, setCurrentPage] = useState(() => {
     //     const savedPage = localStorage.getItem(`${title}-currentPage`);
     //     console.log('savedPage', savedPage);
@@ -203,21 +176,18 @@ const ReadChatPage = () => {
         loadDictionary();
         loadAskedQuestions();
         audioRef.current.play();
-        audioRef.current.playbackRate = audioSpeed;
+        audioRef.current.playbackRate = audioSpeedRef.current;
     }, []);
 
     useEffect(() => {
-        console.log('isFirstTime', isFirstTime);
         if (isFirstTime) {
             audioRef.current.pause();
             setIsPlaying(false);
             setTimeout(() => {
-                // setIsFirstTime(false);
-                console.log('isAsking', isAskingRef.current);
-                console.log('isKnowledge', isKnowledge);
-                if (!isAskingRef.current && !isKnowledge) {
+                console.log('THIS IS THE FIRST TIME playing audio');
+                if (!isAsking && !isKnowledge) {
                     audioRef.current.play();
-                    audioRef.current.playbackRate = audioSpeed;
+                    audioRef.current.playbackRate = audioSpeedRef.current;
                     setIsPlaying(true);
                 }
             }, 5000);
@@ -252,10 +222,6 @@ const ReadChatPage = () => {
             await wavRecorder.record((data) => client.appendInputAudio(data.mono));
         }
     }, []);
-
-    useEffect(() => {
-        console.log('isAsking changed', isAskingRef.current);
-    }, [isAskingRef.current]);
 
     /**
      * Disconnect and reset conversation state
@@ -342,7 +308,7 @@ const ReadChatPage = () => {
                 setAudioPage(currentPageRef.current);
             }
             audioRef.current.play();
-            audioRef.current.playbackRate = audioSpeed;
+            audioRef.current.playbackRate = audioSpeedRef.current;
         }
         setIsPlaying(!isPlaying);
     };
@@ -365,7 +331,7 @@ const ReadChatPage = () => {
                     };
                     try {
                         await audio.play();
-                        audio.playbackRate = audioSpeed;
+                        audio.playbackRate = audioSpeedRef.current;
                         setIsPlaying(true);
                     } catch (error) {
                         console.error('Error playing audio:', error);
@@ -428,12 +394,10 @@ const ReadChatPage = () => {
             //setIsPlaying(false);
             audioRef.current.currentTime = 0;
             setIsKnowledge(false);
-            // setIsAsking(false);
-            isAskingRef.current = false;
+            setIsAsking(false);
             setIsAsked(false);
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
-            setAnswerRecord([]);
             // setChatHistory([]);
             isWaitingForResponseRef.current = false;
             if (clientRef.current.realtime.isConnected()) {
@@ -461,12 +425,10 @@ const ReadChatPage = () => {
         audioRef.current.currentTime = 0;
         // setIsPlaying(false);
         setIsKnowledge(false);
-        // setIsAsking(false);
-        isAskingRef.current = false;
+        setIsAsking(false);
         setIsAsked(false);
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
-        setAnswerRecord([]);
         // setChatHistory([]);
         isWaitingForResponseRef.current = false;
         if (clientRef.current.realtime.isConnected()) {
@@ -576,7 +538,6 @@ const ReadChatPage = () => {
         - Unless you are ending the conversation, ends each round of conversation with a friendly line like 'Is there anything else you want to know about this page?' (the last sentence need to be a question)
         - You should not ask questions unless you are asking 'Is there anything else you want to know about this page?'
         - If the child does not have any questions, you can say 'It was fun chatting with you! Let's keep reading.'
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `;
         return instruction4Frogs;
     }
@@ -591,7 +552,7 @@ const ReadChatPage = () => {
             - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
             - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
             - Keep this conversation within three rounds. If the child asks more than three questions, you can say, "There are many exciting things in this story, let's keep exploring it." and end the conversation.
-            - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+            - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
 
             **Important Reminders**:
             - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
@@ -599,7 +560,6 @@ const ReadChatPage = () => {
             - Do not make up the child's response, if you do not get response, just ask again.
             - Do not ask questions.
             - Only recognize the child's answer in English.
-            - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
 
             Essential Details:
                 - **Story Title**: ${title}
@@ -615,7 +575,7 @@ const ReadChatPage = () => {
         - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
         - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
         - Keep this conversation within three rounds. If the child asks more than three questions, you can say, "There are many exciting things in this story, let's keep exploring it." and end the conversation.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
 
         **Important Reminders**:
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
@@ -623,7 +583,6 @@ const ReadChatPage = () => {
         - Do not make up the child's response, if you do not get response, just ask again.
         - Do not ask questions.
         - Only recognize the child's answer in English.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
 
         Essential Details:
             - **Story Title**: ${title}
@@ -671,7 +630,7 @@ const ReadChatPage = () => {
         if (isFirstTime) {
             const instruction4Guiding = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
-        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         
         **Story Information**:
         - Story Title: ${title}
@@ -706,13 +665,12 @@ const ReadChatPage = () => {
         - Keep sentences simple, engaging, and under 25 words.
         - Avoid assuming or making up the child's response. Just wait for the child's response for each turn.
         - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.   
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `;
             return instruction4Guiding;
         }
         const instruction4Guiding = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
-        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         
         **Story Information**:
         - Story Title: ${title}
@@ -747,7 +705,6 @@ const ReadChatPage = () => {
         - Keep sentences simple, engaging, and under 25 words.
         - Avoid assuming or making up the child's response. Just wait for the child's response for each turn.
         - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.   
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `;
         console.log(instruction4Guiding);
         return instruction4Guiding;
@@ -781,7 +738,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - Do not end the conversation. You need to address the question first.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `
         const instruction4Correct2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -809,7 +766,7 @@ const ReadChatPage = () => {
        
     **Instructions for Whole Response**:
         - Do not include any question or question marks in the response.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `
 
         // case 1: only one 'correct' or 'correct' after one 'incorrect'/'partially correct'
@@ -858,8 +815,7 @@ const ReadChatPage = () => {
      **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - Do not end the conversation.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `
         const instruction4PartialCorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -888,8 +844,7 @@ const ReadChatPage = () => {
 
     **Instructions for Whole Response**:
         - Do not include any question or question marks in the response.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `
 
         let PartialCorrectCount = 0;
@@ -937,8 +892,7 @@ const ReadChatPage = () => {
      **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - Do not end the conversation.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `
         const instruction4Incorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -967,8 +921,7 @@ const ReadChatPage = () => {
 
     **Instructions for Whole Response**:
         - Do not include any question or question marks in the response.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `
         let incorrectCount = 0;
         let correctCount = 0;
@@ -1028,8 +981,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - If your response includes a question, do not end the conversation. You need to address the question first.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4ChildQuestion);
         return instruction4ChildQuestion;
@@ -1044,7 +996,7 @@ const ReadChatPage = () => {
         3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
         Since the evaluation of the child's response is 'invalid', you should respond with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4Invalid);
         return instruction4Invalid;
@@ -1059,7 +1011,7 @@ const ReadChatPage = () => {
         3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
 
         Start by acknowledging the child’s response (e.g., “Interesting idea!”). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Speak ${audioSpeedRef.current <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeedRef.current} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4OffTopic);
         return instruction4OffTopic;
@@ -1095,7 +1047,7 @@ const ReadChatPage = () => {
             1. If the evaluation is 'correct', provide a concise explanation to deepen their understanding.
             2. If the evaluation is 'incorrect', briefly explain why what the child has chosen is not right (without explicitly telling them they did wrong) 
             3. If the evaluation is 'partially correct', hint the child to think to get the correct answer (without explicitly telling the correct answer)
-            4. If the evaluation is 'child asks question', answer the child’s question using simple words.
+            4. If the evaluation is ‘question-posed’, answer the child’s question using simple words.
 
         **Situations for Not Posing a Follow-up Question**:
         - You do not need to pose a follow-up question if:
@@ -1128,7 +1080,6 @@ const ReadChatPage = () => {
         **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
         - If your response includes a question, you can't conclude the conversation. You need to address the question first.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `;
         console.log(instruction4FollowUp);
         return instruction4FollowUp;
@@ -1224,6 +1175,7 @@ const ReadChatPage = () => {
                 if(timerRef.current) clearInterval(timerRef.current);
                 // if the item starts with <test>, delete it
                 if (item?.content[0]?.transcript?.startsWith('<')) {
+                    setIsFirstTime(false);
                     // keep the item id, and when the item status is completed, delete it
                     setItemToDelete(item.id);
                     console.log('evaluation result', item.content[0]?.transcript);
@@ -1233,7 +1185,7 @@ const ReadChatPage = () => {
                         await client.realtime.send('conversation.item.delete', {
                             item_id: item.id
                         });
-                        answerRecord[Math.floor(items.length / 2) - 1] = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                        answerRecord[Math.floor(items.length / 2) - 1] = item.content[0]?.transcript.replace('<eval>', '').trim();
                         console.log('answerRecord', answerRecord);
                         // if this is the first completed item for the item id, send a response
                         if (item.id !== itemToRespond && item.role === 'assistant' && items[items.length - 1]?.status === 'completed') {
@@ -1249,7 +1201,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4Correct(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4Correct(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1258,7 +1210,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4PartialCorrect(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4PartialCorrect(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1267,7 +1219,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4Incorrect(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4Incorrect(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1276,7 +1228,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4OffTopic(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4OffTopic(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1285,7 +1237,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4ChildQuestion(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4ChildQuestion(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1294,7 +1246,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4Invalid(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4Invalid(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1303,7 +1255,7 @@ const ReadChatPage = () => {
                                         await client.realtime.send('response.create', {
                                             response: {
                                                 "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4FollowUp(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                                "instructions": getInstruction4FollowUp(items, item.content[0]?.transcript.replace('<eval>', '').trim())
                                             }
                                         });
                                         userRespondedRef.current = false;
@@ -1347,10 +1299,10 @@ const ReadChatPage = () => {
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
                             if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.endsWith('talk.')) {
+                                console.log('conversation ended');
                                 while (wavStreamPlayer.isPlaying()) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
                                 }
-                                console.log('conversation ended');
                                 setIsConversationEnded(true);
                             } else {
                                 // every time after the assistant's response (except the response asking for the child's answer), set a timer to check if there is a user's response. If there is no user's response after 15 seconds, ask question again.
@@ -1364,8 +1316,6 @@ const ReadChatPage = () => {
                                     startResponseTimer();
                                 }
                             }
-                        } else {
-                            setIsFirstTime(false);
                         }
                     }
                     setItems(items);
@@ -1488,21 +1438,21 @@ const ReadChatPage = () => {
 
     const handleSpeedChange = (event, newValue) => {
         console.log('speed changed', newValue);
-        setAudioSpeed(newValue);
+        audioSpeedRef.current = newValue;
     };
 
     useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.playbackRate = audioSpeed;
+            audioRef.current.playbackRate = audioSpeedRef.current;
         }
-        localStorage.setItem(`${title}-audioSpeed`, audioSpeed);
-    }, [audioSpeed]);
+        localStorage.setItem(`${title}-audioSpeed`, audioSpeedRef.current);
+    }, [audioSpeedRef.current]);
 
     const handlePenguinClick = async () => {
+
         audioRef.current.pause();
         setIsPlaying(false);
-        // setIsAsking(true);
-        isAskingRef.current = true;
+        setIsAsking(true);
         if (isMinimizedChat) {
             setIsMinimizedChat(false);
             return;
@@ -1584,15 +1534,14 @@ const ReadChatPage = () => {
             }, 500);
         }
         else {
-            // setIsAsking(false);
-            isAskingRef.current = false;
+            setIsAsking(false);
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             if (sentenceIndexRef.current === pages[currentPageRef.current]?.text.length) {
                 setIsPlaying(true);
                 handleNextPage();
             } else {
                 audioRef.current.play();
-                audioRef.current.playbackRate = audioSpeed;
+                audioRef.current.playbackRate = audioSpeedRef.current;
                 setIsPlaying(true);
             }
         }
@@ -1600,14 +1549,8 @@ const ReadChatPage = () => {
 
     const handleCloseMessage = () => {
         // hide the message box
-        // setIsFirstTime(false);
-        // set the button to be invisible
-        const messageBox = document.getElementById('penguin-message');
-        if (messageBox) {
-            messageBox.style.display = 'none';
-        }
         audioRef.current.play();
-        audioRef.current.playbackRate = audioSpeed;
+        audioRef.current.playbackRate = audioSpeedRef.current;
         setIsPlaying(true);
     }
 
@@ -1663,7 +1606,7 @@ const ReadChatPage = () => {
                         {showSpeedSlider && (
                             <div id='speed-slider-box'>
                                 <Slider
-                                    value={audioSpeed}
+                                    value={audioSpeedRef.current}
                                     onChange={handleSpeedChange}
                                     min={0.5}
                                     max={1.5}
@@ -1725,7 +1668,7 @@ const ReadChatPage = () => {
                 </div>
                 {/* the message should appear for 5 seconds and then disappear */}
                 {isFirstTime && (
-                    <div className='penguin-message' id='penguin-message'>
+                    <div className='penguin-message' >
                         {/* add a triangle at the right of the message box, as a message tail */}
                         <div className='message-tail'></div>
                         { `Hey ${user}, I'm your reading mate. You can click me to ask anything about the story! 😃`}
@@ -1735,7 +1678,7 @@ const ReadChatPage = () => {
                     </div>
                 )}
             </div>
-            {(isAskingRef.current || isKnowledge) && !isMinimizedChat && (
+            {(isAsking || isKnowledge) && !isMinimizedChat && (
                     <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (

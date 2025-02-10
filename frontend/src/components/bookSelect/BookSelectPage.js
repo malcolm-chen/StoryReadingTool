@@ -12,7 +12,7 @@ const BookSelectPage = () => {
     console.log('BookSelectPage rendered');
     const navigate = useNavigate();
     const location = useLocation();
-    const [user, setUser] = useState(location.state?.user || 'User');
+    const [user, setUser] = useState(location.state?.user || '');
     const [modeSet, setModeSet] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState(location.state?.title || 'Untitled');
@@ -31,7 +31,7 @@ const BookSelectPage = () => {
     }, []);
 
     useEffect(() => {
-        if (user === null) {
+        if (user === null || user === '') {
             navigate('/');
         }
     }, [user]);
@@ -65,7 +65,7 @@ const BookSelectPage = () => {
                     {curSelected === 0 &&
                         <div className='book-list'>
                             {bookList.map((book, index) => (
-                                <Card className="bookCardFrame" onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer', "--Card-radius": "30px" }}>
+                                <Card key={book.title || index} className="bookCardFrame" onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer', "--Card-radius": "30px" }}>
                                     <CardCover>
                                         <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='book cover image' />
                                     </CardCover>
@@ -111,7 +111,7 @@ const BookSelectPage = () => {
                                 <h4>No favorites yet</h4>
                             }
                             {favorites.map((book, index) => (
-                                <Card className="bookCardFrame" onClick={() =>handleOpenBook(book)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
+                                <Card key={book || index} className="bookCardFrame" onClick={() =>handleOpenBook(book)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
                                     <CardCover sx={{ borderRadius: '20px !important' }}>
                                         <img className='bookCover' src={`./files/covers/${book}.jpg`} alt='Book Cover' />
                                     </CardCover>
@@ -156,7 +156,7 @@ const BookSelectPage = () => {
                                 <h4>No finished books yet</h4>
                             }
                             {finishedBooks.map((book, index) => (
-                                <Card className="bookCardFrame"  onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
+                                <Card key={book.title || index} className="bookCardFrame"  onClick={() =>handleOpenBook(book.title)} sx={{backgroundColor: '#fffffe', cursor: 'pointer' }}>
                                     <CardCover sx={{ borderRadius: '20px !important' }}>
                                         <img className='bookCover' src={`./files/covers/${book.title}.jpg`} alt='AmaraAndTheBats' />
                                     </CardCover>

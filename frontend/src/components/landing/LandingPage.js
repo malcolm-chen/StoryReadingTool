@@ -15,8 +15,10 @@ const LandingPage = () => {
     useEffect(() => {
         // Check if the user is already logged in
         const token = localStorage.getItem('userToken');
-        if (token) {
-            navigate('/select');
+        // if token is not undefined and not null, navigate to select page
+        if (token !== 'undefined' && token !== null && token.length > 0) {
+            const username = localStorage.getItem('username');
+            navigate('/select', { state: { user: username } });
         }
     }, [navigate]);
 

@@ -128,7 +128,7 @@ def reset_the_user(username):
         "asked_questions": {}
     })
 
-# reset_the_user("Jiaju")
+reset_the_user("jiaju")
 
 def add_users(user_dict):
     for username, password in user_dict.items():

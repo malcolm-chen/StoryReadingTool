@@ -16,7 +16,7 @@ import { FaPlay, FaPause } from "react-icons/fa";
 import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import { FaMicrophone } from "react-icons/fa6";
-import { FaCirclePlay } from "react-icons/fa6";
+import { FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { RiSpeedUpFill } from "react-icons/ri";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 // let currentPage = 0;
@@ -49,6 +49,8 @@ const ReadChatPage = () => {
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
+    const [isReplaying, setIsReplaying] = useState(false);
+    const [replayingIndex, setReplayingIndex] = useState(null);
     // const [isAsking, setIsAsking] = useState(false);
     const [isAsked, setIsAsked] = useState(false);
     const [showSpeedSlider, setShowSpeedSlider] = useState(false);
@@ -289,6 +291,7 @@ const ReadChatPage = () => {
      */
     const startRecording = async () => {
         setIsRecording(true);
+        setIsConversationEnded(false);
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
         if (timerRef.current) clearInterval(timerRef.current);
@@ -1347,8 +1350,14 @@ const ReadChatPage = () => {
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
                             if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.endsWith('talk.')) {
-                                while (wavStreamPlayer.isPlaying()) {
+                                while (wavStreamPlayer.isPlaying() || isReplaying) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
+                                }
+                                if (isReplaying) {
+                                    console.log('isReplaying', isReplaying);
+                                    while (isReplaying) {
+                                        await new Promise(resolve => setTimeout(resolve, 100));
+                                    }
                                 }
                                 console.log('conversation ended');
                                 setIsConversationEnded(true);
@@ -1358,7 +1367,7 @@ const ReadChatPage = () => {
                                 console.log('isWaitingForResponseRef.current', isWaitingForResponseRef.current);
                                 console.log('userRespondedRef.current', userRespondedRef.current);
                                 if (!isWaitingForResponseRef.current) {
-                                    while (wavStreamPlayer.isPlaying()) {
+                                    while (wavStreamPlayer.isPlaying() || isReplaying) {
                                         await new Promise(resolve => setTimeout(resolve, 100));
                                     }
                                     startResponseTimer();
@@ -1454,15 +1463,23 @@ const ReadChatPage = () => {
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
         const replayAudio = replayAudioRef.current;
-        replayAudio.src = chatHistoryRef.current[currentPageRef.current][index].formatted.file.url;
+        console.log('---replayAudio', currentPageChatHistory, index);
+        replayAudio.src = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory][index].formatted.file.url;
         // pause the replayAudio
         replayAudio.pause();
         replayAudio.currentTime = 0;
         replayAudio.play();
-        setIsPlaying(true);
+        setReplayingIndex(index); // Set the replaying index
+        setIsReplaying(true);
         replayAudio.onended = () => {
-            setIsPlaying(false);
+            console.log('replay ended');
+            setIsReplaying(false);
+            setReplayingIndex(null); // Reset the replaying index when done
         };
+        // setIsPlaying(true);
+        // replayAudio.onended = () => {
+        //     setIsPlaying(false);
+        // };
     }
 
     const handleExpandChat = () => {
@@ -1830,12 +1847,12 @@ const ReadChatPage = () => {
                                                 </h5>
                                             )}
                                             {msg.status === 'completed' && !msg.content[0].transcript.startsWith('<') && (
-                                                <IconButton variant='plain' style={{ 
+                                                <IconButton id='replay-btn' key={index} variant='plain' style={{ 
                                                     position: 'absolute', 
                                                     right: '8px', 
                                                     bottom: '8px', 
                                                 }}>
-                                                    <FaCirclePlay size={25} color='#2A2278' />
+                                                    {replayingIndex === index ? <FaCirclePause size={25} color='#2A2278' /> : <FaCirclePlay size={25} color='#2A2278' />}
                                                 </IconButton>
                                             )}
                                         </Box>

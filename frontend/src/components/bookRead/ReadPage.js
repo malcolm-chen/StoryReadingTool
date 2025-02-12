@@ -49,7 +49,6 @@ const ReadChatPage = () => {
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
-    const [isReplaying, setIsReplaying] = useState(false);
     const [replayingIndex, setReplayingIndex] = useState(null);
     // const [isAsking, setIsAsking] = useState(false);
     const [isAsked, setIsAsked] = useState(false);
@@ -88,6 +87,7 @@ const ReadChatPage = () => {
     const userRespondedRef = useRef(false);
     const chatHistoryRef = useRef([]);
     const isAskingRef = useRef(false);
+    const isReplayingRef = useRef(false);
 
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
@@ -590,7 +590,8 @@ const ReadChatPage = () => {
             You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
 
             Instructions:
-            - Start by asking 'Hey ${user}, what do you want to know about this page? You can press AND hold the big yellow button to talk.'
+            - Ignore all previous conversation history.
+            - Always start by asking 'Hey ${user}, what do you want to know about this page? You can press AND hold the big yellow button to talk.'
             - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
             - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
             - Keep this conversation within three rounds. If the child asks more than three questions, you can say, "There are many exciting things in this story, let's keep exploring it." and end the conversation.
@@ -1350,15 +1351,16 @@ const ReadChatPage = () => {
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
                             if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.endsWith('talk.')) {
-                                while (wavStreamPlayer.isPlaying() || isReplaying) {
+                                while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
                                 }
-                                if (isReplaying) {
-                                    console.log('isReplaying', isReplaying);
-                                    while (isReplaying) {
-                                        await new Promise(resolve => setTimeout(resolve, 100));
-                                    }
-                                }
+                                // console.log('isReplaying', isReplayingRef.current);
+                                // if (isReplayingRef.current) {
+                                //     console.log('isReplaying', isReplayingRef.current);
+                                //     while (isReplayingRef.current) {
+                                //         await new Promise(resolve => setTimeout(resolve, 100));
+                                //     }
+                                // }
                                 console.log('conversation ended');
                                 setIsConversationEnded(true);
                             } else {
@@ -1367,7 +1369,7 @@ const ReadChatPage = () => {
                                 console.log('isWaitingForResponseRef.current', isWaitingForResponseRef.current);
                                 console.log('userRespondedRef.current', userRespondedRef.current);
                                 if (!isWaitingForResponseRef.current) {
-                                    while (wavStreamPlayer.isPlaying() || isReplaying) {
+                                    while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                         await new Promise(resolve => setTimeout(resolve, 100));
                                     }
                                     startResponseTimer();
@@ -1470,10 +1472,10 @@ const ReadChatPage = () => {
         replayAudio.currentTime = 0;
         replayAudio.play();
         setReplayingIndex(index); // Set the replaying index
-        setIsReplaying(true);
+        isReplayingRef.current = true;
         replayAudio.onended = () => {
             console.log('replay ended');
-            setIsReplaying(false);
+            isReplayingRef.current = false;
             setReplayingIndex(null); // Reset the replaying index when done
         };
         // setIsPlaying(true);

@@ -209,23 +209,23 @@ const ReadChatPage = () => {
         audioRef.current.playbackRate = audioSpeed;
     }, []);
 
-    useEffect(() => {
-        console.log('isFirstTime', isFirstTime);
-        if (isFirstTime) {
-            audioRef.current.pause();
-            setIsPlaying(false);
-            setTimeout(() => {
-                // setIsFirstTime(false);
-                console.log('isAsking', isAskingRef.current);
-                console.log('isKnowledge', isKnowledge);
-                if (!isAskingRef.current && !isKnowledge) {
-                    audioRef.current.play();
-                    audioRef.current.playbackRate = audioSpeed;
-                    setIsPlaying(true);
-                }
-            }, 5000);
-        }
-    }, [isFirstTime]);
+    // useEffect(() => {
+    //     console.log('isFirstTime', isFirstTime);
+    //     if (isFirstTime) {
+    //         audioRef.current.pause();
+    //         setIsPlaying(false);
+    //         setTimeout(() => {
+    //             // setIsFirstTime(false);
+    //             console.log('isAsking', isAskingRef.current);
+    //             console.log('isKnowledge', isKnowledge);
+    //             if (!isAskingRef.current && !isKnowledge) {
+    //                 audioRef.current.play();
+    //                 audioRef.current.playbackRate = audioSpeed;
+    //                 setIsPlaying(true);
+    //             }
+    //         }, 5000);
+    //     }
+    // }, [isFirstTime]);
 
     /**
      * Connect to conversation:

@@ -59,6 +59,7 @@ const ReadChatPage = () => {
     const [timer, setTimer] = useState(0);
     const [answerRecord, setAnswerRecord] = useState([]);
     const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
+    const [isShaking, setIsShaking] = useState(false);
     const timerRef = useRef(null);
     // const [evaluation, setEvaluation] = useState(null);
     
@@ -657,7 +658,7 @@ const ReadChatPage = () => {
         - Off-topic: The response is unrelated to the question or the story context.
                     
         **Response Format**:
-        Precede each evaluation with the tag <eval>. Examples of your output:
+        Precede each evaluation with the tag <eval>. Do not include any other text apart from the tag and evaluation. Examples of your output, reply with one of these only:
         - <eval>invalid
         - <eval>correct
         - <eval>partially correct
@@ -1154,16 +1155,23 @@ const ReadChatPage = () => {
         console.log(instruction);
     }
 
-    const startResponseTimer = () => {
+    const startResponseTimer = async () => {
         // update the response timer every 1 second
         console.log('startResponseTimer');
         userRespondedRef.current = false;
         isWaitingForResponseRef.current = true;
         setTimer(0); // 计时器从 0 开始
         if (timerRef.current) clearInterval(timerRef.current); 
-
-        timerRef.current = setInterval(() => {
-        setTimer((prev) => prev + 1); // 每秒递增
+        // if the user clicks replay during the timer, clear the timer, and wait until the replay is finished and start the timer again
+        timerRef.current = setInterval(async () => {
+            setTimer((prev) => prev + 1); // 每秒递增
+            if (isReplayingRef.current) {
+                clearInterval(timerRef.current);
+                while (isReplayingRef.current) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                startResponseTimer();
+            }
         }, 1000);
     }
 
@@ -1234,11 +1242,32 @@ const ReadChatPage = () => {
                     if (item.status === 'completed') {
                         console.log('!!! deleting item', item.content[0]?.transcript);
                         // setEvaluation(item.content[0]?.transcript.replace('<eval>', '').trim());
-                        await client.realtime.send('conversation.item.delete', {
-                            item_id: item.id
-                        });
-                        answerRecord[Math.floor(items.length / 2) - 1] = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
-                        console.log('answerRecord', answerRecord);
+                        try {
+                            await client.realtime.send('conversation.item.delete', {
+                                item_id: item.id
+                            });
+                            const answerOrder = Math.floor(items.length / 2) - 1;
+                            // make sure only update answerRecord if all answers in answerRecord are not null before the answerOrder
+                            let allAnswersNotNull = true;
+                            for (let i = 0; i < answerOrder; i++) {
+                                if (answerRecord[i] === null || answerRecord[i] === undefined) {
+                                    allAnswersNotNull = false;
+                                    break;
+                                }
+                            }
+                            console.log('answerOrder', answerOrder);
+                            console.log('allAnswersNotNull', allAnswersNotNull);
+                            if (allAnswersNotNull && (!(answerRecord[answerOrder] !== null && answerRecord[answerOrder] !== undefined))) {
+                                answerRecord[answerOrder] = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                            }
+                            console.log('answerRecord', answerRecord);
+                        } catch (error) {
+                            console.log('error', error);
+                        }
+                        console.log('items', items);
+                        console.log('items to delete', itemToDelete);
+                        // only update answerRecord after the item is deleted
+                        
                         // if this is the first completed item for the item id, send a response
                         if (item.id !== itemToRespond && item.role === 'assistant' && items[items.length - 1]?.status === 'completed') {
                             console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
@@ -1372,7 +1401,9 @@ const ReadChatPage = () => {
                                     while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                         await new Promise(resolve => setTimeout(resolve, 100));
                                     }
-                                    startResponseTimer();
+                                    if (!isReplayingRef.current) {
+                                        startResponseTimer();
+                                    }
                                 }
                             }
                         } else {
@@ -1647,7 +1678,27 @@ const ReadChatPage = () => {
     // useEffect(() => {
     //     console.log('currentPage changed', currentPage);
     // }, [currentPage]);
+    useEffect(() => {
+        // Check if it's the first page
+        if (currentPageRef.current === 0) {
+            // Set a timeout to start shaking after 13 seconds
+            const startShakeTimer = setTimeout(() => {
+                setIsShaking(true);
+                console.log('shaking');
+                // Set another timeout to stop shaking after 1 second
+                const stopShakeTimer = setTimeout(() => {
+                    setIsShaking(false);
+                    console.log('not shaking');
+                }, 1000);
 
+                // Cleanup the stop shake timer
+                return () => clearTimeout(stopShakeTimer);
+            }, 6500);
+
+            // Cleanup the start shake timer on component unmount or when the page changes
+            return () => clearTimeout(startShakeTimer);
+        }
+    }, [currentPageRef.current]);
 
     return (
         <Box className="background-container">
@@ -1738,21 +1789,25 @@ const ReadChatPage = () => {
                     </h4>
                 </div>
                 }
+                {/* shake the penguin image at the first page, after 13 seconds */}
                 <div id='penguin-box' onClick={handlePenguinClick}>
-                    <img src='./files/imgs/penguin.svg' alt='penguin' style={{ width: '128px' }}></img>
-                    
+                    <img
+                    src='./files/imgs/penguin.svg'
+                    alt='penguin'
+                    style={{ width: '128px' }}
+                    className={isShaking ? 'shake' : ''}
+                />
                 </div>
                 {/* the message should appear for 5 seconds and then disappear */}
-                {isFirstTime && (
+                {/* {isFirstTime && (
                     <div className='penguin-message' id='penguin-message'>
-                        {/* add a triangle at the right of the message box, as a message tail */}
                         <div className='message-tail'></div>
                         { `Hey ${user}, I'm your reading mate. You can click me to ask anything about the story! 😃`}
                         <button id='close-message' onClick={handleCloseMessage}>
                             <h4 style={{ color: 'white', fontSize: '20px', fontFamily: 'Cherry Bomb', zIndex: 2 }}>Got it!</h4>
                         </button>
                     </div>
-                )}
+                )} */}
             </div>
             {(isAskingRef.current || isKnowledge) && !isMinimizedChat && (
                     <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>

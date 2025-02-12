@@ -128,7 +128,7 @@ def reset_the_user(username):
         "asked_questions": {}
     })
 
-reset_the_user("jiaju")
+# reset_the_user("jiaju")
 
 def add_users(user_dict):
     for username, password in user_dict.items():
@@ -140,3 +140,16 @@ def add_users(user_dict):
             "chat_history": {},
             "asked_questions": {}
         })
+
+# write a function to read a user's chat history
+def read_chat_history(username):
+    user = users.find_one({"username": username})
+    chat_history_object = user["chat_history"]['Why Frogs are Wet']['3'][0]
+    print(chat_history_object)
+    # find the file based on object id
+    fs = gridfs.GridFS(client.get_database("StoryBook"))
+    # load the file in json format
+    chat_history_file = fs.find_one({"_id": chat_history_object})
+    return json.loads(chat_history_file.read().decode('utf-8'))
+
+print(read_chat_history("jiaju"))

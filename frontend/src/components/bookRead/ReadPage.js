@@ -1693,7 +1693,7 @@ const ReadChatPage = () => {
 
                 // Cleanup the stop shake timer
                 return () => clearTimeout(stopShakeTimer);
-            }, 6500);
+            }, 6500*audioSpeed);
 
             // Cleanup the start shake timer on component unmount or when the page changes
             return () => clearTimeout(startShakeTimer);

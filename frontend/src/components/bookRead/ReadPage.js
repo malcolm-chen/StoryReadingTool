@@ -296,6 +296,9 @@ const ReadChatPage = () => {
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
         if (timerRef.current) clearInterval(timerRef.current);
+        replayAudioRef.current.pause();
+        setReplayingIndex(null);
+        isReplayingRef.current = false;
         
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
@@ -690,6 +693,7 @@ const ReadChatPage = () => {
             1. Initiate Conversation:
                 Begin the interaction by posing the first question (recall question), which will guide to the concept word.
                 You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting! + first question + You can press AND hold the big yellow button to talk."; "Hey xxx, share with me what you think + first question + You can press AND hold the big yellow button to talk."; "xxx, let's chat about what you just read! + first question + You can press AND hold the big yellow button to talk."; etc. 
+                Do not ask the first question in the form of yes/no question (e.g., "Can you tell me xxx?", or "Do you know xxx?").
             2. During the Conversation (Two different questions in total):
                 a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
                 b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Partially Correct/Incorrect/Off topic/Child Asks Question
@@ -1502,14 +1506,16 @@ const ReadChatPage = () => {
         // pause the replayAudio
         replayAudio.pause();
         replayAudio.currentTime = 0;
-        replayAudio.play();
-        setReplayingIndex(index); // Set the replaying index
-        isReplayingRef.current = true;
-        replayAudio.onended = () => {
-            console.log('replay ended');
-            isReplayingRef.current = false;
-            setReplayingIndex(null); // Reset the replaying index when done
-        };
+        if (isReplayingRef.current === false) {
+            replayAudio.play();
+            setReplayingIndex(index); // Set the replaying index
+            isReplayingRef.current = true;
+            replayAudio.onended = () => {
+                console.log('replay ended');
+                isReplayingRef.current = false;
+                setReplayingIndex(null); // Reset the replaying index when done
+            };
+        }
         // setIsPlaying(true);
         // replayAudio.onended = () => {
         //     setIsPlaying(false);

@@ -701,7 +701,7 @@ const ReadChatPage = () => {
                         For off-topic answers, gently steer the conversation back to the original topic.
                         For child asks question, answer the question with easy-to-understand words.
                         For invalid answers, ask the child to say it again.
-                    iii. Follow-up question: if the conversation is not ended, pose one more related question based on previous question to continue the discussion or transition to the end of the conversation.
+                    iii. Follow-up question: if the conversation is not ended, pose one more related, inferential, open-ended question based on previous question to continue the discussion or transition to the end of the conversation.
             3. End Conversation:
                 After asking one recall question and one follow-up question, ask if the child has any questions. If the child needs scaffolding, you can use more rounds.
                 If they don't have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
@@ -779,7 +779,7 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
 
     **Instructions for Pose a Follow-up Question**:
-        - Pose one follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}, and the core idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}.
+        - Pose one follow-up, open-ended question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}, and the core idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}.
         Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
         ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
 
@@ -1090,7 +1090,7 @@ const ReadChatPage = () => {
             2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
             3. If the evaluation is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
             4. If the evaluation is 'correct', you should first acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
-            5. If the evaluation is 'question-posed', you should acknowledge their question (e.g., “Good question!”, “Oh it’s an interesting question!”)
+            5. If the evaluation is 'child asks question', you should acknowledge their question (e.g., “Good question!”, “Oh it’s an interesting question!”)
             6. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
         
         **Instructions for Explanation**:
@@ -1141,8 +1141,9 @@ const ReadChatPage = () => {
 
     const getInstruction4NoResponse = () => {
         const instruction4NoResponse = `
-        Ignore the chat history. Ask this exact question: "I didn't hear your answer, are you still there?"
-        Make sure to ask this exact question ONCE, and do not ask or talk about anything else.
+        1. Read the chat history to find the last question you asked.
+        2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question you asked.
+        3. Make sure to ask this exact question ONCE, and do not say or ask anything else.
         `;
         console.log(instruction4NoResponse);
         return instruction4NoResponse;

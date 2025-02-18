@@ -293,6 +293,7 @@ const ReadChatPage = () => {
     const startRecording = async () => {
         setIsRecording(true);
         setIsConversationEnded(false);
+        console.log('start recording');
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
         if (timerRef.current) clearInterval(timerRef.current);
@@ -321,6 +322,7 @@ const ReadChatPage = () => {
         const wavRecorder = wavRecorderRef.current;
         await wavRecorder.pause();
         recorderControls.stopRecording();
+        console.log('stop recording');
         // client.createResponse();
         if (isKnowledge) {
             client.realtime.send('input_audio_buffer.commit');
@@ -1935,6 +1937,7 @@ const ReadChatPage = () => {
                                 </>
                             )}
                             <button id='chat-input' 
+                                className='no-selection'
                                 disabled={!isConnected || !canPushToTalk}
                                 onMouseDown={startRecording}
                                 onTouchStart={startRecording}

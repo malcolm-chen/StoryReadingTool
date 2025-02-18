@@ -515,6 +515,13 @@
   border-left: 20px solid #e6e8f5;
 }
 
+.no-select {
+  user-select: none; /* Standard syntax */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
 #penguin-box {
   display: flex;
   flex-direction: column;

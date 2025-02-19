@@ -522,6 +522,13 @@
   -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 #penguin-box {
   display: flex;
   flex-direction: column;

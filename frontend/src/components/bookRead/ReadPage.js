@@ -788,7 +788,7 @@ const ReadChatPage = () => {
         - Pose one follow-up, open-ended question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}, and the core idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}.
         Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
         ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
-        - You should pose an open-ended question, instead of a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?").
+        - You should pose an open-ended question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
 
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -866,7 +866,7 @@ const ReadChatPage = () => {
         - Rephrase the ORIGINAL, most recent, last-posed question (which the child answers partially correctly) into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
         - If you are rephrasing the question, do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
         - Do not end the conversation.
-        - You should pose a open-ended, multi-choice question, instead of a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?").
+        - You should pose a open-ended, multi-choice question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
     
      **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -944,7 +944,7 @@ const ReadChatPage = () => {
                 
     **Instructions for Pose a Follow-up Question**:
         - Rephrase the ORIGINAL, most recent, last-posed question (which the child answers incorrectly) into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
-        - You should pose an open-ended, multi-choice question, instead of a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?").
+        - You should pose an open-ended, multi-choice question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
         - If you are rephrasing the question, do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
         - Do not end the conversation.
     
@@ -1031,7 +1031,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - After you answer the child's question, and there are less than three rounds of questions, ask the ORIGINAL question, which has not been answered, to the child.
         ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
-        - You should pose an open-ended, multi-choice question, instead of a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?").
+        - You should pose an open-ended, multi-choice question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
 
     **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
@@ -1123,7 +1123,7 @@ const ReadChatPage = () => {
         
         **Instructions for Pose a Follow-up Question**:
          - If you are posing a follow-up question, you do not need to conclude the conversation.
-         - You should pose open-ended questions, instead of yes/no questions (bad examples: "Can you tell me xxx", "Do you know xxx?").
+         - You should pose open-ended questions. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
          - Here are the only situations you need to pose a follow-up question based on the child's response:
             1. If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
             Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.

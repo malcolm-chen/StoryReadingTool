@@ -777,7 +777,7 @@ const ReadChatPage = () => {
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
+        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgement to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and more)
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -806,7 +806,7 @@ const ReadChatPage = () => {
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
+        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgement to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and more)
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -854,7 +854,7 @@ const ReadChatPage = () => {
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!").
+        - Since the evaluation of the child's response is 'partially correct', you should first provide encouraging acknowledgement and tailor your acknowledgement to the context (e.g., "That's a good try!", "Aha! You're on the right track!", and more).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -885,7 +885,7 @@ const ReadChatPage = () => {
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!", etc.).
+        - Since the evaluation of the child's response is 'partially correct', you should first provide acknowledgement and tailor your acknowledgement to the context (e.g., "That's a good try!", "Aha! You're on the right track!", and more).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -934,7 +934,7 @@ const ReadChatPage = () => {
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!", etc.).
+        - Since the evaluation of the child's response is 'incorrect', you should acknowledge their effort and tailor your acknowledgement to the context (e.g., "That's a good try!", "Aha! You're on the right track!", and more).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -1012,7 +1012,7 @@ const ReadChatPage = () => {
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the child posed a question, you should first provide encouraging feedback (e.g., Good thinking!", "Oh it's an interesting question!").
+        - Since the child posed a question, you should first acknowledge their effort and tailor your acknowledgement to the context (e.g., Good thinking!", "Oh it's an interesting question!", and more).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -1090,7 +1090,7 @@ const ReadChatPage = () => {
         **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Use various acknowledgements tailored to the context. Do not repeat the same acknowledgement as in the conversation history. 
         - Here are different situations for acknowledgement based on the child's response:
             1. If the evaluation is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
             2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
@@ -1398,7 +1398,9 @@ const ReadChatPage = () => {
                                 //     }
                                 // }
                                 console.log('conversation ended');
-                                setIsConversationEnded(true);
+                                if (!isReplayingRef.current && !isAskingRef.current) {
+                                    setIsConversationEnded(true);
+                                }
                             } else {
                                 // every time after the assistant's response (except the response asking for the child's answer), set a timer to check if there is a user's response. If there is no user's response after 15 seconds, ask question again.
                                 // if the user interrupted the conversation, do not set the timer
@@ -1941,8 +1943,10 @@ const ReadChatPage = () => {
                                 disabled={!isConnected || !canPushToTalk}
                                 onMouseDown={startRecording}
                                 onTouchStart={startRecording}
+                                onPointerDown={startRecording}
                                 onMouseUp={stopRecording}
                                 onTouchEnd={stopRecording}
+                                onPointerUp={stopRecording}
                                 onContextMenu={(e) => e.preventDefault()}
                                 style={{
                                     border: 'none',

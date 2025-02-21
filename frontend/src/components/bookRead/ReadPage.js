@@ -737,8 +737,9 @@ const ReadChatPage = () => {
             1. Initiate Conversation:
                 Begin the interaction by posing the first question (recall question), which will guide to the concept word.
                 You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting! + first question"; "Hey xxx, share with me what you think + first question"; "xxx, let's chat about what you just read! + first question"; etc. 
+                You should pose open-ended questions. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
             2. During the Conversation (Two different questions in total):
-                a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
+                a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive. You should pose open-ended questions. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
                 b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Partially Correct/Incorrect/Off topic/Child Asks Question
                 c. Respond:
                     i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers. If the response is off topic, gently steer the conversation back to the original topic.
@@ -817,7 +818,7 @@ const ReadChatPage = () => {
     **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
        
     **Instructions for Whole Response**:
         - Do not include any question or question marks in the response.
@@ -897,7 +898,7 @@ const ReadChatPage = () => {
     **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
 
     **Instructions for Whole Response**:
         - Do not include any question or question marks in the response.
@@ -977,7 +978,7 @@ const ReadChatPage = () => {
     **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
 
     **Instructions for Whole Response**:
         - Do not include any question or question marks in the response.
@@ -1038,7 +1039,7 @@ const ReadChatPage = () => {
         - You cannot conclude the conversation if you're posing a follow-up question.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
         - Keep the conclusion part concise, under 15 words.
-        - Here is an example: "There are many interesting things in the story! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+        - Here is an example: "There are many interesting things in the story! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
 
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -1139,7 +1140,7 @@ const ReadChatPage = () => {
         - If you are not asking a question, after the explanation, transition to a conclusion. 
         - If the child repeatedly answers incorrectly, you should provide the correct answer, then transition to a conclusion.
         - Keep the conclusion part concise, under 15 words.
-        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples.)
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
 
         **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -1152,9 +1153,12 @@ const ReadChatPage = () => {
 
     const getInstruction4NoResponse = () => {
         const instruction4NoResponse = `
+        **Instructions**:
         1. Read the chat history to find the last question you asked.
         2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question you asked.
-        3. Make sure to ask this exact question ONCE, and do not say or ask anything else.
+        
+        **Important Reminder**:
+        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
         `;
         console.log(instruction4NoResponse);
         return instruction4NoResponse;
@@ -1245,6 +1249,7 @@ const ReadChatPage = () => {
                 const items = client.conversation.getItems();
                 // set timer to 0
                 setTimer(0);
+                // console.log('item', item);
                 if(timerRef.current) clearInterval(timerRef.current);
                 // if the item starts with <test>, delete it
                 if (item?.content[0]?.transcript?.startsWith('<')) {
@@ -1252,7 +1257,7 @@ const ReadChatPage = () => {
                     setItemToDelete(item.id);
                     console.log('evaluation result', item.content[0]?.transcript);
                     if (item.status === 'completed') {
-                        console.log('!!! deleting item', item.content[0]?.transcript);
+                        console.log('!!! deleting item', item);
                         // setEvaluation(item.content[0]?.transcript.replace('<eval>', '').trim());
                         try {
                             await client.realtime.send('conversation.item.delete', {
@@ -1914,12 +1919,12 @@ const ReadChatPage = () => {
                                     <Box id="chatbot-chat">
                                         <Image id='chatbot-avatar' src='./files/imgs/penguin.svg'></Image>
                                         <Box id="msg-bubble" style={{ position: 'relative' }} onClick={() => handleReplay(index)}>
-                                            {!msg.content[0].transcript.startsWith('<') && (
+                                            {!msg.content?.[0]?.transcript?.startsWith('<') && (
                                                 <h5 level='body-lg' style={{margin: '0px', marginRight: '30px'}}>
-                                                    {msg.content[0].transcript}
+                                                    {msg.content?.[0]?.transcript}
                                                 </h5>
                                             )}
-                                            {msg.status === 'completed' && !msg.content[0].transcript.startsWith('<') && (
+                                            {msg.status === 'completed' && !msg.content?.[0]?.transcript?.startsWith('<') && (
                                                 <IconButton id='replay-btn' key={index} variant='plain' style={{ 
                                                     position: 'absolute', 
                                                     right: '8px', 

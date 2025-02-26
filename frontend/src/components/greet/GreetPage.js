@@ -210,7 +210,7 @@ const GreetPage = () => {
         Your task is to help the child get familiar with the interaction with the chatbot.
 
         Instructions:
-        - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When reading the story, I will ask you questions about the story. You can press AND hold the big yellow button to talk. When you release the button, your response will be sent to me. Let's try it! Here is the first question: How old are you?'
+        - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When reading the story, I will ask you questions about the story. You can press AND hold the big yellow button to talk. When you release the button, your response will be sent to me. Let's try it! Here is the first question: How old are you?' (end the first turn with a question mark)
         - If the child's response is not clear, you can ask the child to repeat it, and you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done'.
         - After the child's response is clearly recognized, you should first acknowledge the child's age and their effort in successfully talking to you, and then ask the second question: "We are going to read a story about frog. What do you know about frogs?"
         - After the child answers the second question, acknowledge their response, and conclude the conversation by saying 'Great! Now, let's explore the story together!'
@@ -297,8 +297,8 @@ const GreetPage = () => {
     }
 
     useEffect(() => {
-        if (timer >= 10 && !userRespondedRef.current) {
-          console.log('User did not respond in 10 seconds. Sending another message...');
+        if (timer >= 15 && !userRespondedRef.current) {
+          console.log('User did not respond in 15 seconds. Sending another message...');
           console.log('isWaitingForResponse', isWaitingForResponseRef.current);
           const client = clientRef.current;
           // if the client is connected, send a message

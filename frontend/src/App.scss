@@ -673,7 +673,7 @@ button {
   justify-content: center;
 }
 
-#chat-window {
+.chat-window {
   width: 100%;
   height: 300px;
   background-color: #ffffff00;
@@ -684,6 +684,19 @@ button {
   position: relative;
   margin-top: 48px;
   padding: 0 16px;
+  z-index: 100;
+}
+
+#greet-chat-window {
+  #chatbot-avatar {
+    width: 120px;
+    height: 120px;
+  }
+  #user-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 30px;
+  }
 }
 
 #chatbot-chat {
@@ -713,6 +726,7 @@ button {
   text-align: left;
   display: flex;
   flex-direction: row;
+  max-width: 90%;
 }
 
 #chatbot-avatar {
@@ -765,6 +779,7 @@ button {
   height: 100%;
   z-index: 2;
 }
+
 #chat-end {
   width: 100%;
   height: 100%;
@@ -773,6 +788,22 @@ button {
   align-items: center;
 }
 
+#skip-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+  width: fit-content;
+  h2 {
+    font-size: 35px;
+    font-family: 'Cherry Bomb';
+    color: #fefdff;
+  }
+  background-color: transparent; // Ensure initial state is transparent
+  &:hover {
+    background-color: transparent; // Keep it transparent on hover
+  }
+}
 
 .main-content {
   display: flex;
@@ -795,6 +826,16 @@ button {
   width: 100%;
   position: relative;
   max-height: calc(100% - 130px);
+}
+
+#greet-container {
+  background-image: linear-gradient(to bottom, #261E70, #5C4ED3);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+  position: relative;
+  height: calc(100% - 130px);
 }
 
 #chat-container {

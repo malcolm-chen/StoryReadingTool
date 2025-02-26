@@ -14,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/select" element={<BookSelectPage />} />
+          <Route path="/greet" element={<GreetPage />} />
           <Route path="/read" element={<ReadPage />} />
         </Routes>
       </div>

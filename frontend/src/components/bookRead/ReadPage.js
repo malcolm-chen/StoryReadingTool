@@ -58,6 +58,7 @@ const ReadChatPage = () => {
     const [itemToRespond, setItemToRespond] = useState(null);
     const [timer, setTimer] = useState(0);
     const [answerRecord, setAnswerRecord] = useState([]);
+    const [noReponseCnt, setNoReponseCnt] = useState(0);
     const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
     const [isShaking, setIsShaking] = useState(false);
     const timerRef = useRef(null);
@@ -388,6 +389,7 @@ const ReadChatPage = () => {
                         setIsPlaying(false);
                         setIsConversationEnded(false);
                         setAnswerRecord([]);
+                        setNoReponseCnt(0);
                         setCurrentPageChatHistory([]);
                         // check if the client is not setup for guiding
                         if (!clientRef.current.realtime.isConnected()) {
@@ -443,6 +445,7 @@ const ReadChatPage = () => {
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
             setAnswerRecord([]);
+            setNoReponseCnt(0);
             // setChatHistory([]);
             isWaitingForResponseRef.current = false;
             if (clientRef.current.realtime.isConnected()) {
@@ -476,6 +479,7 @@ const ReadChatPage = () => {
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
         setAnswerRecord([]);
+        setNoReponseCnt(0);
         // setChatHistory([]);
         isWaitingForResponseRef.current = false;
         if (clientRef.current.realtime.isConnected()) {
@@ -1213,6 +1217,7 @@ const ReadChatPage = () => {
                     "instructions": getInstruction4NoResponse()
                 }
             });
+            setNoReponseCnt(noReponseCnt + 1);
           }
           if (timerRef.current) clearInterval(timerRef.current); // 停止计时器
         }
@@ -1272,7 +1277,7 @@ const ReadChatPage = () => {
                             await client.realtime.send('conversation.item.delete', {
                                 item_id: item.id
                             });
-                            const answerOrder = Math.floor(items.length / 2) - 1;
+                            const answerOrder = Math.floor((items.length - noReponseCnt) / 2) - 1;
                             // make sure only update answerRecord if all answers in answerRecord are not null before the answerOrder
                             let allAnswersNotNull = true;
                             for (let i = 0; i < answerOrder; i++) {

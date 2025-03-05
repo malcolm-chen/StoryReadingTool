@@ -863,14 +863,13 @@ const ReadChatPage = () => {
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
-        - Do not explicitly tell the child the correct answer.
+        - Do not explicitly include the correct answer in the explanation.
         
     **Instructions for Pose a Follow-up Question**:
-        - Rephrase the ORIGINAL, most recent, last-posed question (which the child answers partially correctly) into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
-        - The rephrased question should have the same question type as the original question. For example, if the original question is 'What xxx', the rephrased question should also be 'What xxx', then add the multiple-choice options.
-        - Do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
+        - Ask the ORIGINAL, most recent, last-posed question (which the child answers partially correctly) again, but add some multiple-choice options. Avoid using labels like "A, B, C." 
+        - Here is an example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        - You only need to add some multiple-choice options to the original question. Do not pose a new question.
         - Do not end the conversation.
-        - You should pose a open-ended, multi-choice question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
     
      **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -946,15 +945,15 @@ const ReadChatPage = () => {
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Do not explicitly tell the child the correct answer.
+        - Do not explicitly include the correct answer in the explanation.
         - Keep your explanation simple, engaging and under 20 words.
                 
     **Instructions for Pose a Follow-up Question**:
-        - Rephrase the ORIGINAL, most recent, last-posed question (which the child answers incorrectly) into a multiple-choice format. Ensure the rephrased question addresses the same topic as the original and uses natural phrasing for the answer options, avoiding labels like "A, B, C." For example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
-        - The rephrased question should have the same question type as the original question. For example, if the original question is 'What xxx', the rephrased question should also be 'What xxx', then add the multiple-choice options.
-        - You should pose an open-ended, multi-choice question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
-        - Do not directly reveal the answer. You should hint the child to think about the correct answer through the rephrased multiple-choice question.
+        - Ask the ORIGINAL, most recent, last-posed question (which the child answers incorrectly) again, but add some multiple-choice options. Avoid using labels like "A, B, C." 
+        - Here is an example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
+        - You only need to add some multiple-choice options to the original question. Do not pose a new question.
         - Do not end the conversation.
+    
     
      **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -1410,13 +1409,6 @@ const ReadChatPage = () => {
                                 while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
                                 }
-                                // console.log('isReplaying', isReplayingRef.current);
-                                // if (isReplayingRef.current) {
-                                //     console.log('isReplaying', isReplayingRef.current);
-                                //     while (isReplayingRef.current) {
-                                //         await new Promise(resolve => setTimeout(resolve, 100));
-                                //     }
-                                // }
                                 console.log('conversation ended');
                                 if (!isReplayingRef.current && !isAskingRef.current) {
                                     setIsConversationEnded(true);
@@ -1500,24 +1492,6 @@ const ReadChatPage = () => {
             if (!event.target.closest('#speed-btn-box') && !event.target.closest('#caption-btn-box') && !event.target.closest('#play-btn-box')) {
                 handleNextPage();
             }
-        }
-    };
-
-    const handleProgressBarClick = (event) => {
-        const progressBar = event.currentTarget;
-        const clickPosition = event.clientX - progressBar.getBoundingClientRect().left;
-        const progressBarWidth = progressBar.offsetWidth;
-        const clickRatio = clickPosition / progressBarWidth;
-        const newPage = Math.floor(clickRatio * pages.length);
-    
-        if (newPage >= 0 && newPage < pages.length) {
-            audioRef.current.pause();
-            setIsKnowledge(false);
-            // setCurrentPage(newPage);
-            currentPageRef.current = newPage;
-            sentenceIndexRef.current = 0;
-            localStorage.setItem(`${title}-currentPage`, newPage);
-            localStorage.setItem(`${title}-currentSentence`, 0);
         }
     };
 
@@ -1679,18 +1653,6 @@ const ReadChatPage = () => {
         }
     }
 
-    const handleCloseMessage = () => {
-        // hide the message box
-        // setIsFirstTime(false);
-        // set the button to be invisible
-        const messageBox = document.getElementById('penguin-message');
-        if (messageBox) {
-            messageBox.style.display = 'none';
-        }
-        audioRef.current.play();
-        audioRef.current.playbackRate = audioSpeed;
-        setIsPlaying(true);
-    }
 
     useEffect(() => {
         // Cleanup function to pause audio when component unmounts
@@ -1801,12 +1763,6 @@ const ReadChatPage = () => {
                         <MdArrowCircleRight size={60} color='#7AA2E3'/>
                     </IconButton>
                 </Box>            
-                {/* <Box id='page-progress' display="flex" justifyContent="center" mt={2} gap="1rem">
-                    <Box onClick={handleProgressBarClick} sx={{ cursor: 'pointer', width: '100%' }}>
-                        <LinearProgress color="neutral" size="lg" determinate value={(currentPageRef.current + 1) / pages.length * 100} />
-                    </Box>
-                    <h4 style={{ marginLeft: '16px', fontSize: '20px', color: 'rgba(0,0,0,0.5)' }}>Page <span style={{ color: 'rgba(0,0,0,1)' }}>{currentPageRef.current + 1}</span> of {pages.length}</h4>
-                </Box> */}
             </div>
             <div id='bottom-box'>
                 {showCaption && 
@@ -1829,25 +1785,15 @@ const ReadChatPage = () => {
                     className={isShaking ? 'shake' : ''}
                 />
                 </div>
-                {/* the message should appear for 5 seconds and then disappear */}
-                {/* {isFirstTime && (
-                    <div className='penguin-message' id='penguin-message'>
-                        <div className='message-tail'></div>
-                        { `Hey ${user}, I'm your reading mate. You can click me to ask anything about the story! 😃`}
-                        <button id='close-message' onClick={handleCloseMessage}>
-                            <h4 style={{ color: 'white', fontSize: '20px', fontFamily: 'Cherry Bomb', zIndex: 2 }}>Got it!</h4>
-                        </button>
-                    </div>
-                )} */}
             </div>
             {(isAskingRef.current || isKnowledge) && !isMinimizedChat && (
                     <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (
-                            <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1 }}></Box>
+                            <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
                         )}
                         {isRecording && (
-                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 1 }}>
+                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 101 }}>
                                 <VoiceVisualizer 
                                     controls={recorderControls} 
                                     isControlPanelShown={false} 
@@ -1975,7 +1921,7 @@ const ReadChatPage = () => {
                                     justifyContent: 'center',
                                     backgroundColor: '#F4A011',
                                     position: 'relative',
-                                    zIndex: 100
+                                    zIndex: 103
                                 }}
                             >
                                 {/* <FaMicrophone size={40} color='white'/> */}

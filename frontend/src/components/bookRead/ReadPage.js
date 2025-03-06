@@ -58,7 +58,6 @@ const ReadChatPage = () => {
     const [itemToRespond, setItemToRespond] = useState(null);
     const [timer, setTimer] = useState(0);
     const [answerRecord, setAnswerRecord] = useState([]);
-    const [noReponseCnt, setNoReponseCnt] = useState(0);
     const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
     const [isShaking, setIsShaking] = useState(false);
     const timerRef = useRef(null);
@@ -90,7 +89,7 @@ const ReadChatPage = () => {
     const chatHistoryRef = useRef([]);
     const isAskingRef = useRef(false);
     const isReplayingRef = useRef(false);
-
+    const noReponseCntRef = useRef(0);
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
     }, [chatHistoryRef.current]);
@@ -389,7 +388,7 @@ const ReadChatPage = () => {
                         setIsPlaying(false);
                         setIsConversationEnded(false);
                         setAnswerRecord([]);
-                        setNoReponseCnt(0);
+                        noReponseCntRef.current = 0;
                         setCurrentPageChatHistory([]);
                         // check if the client is not setup for guiding
                         if (!clientRef.current.realtime.isConnected()) {
@@ -445,7 +444,7 @@ const ReadChatPage = () => {
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
             setAnswerRecord([]);
-            setNoReponseCnt(0);
+            noReponseCntRef.current = 0;
             // setChatHistory([]);
             isWaitingForResponseRef.current = false;
             if (clientRef.current.realtime.isConnected()) {
@@ -479,7 +478,7 @@ const ReadChatPage = () => {
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
         setAnswerRecord([]);
-        setNoReponseCnt(0);
+        noReponseCntRef.current = 0;
         // setChatHistory([]);
         isWaitingForResponseRef.current = false;
         if (clientRef.current.realtime.isConnected()) {
@@ -1008,8 +1007,10 @@ const ReadChatPage = () => {
         }
 
         if (incorrectCount === 1 || (incorrectCount === 2 && correctCount === 1)) {
+            console.log('instruction4Incorrect1');
             return instruction4Incorrect1;
         } else {
+            console.log('instruction4Incorrect2');
             return instruction4Incorrect2;
         }
     }
@@ -1211,13 +1212,13 @@ const ReadChatPage = () => {
           const client = clientRef.current;
           // if the client is connected, send a message
           if (isClientSetup && isWaitingForResponseRef.current) {
+            noReponseCntRef.current = noReponseCntRef.current + 1;
             client.realtime.send('response.create', {
                 response: {
                     "modalities": ["text", "audio"],
                     "instructions": getInstruction4NoResponse()
                 }
             });
-            setNoReponseCnt(noReponseCnt + 1);
           }
           if (timerRef.current) clearInterval(timerRef.current); // 停止计时器
         }
@@ -1277,7 +1278,9 @@ const ReadChatPage = () => {
                             await client.realtime.send('conversation.item.delete', {
                                 item_id: item.id
                             });
-                            const answerOrder = Math.floor((items.length - noReponseCnt) / 2) - 1;
+                            console.log('items length', items.length);
+                            console.log('noReponseCnt', noReponseCntRef.current);
+                            const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                             // make sure only update answerRecord if all answers in answerRecord are not null before the answerOrder
                             let allAnswersNotNull = true;
                             for (let i = 0; i < answerOrder; i++) {
@@ -1288,8 +1291,11 @@ const ReadChatPage = () => {
                             }
                             console.log('answerOrder', answerOrder);
                             console.log('allAnswersNotNull', allAnswersNotNull);
-                            if (allAnswersNotNull && (!(answerRecord[answerOrder] !== null && answerRecord[answerOrder] !== undefined))) {
-                                answerRecord[answerOrder] = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                            // if (allAnswersNotNull && (!(answerRecord[answerOrder] !== null && answerRecord[answerOrder] !== undefined))) {
+                            //     answerRecord[answerOrder] = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                            // }
+                            if (answerOrder > answerRecord.length - 1) {
+                                answerRecord.push(item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim());
                             }
                             console.log('answerRecord', answerRecord);
                         } catch (error) {

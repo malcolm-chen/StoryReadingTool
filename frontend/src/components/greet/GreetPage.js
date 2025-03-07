@@ -223,8 +223,8 @@ const GreetPage = () => {
         - Only recognize the child's answer in English.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done', and then you should ask the child to repeat it.
-        - If the conversation is not ended, you should end each turn with a question.
         - When concluding the conversation, you should not ask any more questions.
+        - If the conversation is NOT ended, always end each turn with a question.
         `;
         return instruction4Greet;
     }
@@ -530,9 +530,9 @@ const GreetPage = () => {
 
 
     return (
-        <Box className="background-container">
+        <Box className="background-container" style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>
             <Header user={user} title={title} hasTitle={true} />
-            <div id='main-container' style={{flexBasis: '70%'}}>
+            <div id='main-container' style={{flexBasis: '70%', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none'}}>
                 <div id='greet-container'>
                     {isRecording && (
                         <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
@@ -549,7 +549,7 @@ const GreetPage = () => {
                     )}
                 
             
-                    <Box id='greet-chat-window' className='chat-window'>
+                    <Box id='greet-chat-window' className='chat-window' style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>
                         
                         {chatHistory.length == 0 && (
                             <Box id='loading-box'>
@@ -563,7 +563,12 @@ const GreetPage = () => {
                                     // if message is loading, add a loading icon
                                     <Box id="user-chat" style={{marginBottom: '25px', zIndex: 100}}>
                                         <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "8px"}}>{user.substring(0, 2)}</Avatar>
-                                        <Box id="msg-bubble" style={{ backgroundColor: '#ECECEC' }}>
+                                        <Box id="msg-bubble" style={{ 
+                                            backgroundColor: '#ECECEC',
+                                            WebkitTouchCallout: 'none',
+                                            WebkitUserSelect: 'none',
+                                            userSelect: 'none'
+                                        }}>
                                             {msg.content[0].transcript !== null ? (
                                                 <h3 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h3>
                                             ) : (
@@ -574,7 +579,12 @@ const GreetPage = () => {
                                 ) : (
                                     <Box id="chatbot-chat" style={{marginBottom: '25px', zIndex: 100}}>
                                         <Image id='chatbot-avatar' src='./files/imgs/penguin.svg'></Image>
-                                        <Box id="msg-bubble" style={{ position: 'relative' }} onClick={() => handleReplay(index)}>
+                                        <Box id="msg-bubble" style={{ 
+                                            position: 'relative',
+                                            WebkitTouchCallout: 'none',
+                                            WebkitUserSelect: 'none',
+                                            userSelect: 'none'
+                                        }} onClick={() => handleReplay(index)}>
                                             {!msg.content?.[0]?.transcript?.startsWith('<') && (
                                                 <h3 level='body-lg' style={{margin: '0px', marginRight: '30px'}}>
                                                     {msg.content?.[0]?.transcript}
@@ -623,7 +633,7 @@ const GreetPage = () => {
                                     backgroundColor: '#F4A011',
                                     position: 'relative',
                                     width: '90%',
-                                    zIndex: 100
+                                    zIndex: 102
                                 }}
                             >
                                 {/* <FaMicrophone size={40} color='white'/> */}

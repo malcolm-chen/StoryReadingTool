@@ -619,8 +619,8 @@ const ReadChatPage = () => {
         For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
         *Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        When evaluating, you should not only focus on the current round of QA. You should consider the whether the child's response addresses the main question.
-        - Correct: The response is accurate and closely related to the provided answer.
+        When evaluating, you should not only focus on the current round of QA. You should consider whether the child's latest response addresses the main question and whether the child's latest response is the most accurate answer to the main question.
+        - Correct: The response is accurate and closely related to the provided answer. For example, if the correct answer to the question 'What happens to a frog when it hibernates?' is 'A frog hardly breathes, and its heart slows down when it hibernates. It stays buried under mud in streams and ponds for months,' then responses that include all key elements such as 'hardly breathes,' 'buried under ponds,' and 'heart slows down' should be judged as correct.
         - Incorrect: The response is partially correct, not accurate enough, wrong, or shows no understanding of the question (e.g., "I don't know," "I don't remember," or incorrect guesses).
         - Child Asks Question: As long as the child asks a question, mark it as "child asks question".
         - Off-topic: The response is unrelated to the question or the story context.

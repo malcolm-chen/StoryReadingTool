@@ -65,8 +65,12 @@ const GreetPage = () => {
 
 
     useEffect(() => {
-        if (user === null) {
+        const disconnectAndNavigate = async () => {
+            await disconnectConversation();
             navigate('/');
+        }
+        if (user === null) {
+            disconnectAndNavigate();
         }
     }, [user]);
 

@@ -256,10 +256,6 @@ const ReadChatPage = () => {
         }
     }, []);
 
-    useEffect(() => {
-        console.log('isAsking changed', isAskingRef.current);
-    }, [isAskingRef.current]);
-
     /**
      * Disconnect and reset conversation state
      */
@@ -593,75 +589,28 @@ const ReadChatPage = () => {
         return instruction4Frogs;
     }
 
-    async function getInstruction4Asking() {
-        if (isFirstTime) {
-            const instruction4Asking = `
-            You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
-
-            Instructions:
-            - Ignore all previous conversation history.
-            - Always start by asking 'Hey ${user}, what do you want to know about this page? You can press AND hold the big yellow button to talk.'
-            - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
-            - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
-            - Keep this conversation within three rounds. If the child asks more than three questions, you can say, "There are many exciting things in this story, let's keep exploring it." and end the conversation.
-            - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-
-            **Important Reminders**:
-            - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
-            - Keep the conversation within three rounds.
-            - Do not make up the child's response, if you do not get response, just ask again.
-            - Do not ask questions.
-            - Only recognize the child's answer in English.
-            - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-
-            Essential Details:
-                - **Story Title**: ${title}
-                - **Story Text for Current Page**: ${pages[currentPageRef.current]?.text.join(' ')}
-            `;
-            return instruction4Asking;
-        }
-        const instruction4Asking = `
-        You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook and asking questions about it.
-
-        Instructions:
-        - Start by asking 'Hey ${user}, what do you want to know about this page?'
-        - If you cannot recognize the child's answer in English, say, "I didn't hear your answer, can you say it again?"
-        - You need to actively answer the child's questions and provide simple explanations like you are talking to a 5 year old to help them comprehend the story.
-        - Keep this conversation within three rounds. If the child asks more than three questions, you can say, "There are many exciting things in this story, let's keep exploring it." and end the conversation.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-
-        **Important Reminders**:
-        - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
-        - Keep the conversation within three rounds.
-        - Do not make up the child's response, if you do not get response, just ask again.
-        - Do not ask questions.
-        - Only recognize the child's answer in English.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-
-        Essential Details:
-            - **Story Title**: ${title}
-            - **Story Text for Current Page**: ${pages[currentPageRef.current]?.text.join(' ')}
-        `;
-        return instruction4Asking;
-    }
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
+        Focus only on evaluating the child's response to the latest question.
+        
         **Instructions for Evaluation**:
         You need to evaluate the child's response based on the following inputs:
         - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
         - Child's Latest Response: The most recent input from the child.
         - Story Context: ${pages[currentPageRef.current]?.text.join(' ')}
-        Focus only on evaluating the child's response to the latest question.
-
+        - Question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        
         **Steps for Evaluation**:
         Step 1: Check Response Validity
         If the response is empty, cannot be recognized due to noise, being too short, or sent by mistake, mark it as "invalid".
-        Step 2: Evaluate Valid Responses
-        For responses that contain meaningful content, use the following criteria:
+        Step 2: Check the status of the conversation
+        If the assistant has asked a question like 'do you have any questions about this page?', and the child does not have any questions, mark it as "conv end".
+        Step 3: Evaluate Valid Responses
+        For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
         - Correct: The response is accurate (or partially accurate) and directly relevant to the question.
-        - Partially Correct: The response shows partial accuracy and relevance. For example, in a multiple-choice question, selecting one correct option qualifies as partially correct.
-        - Incorrect: The response is wrong or shows no understanding of the question (e.g., "I don't know," "I don't remember," or incorrect guesses).
+        - Incorrect: The response is inaccurate, wrong, or shows no understanding of the question (e.g., "I don't know," "I don't remember," or incorrect guesses).
         - Child Asks Question: As long as the child asks a question, mark it as "child asks question".
         - Off-topic: The response is unrelated to the question or the story context.
                     
@@ -669,8 +618,8 @@ const ReadChatPage = () => {
         Precede each evaluation with the tag <eval>. Do not include any other text apart from the tag and evaluation. 
         Below are the examples of your output, reply with one of these only:
         - <eval>invalid
+        - <eval>conv end
         - <eval>correct
-        - <eval>partially correct
         - <eval>incorrect
         - <eval>child asks question
         - <eval>off-topic
@@ -679,52 +628,8 @@ const ReadChatPage = () => {
         return instruction4Evaluation;
     }
 
-
     // update the instruction4Guiding when the currentPageRef.current changes   
     async function getInstruction4Guiding() {
-        if (isFirstTime) {
-            const instruction4Guiding = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
-        Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        
-        **Story Information**:
-        - Story Title: ${title}
-        - Story Text: ${pages[currentPageRef.current]?.text.join(' ')}
-        - Concept Word: ${knowledgeRef.current[currentPageRef.current]?.keyword}
-        - Learning Objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}
-        - Core Idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}
-        - First Question: ${await getFirstQuestion()}
-
-        **Instructions for the Conversation**:
-            1. Initiate Conversation:
-                Begin the interaction by posing the first question (recall question), which will guide to the concept word.
-                You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting! + first question + You can press AND hold the big yellow button to talk."; "Hey xxx, share with me what you think + first question + You can press AND hold the big yellow button to talk."; "xxx, let's chat about what you just read! + first question + You can press AND hold the big yellow button to talk."; etc. 
-                Do not ask the first question in the form of yes/no question (e.g., "Can you tell me xxx?", or "Do you know xxx?").
-            2. During the Conversation (Two different questions in total):
-                a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive.
-                b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Partially Correct/Incorrect/Off topic/Child Asks Question
-                c. Respond:
-                    i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers. If the response is off topic, gently steer the conversation back to the original topic.
-                    ii. Explanation:
-                        For correct answers, provide a concise explanation to deepen understanding.
-                        For incorrect/partially correct answers, rephrase the question into a multiple-choice format to guide the child's thinking.
-                        For off-topic answers, gently steer the conversation back to the original topic.
-                        For child asks question, answer the question with easy-to-understand words.
-                        For invalid answers, ask the child to say it again.
-                    iii. Follow-up question: if the conversation is not ended, pose one more related, inferential, open-ended question based on previous question to continue the discussion or transition to the end of the conversation.
-            3. End Conversation:
-                After asking one recall question and one follow-up question, ask if the child has any questions. If the child needs scaffolding, you can use more rounds.
-                If they don't have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
-
-        **Response Guidelines**:
-        - Maintain a friendly, conversational tone suitable for a 6-8-year-old child.
-        - Keep sentences simple, engaging, and under 25 words.
-        - Avoid assuming or making up the child's response. Just wait for the child's response for each turn.
-        - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.   
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        `;
-            return instruction4Guiding;
-        }
         const instruction4Guiding = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. From now on, your role is to guide an interactive conversation based on the story information and instructions to enrich their knowledge.
         Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -732,81 +637,52 @@ const ReadChatPage = () => {
         **Story Information**:
         - Story Title: ${title}
         - Story Text: ${pages[currentPageRef.current]?.text.join(' ')}
-        - Concept Word: ${knowledgeRef.current[currentPageRef.current]?.keyword}
-        - Learning Objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}
-        - Core Idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}
-        - First Question: ${await getFirstQuestion()}
+        - First Question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
 
-        **Instructions for the Conversation**:
+        **Instructions for the Conversation (Within 4 rounds)**:
             1. Initiate Conversation:
-                Begin the interaction by posing the first question (recall question), which will guide to the concept word.
-                You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting! + first question"; "Hey xxx, share with me what you think + first question"; "xxx, let's chat about what you just read! + first question"; etc. 
-                You should pose open-ended questions. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
-                Always end your first turn of conversation with a question, instead of a declarative sentence.
-            2. During the Conversation (Two different questions in total):
-                a. Pose Question: Each question should focus on the learning objective to impart the external knowledge. Use scaffolding to guide the child step-by-step in their thinking. Ensure that all questions in the conversation are cohesive. You should pose open-ended questions. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
-                b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Partially Correct/Incorrect/Off topic/Child Asks Question
+                Begin the interaction by posing the question, which will guide to the concept word.
+                You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, share with me what you think" + first question; "xxx, let's chat about what you just read!" + first question; etc. 
+                Do not ask the first question in the form of yes/no question (e.g., "Can you tell me xxx?", or "Do you know xxx?").
+            2. During the Conversation:
+                b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Incorrect/Off topic/Child Asks Question
                 c. Respond:
-                    i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers. If the response is off topic, gently steer the conversation back to the original topic.
+                    i. Acknowledgement: Provide positive feedback for correct answers and encouraging feedback for incorrect answers.
                     ii. Explanation:
                         For correct answers, provide a concise explanation to deepen understanding.
-                        For incorrect/partially correct answers, rephrase the question into a multiple-choice format to guide the child's thinking.
+                        For incorrect answers, provide a hint to guide the child's thinking. Do not reveal the answer.
                         For off-topic answers, gently steer the conversation back to the original topic.
                         For child asks question, answer the question with easy-to-understand words.
                         For invalid answers, ask the child to say it again.
-                    iii. Follow-up question: if the conversation is not ended, pose one more related question based on previous question to continue the discussion or transition to the end of the conversation.
+                    iii. Follow-up question:
+                        If the conversation is not ended, and the child's answer is incorrect, ask the child to think about the question again.
             3. End Conversation:
-                After asking one recall question and one follow-up question, ask if the child has any questions. If the child needs scaffolding, you can use more rounds.
-                If they don't have further questions, politely close the interaction with a friendly line like: "It was fun chatting with you! Have a great time reading."
+                After four rounds, or when the child answers the question correctly, ask if the child has any questions.
+                - If the child has further questions, continue the conversation for only one more round. Then, conclude the conversation with a friendly line like: "It was fun chatting with you! Let's keep reading."
+                - If they don't have further questions, close the interaction with a friendly line like: "It was fun chatting with you! Let's keep reading."
 
         **Response Guidelines**:
         - Maintain a friendly, conversational tone suitable for a 6-8-year-old child.
         - Keep sentences simple, engaging, and under 25 words.
         - Avoid assuming or making up the child's response. Just wait for the child's response for each turn.
-        - Ensure that all responses align with the structured three-turn process, focusing on scaffolding, evaluation, and explanation.   
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation under 4 rounds.
         `;
+        
         console.log(instruction4Guiding);
         return instruction4Guiding;
     }
 
     const getInstruction4Correct = (items, evaluation) => {
-        const instruction4Correct1 = `
+        const instruction4Correct = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
-
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. one follow-up question.
-    **Instructions for Acknowledgement**:
-        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
-        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgement to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and more)
-
-    **Instructions for Explanation**:
-        - Your explanation should be suitable for children aged 6 to 8.
-        - Keep your explanation simple, engaging and under 20 words.
-        - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
-
-    **Instructions for Pose a Follow-up Question**:
-        - Pose one follow-up, open-ended question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}, and the core idea: ${knowledgeRef.current[currentPageRef.current]?.core_idea.map(idea => `${idea.knowledge}`).join('\n')}.
-        Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
-        ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
-        - You should pose an open-ended question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
-
-    **Instructions for Whole Response**:
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Do not end the conversation. You need to address the question first.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        `
-        const instruction4Correct2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        5. the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
     **Instructions for Acknowledgement**:
@@ -821,142 +697,61 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
 
     **Instructions for Conclusion**:
-        - Do not use question marks in the conclusion.
-        - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
+        - Your conclusion should include a question "Do you have any questions about this page?"
+        - Keep the conclusion part concise, under 15 words. 
+        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the question "Do you have any questions about this page?")
        
     **Instructions for Whole Response**:
-        - Do not include any question or question marks in the response.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `
 
         // case 1: only one 'correct' or 'correct' after one 'incorrect'/'partially correct'
-        let correctCount = 0;
-        for (const answer of answerRecord) {
-            if (answer === 'correct') {
-                correctCount++;
-            }
-        }
-        console.log('correctCount', correctCount);
-        if (correctCount === 1) {
-            console.log(instruction4Correct1);
-            return instruction4Correct1;
-        } else {
-            console.log(instruction4Correct2);
-            return instruction4Correct2;
-        }
+        // let correctCount = 0;
+        // for (const answer of answerRecord) {
+        //     if (answer === 'correct') {
+        //         correctCount++;
+        //     }
+        // }
+        // console.log('correctCount', correctCount);
+        // if (correctCount === 1) {
+        //     console.log(instruction4Correct1);
+        //     return instruction4Correct1;
+        // } else {
+        //     console.log(instruction4Correct2);
+        //     return instruction4Correct2;
+        // }
+        return instruction4Correct;
     }
 
-    const getInstruction4PartialCorrect = (items, evaluation) => {
-        const instruction4PartialCorrect1 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
-
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. one follow-up question.
-
-    **Instructions for Acknowledgement**:
-        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
-        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'partially correct', you should first provide encouraging acknowledgement and tailor your acknowledgement to the context (e.g., "That's a good try!", "Aha! You're on the right track!", and more).
-
-    **Instructions for Explanation**:
-        - Your explanation should be suitable for children aged 6 to 8.
-        - Keep your explanation simple, engaging and under 20 words.
-        - Do not explicitly include the correct answer in the explanation.
-        
-    **Instructions for Pose a Follow-up Question**:
-        - Ask the ORIGINAL, most recent, last-posed question (which the child answers partially correctly) again, but add some multiple-choice options. Avoid using labels like "A, B, C." 
-        - Here is an example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
-        - You only need to add some multiple-choice options to the original question. Do not pose a new question.
-        - Do not end the conversation.
-    
-     **Instructions for Whole Response**:
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Do not end the conversation.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - The rephrased question should have the same question type as the original question. For example, if the original question is 'What xxx', the rephrased multiple-choice question should also be 'What xxx', and you should add the multiple-choice options after the question.
-        `
-        const instruction4PartialCorrect2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
-
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
-
-    **Instructions for Acknowledgement**:
-        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
-        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'partially correct', you should first provide acknowledgement and tailor your acknowledgement to the context (e.g., "That's a good try!", "Aha! You're on the right track!", and more).
-
-    **Instructions for Explanation**:
-        - Your explanation should be suitable for children aged 6 to 8.
-        - Explain the answer here with easy-to-understand words.
-        - Keep your explanation simple, engaging and under 20 words. 
-
-    **Instructions for Conclusion**:
-        - Do not use question marks in the conclusion.
-        - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
-
-    **Instructions for Whole Response**:
-        - Do not include any question or question marks in the response.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        `
-
-        let PartialCorrectCount = 0;
-        let correctCount = 0;
-        for (const answer of answerRecord) {
-            if (answer === 'partially correct' || answer === 'incorrect') {
-                PartialCorrectCount++;
-            } else if (answer === 'correct') {
-                correctCount++;
-            }
-        }
-
-        if (PartialCorrectCount === 1 || (PartialCorrectCount === 2 && correctCount === 1)) {
-            return instruction4PartialCorrect1;
-        } else {
-            return instruction4PartialCorrect2;
-        }
-    }
 
     const getInstruction4Incorrect = (items, evaluation) => {
         const instruction4Incorrect1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        5. the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. one follow-up question.
+    Your response should contain three parts: 1. acknowledgement, 2. hint, and 3. one follow-up question.
 
     **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - Since the evaluation of the child's response is 'incorrect', you should acknowledge their effort and tailor your acknowledgement to the context (e.g., "That's a good try!", "Let's try it again!", "Let's think about it together!", and more).
+        - Since the evaluation of the child's response is 'incorrect', you should acknowledge their effort and tailor your acknowledgement to the context (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", and more).
 
-    **Instructions for Explanation**:
-        - Your explanation should be suitable for children aged 6 to 8.
-        - Do not explicitly include the correct answer in the explanation.
-        - Keep your explanation simple, engaging and under 20 words.
+    **Instructions for hint**:
+        - Do not explicitly include the correct answer in the hint.
+        - Your hint should implicitly guide the child to notice some elements of the correct answer.
+        - Your hint should be suitable for children aged 6 to 8.
+        - Keep your hint simple, engaging and under 20 words.
                 
     **Instructions for Pose a Follow-up Question**:
-        - Ask the ORIGINAL, most recent, last-posed question (which the child answers incorrectly) again, but add some multiple-choice options. Avoid using labels like "A, B, C." 
-        - Here is an example: What did Amara's mom and brother do, did they ignore the bat, play with the bat, or wait for a wildlife rescue team?
-        - You only need to add some multiple-choice options to the original question. Do not pose a new question.
-        - Do not end the conversation.
-    
+        - Based on your hint, pose a follow-up question to the child.
+        - Keep the follow-up question simple, engaging and under 20 words.
     
      **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
@@ -987,26 +782,22 @@ const ReadChatPage = () => {
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
-        - Do not use question marks in the conclusion.
-        - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words. Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
+        - Your conclusion should include a question "Do you have any questions about this page?"
+        - Keep the conclusion part concise, under 15 words. 
+        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the question "Do you have any questions about this page?")
 
     **Instructions for Whole Response**:
-        - Do not include any question or question marks in the response.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `
-        let incorrectCount = 0;
-        let correctCount = 0;
+        let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'incorrect' || answer === 'partially correct') {
-                incorrectCount++;
-            } else if (answer === 'correct') {
-                correctCount++;
+            if (answer === 'incorrect' || answer === 'correct') {
+                sumCount++;
             }
         }
 
-        if (incorrectCount === 1 || (incorrectCount === 2 && correctCount === 1)) {
+        if (sumCount < 3) {
             console.log('instruction4Incorrect1');
             return instruction4Incorrect1;
         } else {
@@ -1016,14 +807,15 @@ const ReadChatPage = () => {
     }
 
     const getInstruction4ChildQuestion = (items, evaluation) => {
-        const instruction4ChildQuestion = `
+        const instruction4ChildQuestion1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
-
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question or conclusion.
+        3. child's latest response: the most recent input from the child.
+        4. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question
 
     **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
@@ -1032,45 +824,71 @@ const ReadChatPage = () => {
         - Since the child posed a question, you should first acknowledge their effort and tailor your acknowledgement to the context (e.g., Good thinking!", "Oh it's an interesting question!", and more).
 
     **Instructions for Explanation**:
+        - Give a concise explanation to the child's question.
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
         - Since the child poses a question, answer the question with easy-to-understand words.
 
-    **Situations for Not Posing a Follow-up Question**:
-        - You do not need to pose a follow-up question if:
-        1. The child has asked more than three questions, or
-        2. There are more than four rounds of questions.
-        In these cases, refer to **Instructions for Conclusion**. You do not need to end the conversation early, like only having two rounds of conversation.
-
     **Instructions for Pose a Follow-up Question**:
-        - After you answer the child's question, and there are less than three rounds of questions, ask the ORIGINAL question, which has not been answered, to the child.
-        ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
-        - You should pose an open-ended, multi-choice question. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
+        - Steer the conversation back to the original question.
+        - Ask the not answered question again.
+    
+    **Instructions for Whole Response**:
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence at the end.
+        `;
+
+        const instruction4ChildQuestion2 = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        3. child's latest response: the most recent input from the child (user).
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+
+    **Instructions for Explanation**:
+        - Give a concise explanation to the child's question.
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
 
     **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
-        - You cannot conclude the conversation if you're posing a follow-up question.
-        - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - Keep the conclusion part concise, under 15 words.
-        - Here is an example: "There are many interesting things in the story! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
-
-    **Instructions for Whole Response**:
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - If your response includes a question, do not end the conversation. You need to address the question first.
-        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - End the conversation with a declarative sentence.
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
         `;
-        console.log(instruction4ChildQuestion);
-        return instruction4ChildQuestion;
+        let sumCount = 0;
+        let correctCount = 0;
+        for (const answer of answerRecord) {
+            if (answer === 'incorrect' || answer === 'correct') {
+                sumCount++;
+            }
+            if (answer === 'correct') {
+                correctCount++;
+            }
+        }
+        if (sumCount < 4 || correctCount < 1) {
+            console.log('instruction4ChildQuestion1');
+            return instruction4ChildQuestion1;
+        } else {
+            console.log('instruction4ChildQuestion2');
+            return instruction4ChildQuestion2;
+        }
     }
 
     const getInstruction4Invalid = (items, evaluation) => {
         const instruction4Invalid = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        3. the evaluation of the child's latest response: ${evaluation};
 
         Since the evaluation of the child's response is 'invalid', you should respond with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -1079,13 +897,24 @@ const ReadChatPage = () => {
         return instruction4Invalid;
     }
 
+
+    const getInstruction4ConvEnd = (items, evaluation) => {
+        const instruction4ConvEnd = `
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. 
+        Now your task is to end the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
+        Do not include any question marks in your response.
+        `;
+        console.log(instruction4ConvEnd);
+        return instruction4ConvEnd;
+    }
+
     const getInstruction4OffTopic = (items, evaluation) => {
         const instruction4OffTopic = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child’s latest answer, based on the following information: 
-        1. conversation history: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        3. the evaluation of the child's latest response: ${evaluation};
 
         Start by acknowledging the child’s response (e.g., “Interesting idea!”). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -1097,13 +926,14 @@ const ReadChatPage = () => {
     const getInstruction4FollowUp = (items, evaluation) => {
         const instruction4FollowUp = `
         You need to pose a follow-up question based on the following information: 
-        1. conversation history: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        3. The child's latest response: the most recent input from the child (user).
 
         Follow the following instructions:
         Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
+        The total number of conversation rounds should be 4.
 
         **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
@@ -1113,46 +943,32 @@ const ReadChatPage = () => {
             1. If the evaluation is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
             2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
             3. If the evaluation is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
-            4. If the evaluation is 'correct', you should first acknowledge their answer (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!")
-            5. If the evaluation is 'child asks question', you should acknowledge their question (e.g., “Good question!”, “Oh it’s an interesting question!”)
-            6. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
+            4. If the evaluation is 'child asks question', you should acknowledge their question (e.g., “Good question!”, “Oh it’s an interesting question!”)
+            5. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
         
         **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
         - Here are different situations for explanation based on the child's response:
             1. If the evaluation is 'correct', provide a concise explanation to deepen their understanding.
-            2. If the evaluation is 'incorrect', briefly explain why what the child has chosen is not right (without explicitly telling them they did wrong) 
-            3. If the evaluation is 'partially correct', hint the child to think to get the correct answer (without explicitly telling the correct answer)
-            4. If the evaluation is 'child asks question', answer the child’s question using simple words.
+            2. If the evaluation is 'incorrect', hint the child to think to get the correct answer (without explicitly telling the correct answer)
+            3. If the evaluation is 'child asks question', answer the child’s question using simple words and steer the conversation back to the original question.
 
         **Situations for Not Posing a Follow-up Question**:
         - You do not need to pose a follow-up question if:
-            1. You think the learning objective has been addressed effectively (usually after 4 rounds of conversation in total, and this is the ${items.length/2} round of conversation), or
-            2. You are addressing the first question: the child failed to answer the first question correctly and you rephrased the first question into a multiple-choice question, or
-            3. The child answers incorrectly two times in a row, or
-            4. You already asked three different questions in total, or 
-            5. There are more than four rounds of questions.
+            1. The child answers the question correctly.
+            2. The conversation has more than 4 rounds.
         In these cases, you can end the conversation (refer to **Instructions for Conclusion**). 
         
         **Instructions for Pose a Follow-up Question**:
-         - If you are posing a follow-up question, you do not need to conclude the conversation.
-         - You should pose open-ended questions. Do not pose a yes/no question (bad examples: "Can you tell me xxx", "Do you know xxx?", "Can you think of xxx").
-         - Here are the only situations you need to pose a follow-up question based on the child's response:
-            1. If the evaluation of the child's response is 'correct', you should pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective}.
-            Here are some examples of follow-up questions for your reference. Note that you should try to come up with better follow-up questions, instead of directly using these examples.
-            ${knowledgeRef.current[currentPageRef.current]?.example_nonrecall_questions.join('\n')}
-            2. If the evaluation of the child's response is 'partially correct' or 'incorrect' to the previous question:
-                i. If this is the first time the child answers incorrectly (you haven't rephrased the previous question into a multiple-choice question), rephrase the previous question into a multiple-choice question. The rephrased question should ask about the same thing as the previous question, but in a multiple-choice format. For the options of the multiple-choice question, avoid using “A, B, C” to make it sound more natural. (e.g., What did Amara’s mom and brother do? Did they ignore the bat, play with the bat, or wait for a wildlife rescue team?)
-                ii.  If the child answers incorrectly more than one time (it means you already rephrased into a multiple-choice question), do not rephrase the question or ask the question in the same way again. Do not pose a new question. You should provide the correct answer and end the conversation (refer to **Instructions for Conclusion**).
-                The rephrased question should have the same question type as the original question. For example, if the original question is 'What xxx', the rephrased question should also be 'What xxx', then add the multiple-choice options.
-            3. If the evaluation is 'question-posed', and you have not asked three different questions in total, pose a follow-up question related to the learning objective: ${knowledgeRef.current[currentPageRef.current]?.learning_objective} after the explanation.
+        - Based on your hint, pose a follow-up question to the child.
+        - Keep the follow-up question simple, engaging and under 20 words.
+    
 
         **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
         - You cannot conclude the conversation if you’re posing a follow-up question.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
-        - If the child repeatedly answers incorrectly, you should provide the correct answer, then transition to a conclusion.
         - Keep the conclusion part concise, under 15 words.
         - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
 
@@ -1324,15 +1140,6 @@ const ReadChatPage = () => {
                                         });
                                         userRespondedRef.current = false;
                                         break;
-                                    case 'partially correct':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4PartialCorrect(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
                                     case 'incorrect':
                                         await client.realtime.send('response.create', {
                                             response: {
@@ -1369,6 +1176,13 @@ const ReadChatPage = () => {
                                         });
                                         userRespondedRef.current = false;
                                         break;
+                                    case 'conv end':
+                                        await client.realtime.send('response.create', {
+                                            response: {
+                                                "modalities": ["text", "audio"],
+                                                "instructions": getInstruction4ConvEnd(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                            }
+                                        });
                                     default:
                                         await client.realtime.send('response.create', {
                                             response: {
@@ -1379,7 +1193,7 @@ const ReadChatPage = () => {
                                         userRespondedRef.current = false;
                                         break;
                                 }
-                            }, 100);
+                            }, 1000);
                         }
                     }
                 }
@@ -1563,41 +1377,6 @@ const ReadChatPage = () => {
         }
         localStorage.setItem(`${title}-audioSpeed`, audioSpeed);
     }, [audioSpeed]);
-
-    const handlePenguinClick = async () => {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        // setIsAsking(true);
-        isAskingRef.current = true;
-        if (isMinimizedChat) {
-            setIsMinimizedChat(false);
-            return;
-        }
-        console.log('penguin clicked to ask question');
-        if (!clientRef.current.realtime.isConnected()) {
-            if (!isKnowledge) {
-                if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') {
-                    setupClient(await getInstruction4Frogs());
-                } else {
-                    setupClient(await getInstruction4Asking());
-                }
-            } else {
-                setupClient(await getInstruction4Guiding());
-            }
-            setIsClientSetup(true);
-            console.log('client is setup!');
-        } else {
-            if (!isKnowledge) {
-                if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') {
-                    updateClientInstruction(await getInstruction4Frogs());
-                } else {
-                    updateClientInstruction(await getInstruction4Asking());
-                }
-            } else {
-                updateClientInstruction(await getInstruction4Guiding());
-            }
-        }
-    }
 
     const processChatHistory = (chatHistory) => {
         const formData = new FormData();
@@ -1788,7 +1567,7 @@ const ReadChatPage = () => {
                 </div>
                 }
                 {/* shake the penguin image at the first page, after 13 seconds */}
-                <div id='penguin-box' onClick={handlePenguinClick}>
+                <div id='penguin-box'>
                     <img
                     src='./files/imgs/penguin.svg'
                     alt='penguin'

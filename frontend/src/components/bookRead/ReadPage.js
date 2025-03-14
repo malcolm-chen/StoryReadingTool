@@ -708,9 +708,9 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
 
     **Instructions for Conclusion**:
-        - Your conclusion should include a question "Do you have any questions about this page?"
+        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the ONLY ONE question "Do you have any questions about this page?")
        
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -795,10 +795,10 @@ const ReadChatPage = () => {
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
-        - Your conclusion should include a question "Do you have any questions about this page?"
+        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the question "Do you have any questions about this page?")
-
+        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the ONLY ONE question "Do you have any questions about this page?")
+ 
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.

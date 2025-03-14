@@ -802,6 +802,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         let sumCount = 0;
         for (const answer of answerRecord) {

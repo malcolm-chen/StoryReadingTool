@@ -745,7 +745,7 @@ const ReadChatPage = () => {
 
     **Instructions for hint**:
         - Do not explicitly include the correct answer in the hint.
-        - Your hint should implicitly guide the child to notice some elements of the correct answer.
+        - Your hint should implicitly guide the child to think about some elements of the correct answer.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
                 
@@ -759,7 +759,6 @@ const ReadChatPage = () => {
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - The rephrased question should have the same question type as the original question. For example, if the original question is 'What xxx', the rephrased multiple-choice question should also be 'What xxx', and you should add the multiple-choice options after the question.
         `
         const instruction4Incorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 

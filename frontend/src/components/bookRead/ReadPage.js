@@ -61,6 +61,7 @@ const ReadChatPage = () => {
     const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
     const [isShaking, setIsShaking] = useState(false);
     const timerRef = useRef(null);
+    const isStartingRecordingRef = useRef(false);
     // const [evaluation, setEvaluation] = useState(null);
     
     const penguin = './files/imgs/penguin1.svg';
@@ -287,6 +288,10 @@ const ReadChatPage = () => {
      * .appendInputAudio() for each sample
      */
     const startRecording = async () => {
+        if (isStartingRecordingRef.current || isRecording) {
+            return;
+        }
+        isStartingRecordingRef.current = true;
         setIsRecording(true);
         setIsConversationEnded(false);
         console.log('start recording');
@@ -307,19 +312,23 @@ const ReadChatPage = () => {
         }
         recorderControls.startRecording();
         await wavRecorder.record((data) => client.appendInputAudio(data.mono));
+        isStartingRecordingRef.current = false;
     };
 
     /**
      * In push-to-talk mode, stop recording
      */
     const stopRecording = async () => {
+        if (!isRecording) {
+            return;
+        }
         setIsRecording(false);
+        isStartingRecordingRef.current = false;
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
         await wavRecorder.pause();
         recorderControls.stopRecording();
         console.log('stop recording');
-        // client.createResponse();
         if (isKnowledge) {
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
@@ -550,10 +559,10 @@ const ReadChatPage = () => {
             information to identify the frog: the yellow frog on the top of the page
             location: Costa Rica, 
             fact about this frog: These frogs are transparent underneath.
-        - White’s Tree Frog: 
+        - White's Tree Frog: 
             information to identify the frog: the big green frog on the left page
             location: Australia, 
-            fact about this frog: This frog is often found in people’s bathrooms.
+            fact about this frog: This frog is often found in people's bathrooms.
         - Darwin's Frog: 
             information to identify the frog: the big green frog on the right page
             location: Chile, 
@@ -599,18 +608,20 @@ const ReadChatPage = () => {
         - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
         - Child's Latest Response: The most recent input from the child.
         - Story Context: ${pages[currentPageRef.current]?.text.join(' ')}
-        - Question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
         **Steps for Evaluation**:
         Step 1: Check Response Validity
         If the response is empty, cannot be recognized due to noise, being too short, or sent by mistake, mark it as "invalid".
         Step 2: Check the status of the conversation
-        If the assistant has asked a question like 'do you have any questions about this page?', and the child does not have any questions, mark it as "conv end".
+        If the assistant has asked a question like 'Do you have any questions about this page?', and the child does not have any questions, mark it as "conv end".
+        If the child asks more than one question, also mark it as "conv end".
         Step 3: Evaluate Valid Responses
         For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
-        - Correct: The response is accurate (or partially accurate) and directly relevant to the question.
-        - Incorrect: The response is inaccurate, wrong, or shows no understanding of the question (e.g., "I don't know," "I don't remember," or incorrect guesses).
+        *Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
+        *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        When evaluating, you should not only focus on the current round of QA. You should consider the whether the child's response addresses the main question.
+        - Correct: The response is accurate and closely related to the provided answer.
+        - Incorrect: The response is partially correct, not accurate enough, wrong, or shows no understanding of the question (e.g., "I don't know," "I don't remember," or incorrect guesses).
         - Child Asks Question: As long as the child asks a question, mark it as "child asks question".
         - Off-topic: The response is unrelated to the question or the story context.
                     
@@ -644,7 +655,7 @@ const ReadChatPage = () => {
             1. Initiate Conversation:
                 Begin the interaction by posing the question, which will guide to the concept word.
                 You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, share with me what you think" + first question; "xxx, let's chat about what you just read!" + first question; etc. 
-                Do not ask the first question in the form of yes/no question (e.g., "Can you tell me xxx?", or "Do you know xxx?").
+                Do NOT ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
             2. During the Conversation:
                 b. Evaluate Response: Before responding, evaluate the child's answer, which should fall into one of these categories: Invalid/Correct/Incorrect/Off topic/Child Asks Question
                 c. Respond:
@@ -744,17 +755,20 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'incorrect', you should acknowledge their effort and tailor your acknowledgement to the context (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", and more).
 
     **Instructions for hint**:
-        - Do not explicitly include the correct answer in the hint.
-        - Your hint should implicitly guide the child to think about some elements of the correct answer.
+        - Do NOT explicitly include the correct answer in the hint. 
+        - DO NOT REVEAL THE ANSWER.
+        - Your hint should IMPLICITLY guide the child to think about some elements of the correct answer.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
                 
     **Instructions for Pose a Follow-up Question**:
-        - Based on your hint, pose a follow-up question to the child.
-        - Keep the follow-up question simple, engaging and under 20 words.
+        - Based on your hint, reask the main question again in the context (question: ${knowledgeRef.current[currentPageRef.current]?.question})
+        - The follow-up question should guide the child to come up with the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - Keep the follow-up question should only include one question sentence. Keep it simple, engaging and under 20 words.
+        - Do NOT ask the question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
     
-     **Instructions for Whole Response**:
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+    **Instructions for Whole Response**:
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
@@ -872,12 +886,12 @@ const ReadChatPage = () => {
                 correctCount++;
             }
         }
-        if (sumCount < 4 || correctCount < 1) {
-            console.log('instruction4ChildQuestion1');
-            return instruction4ChildQuestion1;
-        } else {
+        if (sumCount >3 || correctCount > 0) {
             console.log('instruction4ChildQuestion2');
             return instruction4ChildQuestion2;
+        } else {
+            console.log('instruction4ChildQuestion1');
+            return instruction4ChildQuestion1;
         }
     }
 
@@ -909,13 +923,13 @@ const ReadChatPage = () => {
 
     const getInstruction4OffTopic = (items, evaluation) => {
         const instruction4OffTopic = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child’s latest answer, based on the following information: 
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
         2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         3. the evaluation of the child's latest response: ${evaluation};
 
-        Start by acknowledging the child’s response (e.g., “Interesting idea!”). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
+        Start by acknowledging the child's response (e.g., "Interesting idea!"). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         `;
         console.log(instruction4OffTopic);
@@ -940,9 +954,9 @@ const ReadChatPage = () => {
         - Use various acknowledgements tailored to the context. Do not repeat the same acknowledgement as in the conversation history. 
         - Here are different situations for acknowledgement based on the child's response:
             1. If the evaluation is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
-            2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that’s okay.")
+            2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that's okay.")
             3. If the evaluation is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
-            4. If the evaluation is 'child asks question', you should acknowledge their question (e.g., “Good question!”, “Oh it’s an interesting question!”)
+            4. If the evaluation is 'child asks question', you should acknowledge their question (e.g., "Good question!", "Oh it's an interesting question!")
             5. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
         
         **Instructions for Explanation**:
@@ -951,7 +965,7 @@ const ReadChatPage = () => {
         - Here are different situations for explanation based on the child's response:
             1. If the evaluation is 'correct', provide a concise explanation to deepen their understanding.
             2. If the evaluation is 'incorrect', hint the child to think to get the correct answer (without explicitly telling the correct answer)
-            3. If the evaluation is 'child asks question', answer the child’s question using simple words and steer the conversation back to the original question.
+            3. If the evaluation is 'child asks question', answer the child's question using simple words and steer the conversation back to the original question.
 
         **Situations for Not Posing a Follow-up Question**:
         - You do not need to pose a follow-up question if:
@@ -966,7 +980,7 @@ const ReadChatPage = () => {
 
         **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
-        - You cannot conclude the conversation if you’re posing a follow-up question.
+        - You cannot conclude the conversation if you're posing a follow-up question.
         - If you are not asking a question, after the explanation, transition to a conclusion. 
         - Keep the conclusion part concise, under 15 words.
         - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
@@ -985,6 +999,8 @@ const ReadChatPage = () => {
         **Instructions**:
         1. Read the chat history to find the last question you asked.
         2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question you asked.
+        3. If the last question is "Do you have any questions about this page?", you should ask the question "Do you have any questions about this page?" again, instead the main question in the chat history.
+        4. Do not ask a question that is not the last question in the chat history.
         
         **Important Reminder**:
         - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.

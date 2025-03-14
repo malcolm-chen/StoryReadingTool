@@ -758,13 +758,13 @@ const ReadChatPage = () => {
         - Do NOT explicitly include the correct answer in the hint. 
         - DO NOT REVEAL THE ANSWER.
         - Your hint should IMPLICITLY guide the child to think about some elements of the correct answer.
-        - Your hint should be suitable for children aged 6 to 8.
+        - Your hint should not include any question.
         - Keep your hint simple, engaging and under 20 words.
                 
-    **Instructions for Pose a Follow-up Question**:
+    **Instructions for Pose ONE Follow-up Question**:
         - Based on your hint, reask the main question again in the context (question: ${knowledgeRef.current[currentPageRef.current]?.question})
         - The follow-up question should guide the child to come up with the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        - Keep the follow-up question should only include one question sentence. Keep it simple, engaging and under 20 words.
+        - The follow-up question should only include ONE question sentence. Keep it simple, engaging and under 20 words.
         - Do NOT ask the question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
     
     **Instructions for Whole Response**:

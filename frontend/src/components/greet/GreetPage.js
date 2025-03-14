@@ -66,7 +66,14 @@ const GreetPage = () => {
 
     useEffect(() => {
         const disconnectAndNavigate = async () => {
-            await disconnectConversation();
+            if (clientRef.current.realtime.isConnected()) {
+                console.log('disconnecting conversation');
+                // deleteConversationItem(items[0].id);
+                await disconnectConversation();
+                const client = clientRef.current;
+                client.reset();
+                setIsClientSetup(false);
+            }
             navigate('/');
         }
         if (user === null) {

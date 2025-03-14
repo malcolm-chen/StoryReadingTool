@@ -810,7 +810,7 @@ const ReadChatPage = () => {
             }
         }
 
-        if (sumCount < 3) {
+        if (sumCount < 4) {
             console.log('instruction4Incorrect1');
             return instruction4Incorrect1;
         } else {

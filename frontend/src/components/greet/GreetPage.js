@@ -40,6 +40,7 @@ const GreetPage = () => {
     const recorderControls = useVoiceVisualizer();
     const [timer, setTimer] = useState(0);
     const timerRef = useRef(null);
+    const isStartingRecordingRef = useRef(false);
     // const [evaluation, setEvaluation] = useState(null);
     
     const penguin = './files/imgs/penguin1.svg';
@@ -179,6 +180,10 @@ const GreetPage = () => {
      * .appendInputAudio() for each sample
      */
     const startRecording = async () => {
+        if (isStartingRecordingRef.current || isRecording) {
+            return;
+        }
+        isStartingRecordingRef.current = true;
         setIsRecording(true);
         setIsConversationEnded(false);
         console.log('start recording');
@@ -199,12 +204,16 @@ const GreetPage = () => {
         }
         recorderControls.startRecording();
         await wavRecorder.record((data) => client.appendInputAudio(data.mono));
+        isStartingRecordingRef.current = false;
     };
 
     /**
      * In push-to-talk mode, stop recording
      */
     const stopRecording = async () => {
+        if (!isRecording) {
+            return;
+        }
         setIsRecording(false);
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
@@ -220,20 +229,23 @@ const GreetPage = () => {
         You are a friendly chatbot engaging with a child named ${user}, who is reading a storybook named ${title}.
         Your task is to help the child get familiar with the interaction with the chatbot.
 
-        Instructions:
+        **Greeting Instructions**:
         - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When reading the story, I will ask you questions about the story. You can press AND hold the big yellow button to talk. When you release the button, your response will be sent to me. Let's try it! Here is the first question: How old are you?' (end the first turn with a question mark)
         - If the child's response is not clear, you can ask the child to repeat it, and you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done'.
-        - After the child's response is clearly recognized, you should first acknowledge the child's age and their effort in successfully talking to you, and then ask the second question: "We are going to read a story about frog. What do you know about frogs?"
+        - After the child's response is clearly recognized, you should first acknowledge the child's age and their effort in successfully talking to you, and then ask the second question: "We are going to read a story about frog. What do you know about frogs?" **End this turn with a question mark.**
         - After the child answers the second question, acknowledge their response, and conclude the conversation by saying 'Great! Now, let's explore the story together!'
         - When concluding the conversation, you should not ask any more questions.
 
-        **Important Reminders**:
-        - Focus on teaching the child how to interact with you, the chatbot.
+        **Conversation Rules**:
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
         - Keep the conversation within three rounds.
+        - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done', and then you should ask the child to repeat it.
+        - If the conversation is NOT ended, always end each turn with a question.
+
+        **Important Reminders**:
+        - Focus on teaching the child how to interact with you, the chatbot.
         - Only recognize the child's answer in English.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done', and then you should ask the child to repeat it.
         - When concluding the conversation, you should not ask any more questions.
         - If the conversation is NOT ended, always end each turn with a question.
         `;

@@ -12,11 +12,10 @@ import { useSwipeable } from 'react-swipeable';
 import { Modal, ModalDialog, ModalClose } from '@mui/joy';
 import { AiOutlineShrink, AiOutlineExpand } from "react-icons/ai";
 import { FaRegClosedCaptioning } from "react-icons/fa6";
-import { FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause, FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import { FaMicrophone } from "react-icons/fa6";
-import { FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { RiSpeedUpFill } from "react-icons/ri";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 // let currentPage = 0;
@@ -55,7 +54,6 @@ const ReadChatPage = () => {
     const [showSpeedSlider, setShowSpeedSlider] = useState(false);
     const recorderControls = useVoiceVisualizer();
     const [itemToDelete, setItemToDelete] = useState(null);
-    const [itemToRespond, setItemToRespond] = useState(null);
     const [timer, setTimer] = useState(0);
     const [answerRecord, setAnswerRecord] = useState([]);
     const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
@@ -91,6 +89,10 @@ const ReadChatPage = () => {
     const isAskingRef = useRef(false);
     const isReplayingRef = useRef(false);
     const noReponseCntRef = useRef(0);
+    const [regenerateIndex, setRegenerateIndex] = useState(null);
+    const itemToRespondRef = useRef(null);
+    const deletedItemsRef = useRef(new Set());
+
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
     }, [chatHistoryRef.current]);
@@ -205,7 +207,7 @@ const ReadChatPage = () => {
         };
         loadStory();
         loadDictionary();
-        loadAskedQuestions();
+        // loadAskedQuestions();
         audioRef.current.play();
         audioRef.current.playbackRate = audioSpeed;
     }, []);
@@ -275,6 +277,8 @@ const ReadChatPage = () => {
 
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
+
+        deletedItemsRef.current.clear();
     }, []);
 
 
@@ -416,7 +420,12 @@ const ReadChatPage = () => {
                     }
                     else {
                         setIsKnowledge(false);
-                        handleNextPage();
+                        if (currentPageRef.current < pages.length - 1) {
+                            handleNextPage();
+                        } else {
+                            audioRef.current.pause();
+                            setIsPlaying(false);
+                        }
                     }
                 }
             };
@@ -615,14 +624,15 @@ const ReadChatPage = () => {
         Step 2: Check the status of the conversation
         If the assistant has asked a question like 'Do you have any questions about this page?', and the child does not have any questions, mark it as "conv end".
         If the child asks more than one question, also mark it as "conv end".
-        Step 3: Evaluate Valid Responses
+        Step 3: Check if the child asks a question
+        As long as the child asks a question, no matter if it is off-topic or not,mark it as "child asks question".
+        Step 4: Evaluate Valid Responses
         For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
         *Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         When evaluating, you should not only focus on the current round of QA. You should consider whether the child's latest response addresses the main question and whether the child's latest response is the most accurate answer to the main question.
         - Correct: The response is accurate and closely related to the provided answer. For example, if the correct answer to the question 'What happens to a frog when it hibernates?' is 'A frog hardly breathes, and its heart slows down when it hibernates. It stays buried under mud in streams and ponds for months,' then responses that include all key elements such as 'hardly breathes,' 'buried under ponds,' and 'heart slows down' should be judged as correct.
         - Incorrect: The response is partially correct, not accurate enough, wrong, or shows no understanding of the question (e.g., "I don't know," "I don't remember," or incorrect guesses).
-        - Child Asks Question: As long as the child asks a question, mark it as "child asks question".
         - Off-topic: The response is unrelated to the question or the story context.
                     
         **Response Format**:
@@ -715,6 +725,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
 
         // case 1: only one 'correct' or 'correct' after one 'incorrect'/'partially correct'
@@ -765,7 +776,7 @@ const ReadChatPage = () => {
         - Based on your hint, reask the main question again in the context (question: ${knowledgeRef.current[currentPageRef.current]?.question})
         - The follow-up question should guide the child to come up with the correct answer without revealing the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - The follow-up question should only include ONE question sentence. Keep it simple, engaging and under 20 words.
-        - Do NOT ask the question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
+        - Do NOT ask the question that starts with "Can you tell me", "Do you know", "Do you remember", etc. The question should be open-ended, not a yes/no question.
     
     **Instructions for Whole Response**:
         - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
@@ -838,6 +849,7 @@ const ReadChatPage = () => {
         - Since the child posed a question, you should first acknowledge their effort and tailor your acknowledgement to the context (e.g., Good thinking!", "Oh it's an interesting question!", and more).
 
     **Instructions for Explanation**:
+        - If the child's question is not about the story, steer the conversation back to the story.
         - Give a concise explanation to the child's question.
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
@@ -868,7 +880,8 @@ const ReadChatPage = () => {
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
 
     **Instructions for Explanation**:
-        - Give a concise explanation to the child's question.
+        - If the child's question is not about the story, steer the conversation back to the story.
+        - If the child's question is about the story, give a concise explanation to the child's question.
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
 
@@ -876,6 +889,9 @@ const ReadChatPage = () => {
         - Do not use question marks in the conclusion.
         - End the conversation with a declarative sentence.
         - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
+    
+    **Instructions for Whole Response**:
+        - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
         `;
         let sumCount = 0;
         let correctCount = 0;
@@ -1103,29 +1119,19 @@ const ReadChatPage = () => {
                     // keep the item id, and when the item status is completed, delete it
                     setItemToDelete(item.id);
                     console.log('evaluation result', item.content[0]?.transcript);
-                    if (item.status === 'completed') {
+                    if (item.status === 'completed' && !deletedItemsRef.current.has(item.id)) {
                         console.log('!!! deleting item', item);
-                        // setEvaluation(item.content[0]?.transcript.replace('<eval>', '').trim());
                         try {
                             await client.realtime.send('conversation.item.delete', {
                                 item_id: item.id
                             });
+                            // 添加到已删除集合中
+                            deletedItemsRef.current.add(item.id);
+                            
                             console.log('items length', items.length);
                             console.log('noReponseCnt', noReponseCntRef.current);
                             const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
-                            // make sure only update answerRecord if all answers in answerRecord are not null before the answerOrder
-                            let allAnswersNotNull = true;
-                            for (let i = 0; i < answerOrder; i++) {
-                                if (answerRecord[i] === null || answerRecord[i] === undefined) {
-                                    allAnswersNotNull = false;
-                                    break;
-                                }
-                            }
-                            console.log('answerOrder', answerOrder);
-                            console.log('allAnswersNotNull', allAnswersNotNull);
-                            // if (allAnswersNotNull && (!(answerRecord[answerOrder] !== null && answerRecord[answerOrder] !== undefined))) {
-                            //     answerRecord[answerOrder] = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
-                            // }
+                            
                             if (answerOrder > answerRecord.length - 1) {
                                 answerRecord.push(item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim());
                             }
@@ -1135,82 +1141,81 @@ const ReadChatPage = () => {
                         }
                         console.log('items', items);
                         console.log('items to delete', itemToDelete);
+                    }
                         // only update answerRecord after the item is deleted
-                        
                         // if this is the first completed item for the item id, send a response
-                        if (item.id !== itemToRespond && item.role === 'assistant' && items[items.length - 1]?.status === 'completed') {
-                            console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
-                            setItemToRespond(item.id);
-                            // send this instruction after the item is completed
-                            setTimeout(async () => {
-                                // if the string has </eval>, remove it
-                                const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
-                                console.log('evaluation', evaluation);
-                                switch (evaluation) {
-                                    case 'correct':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4Correct(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
-                                    case 'incorrect':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4Incorrect(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
-                                    case 'off-topic':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4OffTopic(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
-                                    case 'child asks question':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4ChildQuestion(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
-                                    case 'invalid':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4Invalid(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
-                                    case 'conv end':
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4ConvEnd(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                    default:
-                                        await client.realtime.send('response.create', {
-                                            response: {
-                                                "modalities": ["text", "audio"],
-                                                "instructions": getInstruction4FollowUp(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
-                                            }
-                                        });
-                                        userRespondedRef.current = false;
-                                        break;
-                                }
-                            }, 1000);
-                        }
+                    if (evalStatus(item.content[0]?.transcript) && item.id !== itemToRespondRef.current && item.role === 'assistant') {
+                        console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
+                        itemToRespondRef.current = item.id;
+                        // send this instruction after the item is completed
+                        setTimeout(async () => {
+                            // if the string has </eval>, remove it
+                            const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                            console.log('evaluation', evaluation);
+                            switch (evaluation) {
+                                case 'correct':
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4Correct(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                    userRespondedRef.current = false;
+                                    break;
+                                case 'incorrect':
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4Incorrect(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                    userRespondedRef.current = false;
+                                    break;
+                                case 'off-topic':
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4OffTopic(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                    userRespondedRef.current = false;
+                                    break;
+                                case 'child asks question':
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4ChildQuestion(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                    userRespondedRef.current = false;
+                                    break;
+                                case 'invalid':
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4Invalid(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                    userRespondedRef.current = false;
+                                    break;
+                                case 'conv end':
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4ConvEnd(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                default:
+                                    await client.realtime.send('response.create', {
+                                        response: {
+                                            "modalities": ["text", "audio"],
+                                            "instructions": getInstruction4FollowUp(items, item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim())
+                                        }
+                                    });
+                                    userRespondedRef.current = false;
+                                    break;
+                            }
+                        }, 1000);
                     }
                 }
                 else if (item.id !== itemToDelete || (!item.content[0]?.transcript?.startsWith('<'))) {
@@ -1298,6 +1303,13 @@ const ReadChatPage = () => {
         }
     }, [isConversationEnded]);
 
+    const evalStatus = (transcript) => {
+        if (transcript.includes('correct') || transcript.includes('incorrect') || transcript.includes('off-topic') || transcript.includes('child asks question') || transcript.includes('invalid') || transcript.includes('conv end')) {
+            return true;
+        }
+        return false;
+    }
+
     const handleCaptionToggle = () => {
         setShowCaption(!showCaption);
     }
@@ -1338,27 +1350,44 @@ const ReadChatPage = () => {
 
     const handleReplay = async (index) => {
         const wavStreamPlayer = wavStreamPlayerRef.current;
-        await wavStreamPlayer.interrupt();
         const replayAudio = replayAudioRef.current;
-        console.log('---replayAudio', currentPageChatHistory, index);
-        replayAudio.src = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory][index].formatted.file.url;
-        // pause the replayAudio
-        replayAudio.pause();
-        replayAudio.currentTime = 0;
-        if (isReplayingRef.current === false) {
-            replayAudio.play();
-            setReplayingIndex(index); // Set the replaying index
-            isReplayingRef.current = true;
-            replayAudio.onended = () => {
-                console.log('replay ended');
-                isReplayingRef.current = false;
-                setReplayingIndex(null); // Reset the replaying index when done
-            };
+        
+        // If clicking on a different message while another is playing
+        if (replayingIndex !== null && replayingIndex !== index) {
+            replayAudio.pause();
+            replayAudio.currentTime = 0;
+            isReplayingRef.current = false;
+            setReplayingIndex(null);
         }
-        // setIsPlaying(true);
-        // replayAudio.onended = () => {
-        //     setIsPlaying(false);
-        // };
+
+        // If clicking on the currently playing message
+        if (replayingIndex === index) {
+            if (replayAudio.paused) {
+                // Resume playing
+                await wavStreamPlayer.interrupt();
+                replayAudio.play();
+                isReplayingRef.current = true;
+            } else {
+                // Pause playing
+                replayAudio.pause();
+                isReplayingRef.current = false;
+            }
+            return;
+        }
+
+        // Start playing a new message
+        await wavStreamPlayer.interrupt();
+        replayAudio.src = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory][index].formatted.file.url;
+        replayAudio.currentTime = 0;
+        await replayAudio.play();
+        setReplayingIndex(index);
+        isReplayingRef.current = true;
+        
+        replayAudio.onended = () => {
+            console.log('replay ended');
+            isReplayingRef.current = false;
+            setReplayingIndex(null);
+        };
     }
 
     const handleExpandChat = () => {
@@ -1383,8 +1412,12 @@ const ReadChatPage = () => {
     };
 
     const handleSpeedChange = (event, newValue) => {
-        console.log('speed changed', newValue);
-        setAudioSpeed(newValue);
+        if (newValue === 0.5) {
+            setAudioSpeed(0.7);
+        }
+        else {
+            setAudioSpeed(newValue);
+        }
     };
 
     useEffect(() => {
@@ -1405,7 +1438,7 @@ const ReadChatPage = () => {
             const itemDict = {
                 id: item.id,
                 role: item.role,
-                content: item.content[0].transcript,
+                content: item.content[0]?.transcript,
             }
             formData.append(`${prefix}_dict`, JSON.stringify(itemDict));
             if (item.role === 'user' && item.formatted?.file?.blob) {
@@ -1498,6 +1531,62 @@ const ReadChatPage = () => {
             return () => clearTimeout(startShakeTimer);
         }
     }, [currentPageRef.current]);
+
+    const handleRegenerate = async (index) => {
+        const client = clientRef.current;
+        const items = client.conversation.getItems();
+        const currentItem = items[index];
+        
+        console.log('currentItem', currentItem);
+        // Only allow regeneration for the latest assistant message
+        if (currentItem?.role !== 'assistant' || index !== items.length - 1) return;
+        
+        setRegenerateIndex(index);
+        
+        // Delete the current assistant message
+        await client.realtime.send('conversation.item.delete', {
+            item_id: currentItem.id
+        });
+        
+        // Get the evaluation result from the previous message
+        const prevItems = items.slice(0, index);
+        const lastEvaluation = prevItems.reverse().find(item => 
+            item?.content[0]?.transcript?.startsWith('<eval>'))?.content[0]?.transcript;
+
+        console.log('lastEvaluation', lastEvaluation);
+            
+        if (lastEvaluation) {
+            const evaluation = lastEvaluation.replace('<eval>', '').replace('</eval>', '').trim();
+            // Send a new response based on the last evaluation
+            await client.realtime.send('response.create', {
+                response: {
+                    "modalities": ["text", "audio"],
+                    "instructions": getInstruction4Response(items, evaluation)
+                }
+            });
+        }
+        
+        setRegenerateIndex(null);
+    };
+
+    const getInstruction4Response = (items, evaluation) => {
+        switch (evaluation) {
+            case 'correct':
+                return getInstruction4Correct(items, evaluation);
+            case 'incorrect':
+                return getInstruction4Incorrect(items, evaluation);
+            case 'off-topic':
+                return getInstruction4OffTopic(items, evaluation);
+            case 'child asks question':
+                return getInstruction4ChildQuestion(items, evaluation);
+            case 'invalid':
+                return getInstruction4Invalid(items, evaluation);
+            case 'conv end':
+                return getInstruction4ConvEnd(items, evaluation);
+            default:
+                return getInstruction4FollowUp(items, evaluation);
+        }
+    };
 
     return (
         <Box className="background-container">
@@ -1662,15 +1751,15 @@ const ReadChatPage = () => {
                             </Box>
                         )}
                         {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].filter(msg => msg.type === 'message').map((msg, index) => (
-                            msg.content[0].transcript !== '' && (
+                            msg.content[0]?.transcript !== '' && (
                             <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                 {msg.role === 'user' ? (
                                     // if message is loading, add a loading icon
                                     <Box id="user-chat">
                                         <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "8px"}}>{user.substring(0, 2)}</Avatar>
                                         <Box id="msg-bubble" style={{ backgroundColor: '#ECECEC' }}>
-                                            {msg.content[0].transcript !== null ? (
-                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h5>
+                                            {msg.content[0]?.transcript !== null ? (
+                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0]?.transcript}</h5>
                                             ) : (
                                                 <AiOutlineLoading id='loading-icon' size={20} color='#7AA2E3' />
                                             )}
@@ -1681,18 +1770,34 @@ const ReadChatPage = () => {
                                         <Image id='chatbot-avatar' src='./files/imgs/penguin.svg'></Image>
                                         <Box id="msg-bubble" style={{ position: 'relative' }} onClick={() => handleReplay(index)}>
                                             {!msg.content?.[0]?.transcript?.startsWith('<') && (
-                                                <h5 level='body-lg' style={{margin: '0px', marginRight: '30px'}}>
+                                                <h5 level='body-lg' style={{margin: '0px', marginRight: '50px'}}>
                                                     {msg.content?.[0]?.transcript}
                                                 </h5>
                                             )}
                                             {msg.status === 'completed' && !msg.content?.[0]?.transcript?.startsWith('<') && (
-                                                <IconButton id='replay-btn' key={index} variant='plain' style={{ 
-                                                    position: 'absolute', 
-                                                    right: '8px', 
-                                                    bottom: '8px', 
-                                                }}>
-                                                    {replayingIndex === index ? <FaCirclePause size={25} color='#2A2278' /> : <FaCirclePlay size={25} color='#2A2278' />}
-                                                </IconButton>
+                                                <Box sx={{ display: 'flex', gap: 1, position: 'absolute', right: '8px', bottom: '8px' }}>
+                                                    {/* <IconButton 
+                                                        variant='plain' 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRegenerate(index);
+                                                        }}
+                                                        sx={{ 
+                                                            opacity: (msg.role === 'assistant' && index === [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].length - 1) ? 1 : 0,
+                                                            pointerEvents: (msg.role === 'assistant' && index === [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].length - 1) ? 'auto' : 'none',
+                                                        }}
+                                                    >
+                                                        {regenerateIndex === index ? 
+                                                            <AiOutlineLoading className="spin" size={25} color='#2A2278' /> :
+                                                            <MdOutlineReplayCircleFilled size={25} color='#2A2278' />
+                                                        }
+                                                    </IconButton> */}
+                                                    <IconButton id='replay-btn' variant='plain'>
+                                                        {replayingIndex === index ? 
+                                                            (!isReplayingRef.current ? <FaCirclePlay size={25} color='#2A2278' /> : <FaCirclePause size={25} color='#2A2278' />)
+                                                            : <FaCirclePlay size={25} color='#2A2278' />}
+                                                    </IconButton>
+                                                </Box>
                                             )}
                                         </Box>
                                     </Box>

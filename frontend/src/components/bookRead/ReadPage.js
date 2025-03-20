@@ -753,7 +753,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
-        - Your response should end with the follow-up question.
+        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -836,7 +836,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
-        - Your response should end with the follow-up question.
+        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -919,7 +919,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Your response should end with the follow-up question.
+        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -1002,7 +1002,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Your response should end with the follow-up question.
+        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -1505,7 +1505,7 @@ const ReadChatPage = () => {
                         }
                     }
                 }
-                else if (!isWaitingForEvaluationRef.current && (!deletedItemsRef.current.has(item.id) || (!item.content[0]?.transcript?.startsWith('<')))) {
+                else if (item.role === 'user' || (!isWaitingForEvaluationRef.current && (!deletedItemsRef.current.has(item.id) || (!item.content[0]?.transcript?.startsWith('<'))))) {
                     // console.log('logging this item: ', item.content[0]?.transcript);
                     if (!item.content[0]?.transcript?.startsWith('<') && item.role === 'assistant' && resendFlagRef.current) {
                         console.log('resending response set to false', item.content[0]?.transcript);

@@ -93,6 +93,7 @@ const ReadChatPage = () => {
     const [regenerateIndex, setRegenerateIndex] = useState(null);
     const itemToRespondRef = useRef(null);
     const deletedItemsRef = useRef(new Set());
+    const isWaitingForEvaluationRef = useRef(false);
 
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
@@ -338,16 +339,17 @@ const ReadChatPage = () => {
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
             client.inputAudioBuffer = new Int16Array(0);
-            console.log('last question', items[items.length - 1]?.content[0]?.transcript);
             await client.realtime.send('response.create', {
                 response: {
                     "modalities": ["text", "audio"],
                     "instructions": getInstruction4Evaluation(items),
                 }
             });
-        } else {
-            client.createResponse();
-        }
+            isWaitingForEvaluationRef.current = true;
+        } 
+        // else {
+        //     client.createResponse();
+        // }
     };
 
     const togglePlayPause = () => {
@@ -743,7 +745,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - Based on your hint, pose ONE follow-up question to the child to help them complete the answer.
         - Keep the follow-up question simple, engaging and under 20 words.
-        - Do not ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -781,7 +783,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
@@ -826,7 +828,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - Based on your hint, pose ONE follow-up question to the child to help them think about the correct answer.
         - Keep the follow-up question simple, engaging and under 20 words.
-        - Do not ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -909,7 +911,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - Based on your hint, pose a follow-up question to help the child come up with a relevant answer.
         - Keep the follow-up question simple, engaging and under 20 words.
-        - Do not ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -992,7 +994,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - Based on your hint, pose a follow-up question to help the child come up with the correct answer.
         - Keep the follow-up question simple, engaging and under 20 words.
-        - Do not ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -1297,7 +1299,7 @@ const ReadChatPage = () => {
         **Instructions for Pose a Follow-up Question**:
         - Based on your hint, pose a follow-up question to the child.
         - Keep the follow-up question simple, engaging and under 20 words.
-        - Do not ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
 
         **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.
@@ -1318,8 +1320,8 @@ const ReadChatPage = () => {
     const getInstruction4NoResponse = () => {
         const instruction4NoResponse = `
         **Instructions**:
-        1. Read the chat history to find the last question you asked.
-        2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question you asked.
+        1. Read the chat history to find the last question the assistant asked.
+        2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question asked in the chat history.
         3. If the last question is "Do you have any questions about this page?", you should ask the question "Do you have any questions about this page?" again, instead the main question in the chat history.
         4. Do not ask a question that is not the last question in the chat history.
         
@@ -1422,8 +1424,9 @@ const ReadChatPage = () => {
                 if (item?.content[0]?.transcript?.startsWith('<')) {
                     // keep the item id, and when the item status is completed, delete it
                     setItemToDelete(item.id);
-                    console.log('evaluation result', item.content[0]?.transcript);
-                    if (item.status === 'completed' && !deletedItemsRef.current.has(item.id)) {
+                    isWaitingForEvaluationRef.current = false;
+                    console.log('evaluation result and status', item.content[0]?.transcript, item.status);
+                    if ((item.status === 'completed' || item.status === 'incomplete') && !deletedItemsRef.current.has(item.id)) {
                         console.log('!!! deleting item', item);
                         try {
                             await client.realtime.send('conversation.item.delete', {
@@ -1449,10 +1452,10 @@ const ReadChatPage = () => {
                         // only update answerRecord after the item is deleted
                         // if this is the first completed item for the item id, send a response
                     // 
-                    // console.log('item status', item.status);
-                    // console.log('resendFlagRef.current', resendFlagRef.current);
-                    // console.log('item.id', item.id);
-                    // console.log('itemToRespondRef.current', itemToRespondRef.current);
+                    console.log('item status', item.status);
+                    console.log('resendFlagRef.current', resendFlagRef.current);
+                    console.log('item.id', item.id);
+                    console.log('itemToRespondRef.current', itemToRespondRef.current);
                     if (evalStatus(item.content[0]?.transcript) && item.id !== itemToRespondRef.current && item.role === 'assistant') {
                         console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
                         itemToRespondRef.current = item.id;
@@ -1473,11 +1476,14 @@ const ReadChatPage = () => {
                                 // Wait for 2 seconds and try again
                                 setTimeout(async () => {
                                     try {
-                                        await sendResponse(client, evaluation, items);
+                                        if (resendFlagRef.current) {
+                                            console.log('sending initial response request after 4 seconds');
+                                            await sendResponse(client, evaluation, items);
+                                        }
                                     } catch (error) {
                                         console.error('Error sending response after retry:', error);
                                     }
-                                }, 2000);
+                                }, 4000);
                             } else {
                                 try {
                                     await sendResponse(client, evaluation, items);
@@ -1487,7 +1493,7 @@ const ReadChatPage = () => {
                             }
                         }, 1000);
                     }
-                    else if (resendFlagRef.current && item.status === 'completed' && item.id === itemToRespondRef.current) {
+                    else if (resendFlagRef.current && item.status !== 'in_progress' && item.id === itemToRespondRef.current) {
                         console.log('resending response, after this resendFlag is set to false', item.content[0]?.transcript);
                         resendFlagRef.current = false;
                         const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
@@ -1499,7 +1505,7 @@ const ReadChatPage = () => {
                         }
                     }
                 }
-                else if (!deletedItemsRef.current.has(item.id) || (!item.content[0]?.transcript?.startsWith('<'))) {
+                else if (!isWaitingForEvaluationRef.current && (!deletedItemsRef.current.has(item.id) || (!item.content[0]?.transcript?.startsWith('<')))) {
                     // console.log('logging this item: ', item.content[0]?.transcript);
                     if (!item.content[0]?.transcript?.startsWith('<') && item.role === 'assistant' && resendFlagRef.current) {
                         console.log('resending response set to false', item.content[0]?.transcript);

@@ -1772,15 +1772,31 @@ const ReadChatPage = () => {
         await wavStreamPlayer.interrupt();
         replayAudio.src = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory][index].formatted.file.url;
         replayAudio.currentTime = 0;
-        await replayAudio.play();
-        setReplayingIndex(index);
-        isReplayingRef.current = true;
-        
-        replayAudio.onended = () => {
-            console.log('replay ended');
+        try {
+            await replayAudio.play();
+            setReplayingIndex(index);
+            isReplayingRef.current = true;
+            
+            // 添加暂停事件监听器
+            replayAudio.onpause = () => {
+                isReplayingRef.current = false;
+            };
+    
+            // 添加播放事件监听器
+            replayAudio.onplay = () => {
+                isReplayingRef.current = true;
+            };
+            
+            replayAudio.onended = () => {
+                console.log('replay ended');
+                isReplayingRef.current = false;
+                setReplayingIndex(null);
+            };
+        } catch (error) {
+            console.error('Error playing audio:', error);
             isReplayingRef.current = false;
             setReplayingIndex(null);
-        };
+        }
     }
 
     const handleExpandChat = () => {

@@ -45,6 +45,7 @@ const ReadChatPage = () => {
     const [isExpandedChat, setIsExpandedChat] = useState(false);
     const [isMinimizedChat, setIsMinimizedChat] = useState(false);
     const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
+    const [speedSliderValue, setSpeedSliderValue] = useState(audioSpeed);
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -442,7 +443,8 @@ const ReadChatPage = () => {
                     };
                     try {
                         await audio.play();
-                        audio.playbackRate = audioSpeed;
+                        const currentSpeed = parseFloat(localStorage.getItem(`${title}-audioSpeed`)) || 1;
+                        audio.playbackRate = currentSpeed;
                         setIsPlaying(true);
                     } catch (error) {
                         console.error('Error playing audio:', error);
@@ -1800,9 +1802,11 @@ const ReadChatPage = () => {
     const handleSpeedChange = (event, newValue) => {
         if (newValue === 0.5) {
             setAudioSpeed(0.7);
+            setSpeedSliderValue(0.5);
         }
         else {
             setAudioSpeed(newValue);
+            setSpeedSliderValue(newValue);
         }
     };
 
@@ -2107,7 +2111,7 @@ const ReadChatPage = () => {
                         {showSpeedSlider && (
                             <div id='speed-slider-box'>
                                 <Slider
-                                    value={audioSpeed}
+                                    value={speedSliderValue}
                                     onChange={handleSpeedChange}
                                     min={0.5}
                                     max={1.5}

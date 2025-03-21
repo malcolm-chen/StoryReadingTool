@@ -64,6 +64,25 @@ const GreetPage = () => {
     const isAskingRef = useRef(false);
     const isReplayingRef = useRef(false);
 
+    const handleSkip = async () => {
+        console.log('handleSkip');
+        const wavStreamPlayer = wavStreamPlayerRef.current;
+        await wavStreamPlayer.interrupt();
+
+        if (clientRef.current.realtime.isConnected()) {
+            console.log('disconnecting conversation');
+            // deleteConversationItem(items[0].id);
+            await disconnectConversation();
+            const client = clientRef.current;
+            client.reset();
+            setIsClientSetup(false);
+        }
+        
+        navigate('/read', { state: {
+            title: title,
+            user: user
+        } });
+    }
 
     useEffect(() => {
         const disconnectAndNavigate = async () => {
@@ -240,14 +259,14 @@ const GreetPage = () => {
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
         - Keep the conversation within three rounds.
         - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done', and then you should ask the child to repeat it.
-        - If the conversation is NOT ended, always end each turn with a question.
+        - IF THE CONVERSATION IS NOT ENDED, ALWAYS END EACH TURN WITH A QUESTION.
 
         **Important Reminders**:
         - Focus on teaching the child how to interact with you, the chatbot.
         - Only recognize the child's answer in English.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - When concluding the conversation, you should not ask any more questions.
-        - If the conversation is NOT ended, always end each turn with a question.
+        - IF THE CONVERSATION IS NOT ENDED, ALWAYS END EACH TURN WITH A QUESTION.
         `;
         return instruction4Greet;
     }
@@ -404,7 +423,7 @@ const GreetPage = () => {
                     }
                     if (item.role === 'assistant') {
                         // if the last item does not end with a question mark, it means the conversation is ended
-                        if (!item?.content[0]?.transcript?.endsWith('?')) {
+                        if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.includes('big yellow button') && !item?.content[0]?.transcript?.includes('when you are done')) {
                             while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                 await new Promise(resolve => setTimeout(resolve, 100));
                             }
@@ -541,15 +560,6 @@ const GreetPage = () => {
         console.log('clientsetup changed', isClientSetup);
     }, [isClientSetup]);
 
-    const handleSkip = async () => {
-        console.log('handleSkip');
-        const wavStreamPlayer = wavStreamPlayerRef.current;
-        await wavStreamPlayer.interrupt();
-        navigate('/read', { state: {
-            title: title,
-            user: user
-        } });
-    }
 
 
     return (

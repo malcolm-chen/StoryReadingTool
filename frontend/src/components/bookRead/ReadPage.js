@@ -806,8 +806,8 @@ const ReadChatPage = () => {
         - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating them.
                         
     **Instructions for Pose a Follow-up Question**:
-        - Restating the main question to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
-        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -888,10 +888,10 @@ const ReadChatPage = () => {
         - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
                         
     **Instructions for Pose a Follow-up Question**:
-         - Restating the main question to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
     
-        **Instructions for Whole Response**:
+    **Instructions for Whole Response**:
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
@@ -970,9 +970,8 @@ const ReadChatPage = () => {
         - Since the child's response is irrelevant, provide an implicit hint to guide them toward the context and correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - Based on your hint, pose a follow-up question to help the child come up with a relevant answer.
-        - Keep the follow-up question simple, engaging and under 20 words.
-        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -1053,9 +1052,8 @@ const ReadChatPage = () => {
         - Since the child's response is uncertain, provide an implicit hint to guide them toward the correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - Based on your hint, pose a follow-up question to help the child come up with the correct answer.
-        - Keep the follow-up question simple, engaging and under 20 words.
-        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
     
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -1223,8 +1221,8 @@ const ReadChatPage = () => {
         - Since the child poses a question, answer the question with easy-to-understand words.
 
     **Instructions for Pose a Follow-up Question**:
-        - Steer the conversation back to the original question.
-        - Ask the not answered question again.
+        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
     
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -1363,9 +1361,8 @@ const ReadChatPage = () => {
         In these cases, you can end the conversation (refer to **Instructions for Conclusion**). 
         
         **Instructions for Pose a Follow-up Question**:
-        - Based on your hint, pose a follow-up question to the child.
-        - Keep the follow-up question simple, engaging and under 20 words.
-        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
 
         **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.

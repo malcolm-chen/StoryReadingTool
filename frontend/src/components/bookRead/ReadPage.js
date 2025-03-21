@@ -806,9 +806,10 @@ const ReadChatPage = () => {
         - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating them.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-    
+        - DO NOT ask question that beyond the main question.
+
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -888,9 +889,10 @@ const ReadChatPage = () => {
         - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-    
+        - DO NOT ask question that beyond the main question.
+
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -970,9 +972,10 @@ const ReadChatPage = () => {
         - Since the child's response is irrelevant, provide an implicit hint to guide them toward the context and correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-    
+        - DO NOT ask question that beyond the main question.
+
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -1052,9 +1055,10 @@ const ReadChatPage = () => {
         - Since the child's response is uncertain, provide an implicit hint to guide them toward the correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-    
+        - DO NOT ask question that beyond the main question.
+
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
@@ -1221,9 +1225,10 @@ const ReadChatPage = () => {
         - Since the child poses a question, answer the question with easy-to-understand words.
 
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-    
+        - DO NOT ask question that beyond the main question.
+        
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
@@ -1361,8 +1366,9 @@ const ReadChatPage = () => {
         In these cases, you can end the conversation (refer to **Instructions for Conclusion**). 
         
         **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
-        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - DO NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
+        - DO NOT ask question that beyond the main question.
 
         **Instructions for Conclusion**:
         - Do not use question marks in the conclusion.

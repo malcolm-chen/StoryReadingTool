@@ -61,6 +61,7 @@ const ReadChatPage = () => {
     const timerRef = useRef(null);
     const isStartingRecordingRef = useRef(false);
     const resendFlagRef = useRef(false);
+    const responseResendRef = useRef(false);
     // const [evaluation, setEvaluation] = useState(null);
     
     const penguin = './files/imgs/penguin1.svg';
@@ -336,6 +337,9 @@ const ReadChatPage = () => {
         recorderControls.stopRecording();
         console.log('stop recording');
         if (isKnowledge) {
+            const items = client.conversation.getItems();
+        
+            
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
             client.inputAudioBuffer = new Int16Array(0);
@@ -346,7 +350,59 @@ const ReadChatPage = () => {
                 }
             });
             isWaitingForEvaluationRef.current = true;
-        } 
+            responseResendRef.current = false;
+            // Add timeout check for evaluation response
+            const timeoutDuration = 4000; // 4 seconds
+            const startTime = Date.now();
+            const checkEvalStatus = setInterval(async () => {
+                const currentItems = client.conversation.getItems();
+                const lastItem = currentItems[currentItems.length - 1];
+                console.log('lastItem', lastItem);
+                console.log('isWaitingForEvaluationRef.current', isWaitingForEvaluationRef.current);
+                // If we've waited more than 4 seconds and status is still incomplete/in_progress
+                if (Date.now() - startTime >= timeoutDuration && 
+                    lastItem && 
+                    isWaitingForEvaluationRef.current &&
+                    !lastItem.content[0]?.transcript?.startsWith('<eval>')) {
+                    
+                    clearInterval(checkEvalStatus);
+                    console.log('Evaluation response timeout - retrying');
+                    
+                    // Cancel the current response
+                    if (lastItem.id && isWaitingForEvaluationRef.current) {
+                        console.log('now deleting/canceling the response using last item', lastItem);
+                        if (lastItem.status === 'in_progress') {
+                            await client.realtime.send('response.cancel', {
+                                item_id: lastItem.id
+                            });
+                        } else {
+                            await client.realtime.send('conversation.item.delete', {
+                                item_id: lastItem.id
+                            });
+                        }
+                        // Retry sending the evaluation request
+                        setTimeout(async () => {
+                            if (isWaitingForEvaluationRef.current) {
+                            await client.realtime.send('response.create', {
+                                response: {
+                                        "modalities": ["text", "audio"],
+                                        "instructions": getInstruction4Evaluation(items),
+                                    }
+                                });
+                                responseResendRef.current = true;
+                                itemToRespondRef.current = null;
+                                isWaitingForEvaluationRef.current = true;
+                            }
+                        }, 1000);
+                    }
+                }
+                
+                // Clear interval if status is completed or if 8 seconds have passed
+                if (lastItem?.status === 'completed' || Date.now() - startTime >= 12000) {
+                    clearInterval(checkEvalStatus);
+                }
+            }, 1000);
+         } 
         // else {
         //     client.createResponse();
         // }
@@ -657,6 +713,11 @@ const ReadChatPage = () => {
         - <eval>factually incorrect</eval>
         - <eval>irrelevant response</eval>
         - <eval>uncertainty</eval>
+
+        **Important Reminder**:
+        - Only reply within the format of <eval>...</eval>. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
+        - Only reply within the format of <eval>...</eval>. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
+        - Only reply within the format of <eval>...</eval>. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
         `;
         console.log(instruction4Evaluation);
         return instruction4Evaluation;
@@ -743,8 +804,7 @@ const ReadChatPage = () => {
         - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating them.
                         
     **Instructions for Pose a Follow-up Question**:
-        - Based on your hint, pose ONE follow-up question to the child to help them complete the answer.
-        - Keep the follow-up question simple, engaging and under 20 words.
+        - Restating the main question to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
     
     **Instructions for Whole Response**:
@@ -826,11 +886,10 @@ const ReadChatPage = () => {
         - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
                         
     **Instructions for Pose a Follow-up Question**:
-        - Based on your hint, pose ONE follow-up question to the child to help them think about the correct answer.
-        - Keep the follow-up question simple, engaging and under 20 words.
-        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.
+         - Restating the main question to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
     
-    **Instructions for Whole Response**:
+        **Instructions for Whole Response**:
         - Do not end the conversation.
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
@@ -1420,21 +1479,20 @@ const ReadChatPage = () => {
                 setTimer(0);
                 // console.log('item', item);
                 if(timerRef.current) clearInterval(timerRef.current);
-                // if the item starts with <test>, delete it
-                if (item?.content[0]?.transcript?.startsWith('<')) {
+                // if the item starts with <eval>, delete it
+                if (item?.content[0]?.transcript?.startsWith('<eval>')) {
                     // keep the item id, and when the item status is completed, delete it
                     setItemToDelete(item.id);
-                    isWaitingForEvaluationRef.current = false;
                     console.log('evaluation result and status', item.content[0]?.transcript, item.status);
                     if ((item.status === 'completed' || item.status === 'incomplete') && !deletedItemsRef.current.has(item.id)) {
                         console.log('!!! deleting item', item);
+                        isWaitingForEvaluationRef.current = false;
                         try {
                             await client.realtime.send('conversation.item.delete', {
                                 item_id: item.id
                             });
                             // 添加到已删除集合中
                             deletedItemsRef.current.add(item.id);
-                            
                             console.log('items length', items.length);
                             console.log('noReponseCnt', noReponseCntRef.current);
                             const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
@@ -1448,15 +1506,14 @@ const ReadChatPage = () => {
                         }
                         console.log('items', items);
                         console.log('items to delete', itemToDelete);
-                    }
+                    
                         // only update answerRecord after the item is deleted
                         // if this is the first completed item for the item id, send a response
-                    // 
+                    // after item is deleted, create a new response
                     console.log('item status', item.status);
-                    console.log('resendFlagRef.current', resendFlagRef.current);
                     console.log('item.id', item.id);
                     console.log('itemToRespondRef.current', itemToRespondRef.current);
-                    if (evalStatus(item.content[0]?.transcript) && item.id !== itemToRespondRef.current && item.role === 'assistant') {
+                    if (evalStatus(item.content[0]?.transcript) && item.role === 'assistant') {
                         console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
                         itemToRespondRef.current = item.id;
                         // send this instruction after the item is completed
@@ -1473,38 +1530,58 @@ const ReadChatPage = () => {
                             if (hasActiveResponse) {
                                 console.log('There is an active response, waiting before sending new one');
                                 resendFlagRef.current = true;
-                                // Wait for 2 seconds and try again
-                                setTimeout(async () => {
-                                    try {
-                                        if (resendFlagRef.current) {
-                                            console.log('sending initial response request after 4 seconds');
-                                            await sendResponse(client, evaluation, items);
-                                        }
-                                    } catch (error) {
-                                        console.error('Error sending response after retry:', error);
+                                const items = client.conversation.getItems();
+                                for (const item of items) {
+                                    if (item.status === 'in_progress' || item.status === 'pending') {
+                                        await client.realtime.send('response.cancel', {
+                                            item_id: item.id
+                                        });
                                     }
-                                }, 4000);
-                            } else {
-                                try {
-                                    await sendResponse(client, evaluation, items);
-                                } catch (error) {
-                                    console.error('Error sending response:', error);
                                 }
+                                // Wait for 2 seconds and try again
+                                // setTimeout(async () => {
+                                //     try {
+                                //         if (resendFlagRef.current) {
+                                //             console.log('sending initial response request after 4 seconds');
+                                //             await sendResponse(client, evaluation, items);
+                                //         }
+                                //     } catch (error) {
+                                //         console.error('Error sending response after retry:', error);
+                                //     }
+                                // }, 4000);
+                            }
+                            try {
+                                await sendResponse(client, evaluation, items);
+                            } catch (error) {
+                                console.error('Error sending response:', error);
                             }
                         }, 1000);
                     }
-                    else if (resendFlagRef.current && item.status !== 'in_progress' && item.id === itemToRespondRef.current) {
-                        console.log('resending response, after this resendFlag is set to false', item.content[0]?.transcript);
-                        resendFlagRef.current = false;
-                        const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
-                        console.log('evaluation', evaluation);
-                        try {
-                            await sendResponse(client, evaluation, items);
-                        } catch (error) {
-                            console.error('Error sending response:', error);
-                        }
-                    }
+                    // else if (resendFlagRef.current && item.id === itemToRespondRef.current) {
+                    //     if (item.status === 'in_progress') {
+                    //         await client.realtime.send('response.cancel', {
+                    //             item_id: item.id
+                    //         });
+                    //         client.realtime.send('response.create', {
+                    //             response: {
+                    //                 "modalities": ["text", "audio"],
+                    //                 "instructions": getInstruction4Evaluation(items),
+                    //             }
+                    //         })
+                    //     } else {
+                    //         console.log('resending response, after this resendFlag is set to false', item.content[0]?.transcript);
+                    //         resendFlagRef.current = false;
+                    //         const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                    //         console.log('evaluation', evaluation);
+                    //         try {
+                    //             await sendResponse(client, evaluation, items);
+                    //         } catch (error) {
+                    //             console.error('Error sending response:', error);
+                    //         }
+                    //     }
+                    // }
                 }
+            }
                 else if (item.role === 'user' || (!isWaitingForEvaluationRef.current && (!deletedItemsRef.current.has(item.id) || (!item.content[0]?.transcript?.startsWith('<'))))) {
                     // console.log('logging this item: ', item.content[0]?.transcript);
                     if (!item.content[0]?.transcript?.startsWith('<') && item.role === 'assistant' && resendFlagRef.current) {
@@ -1572,7 +1649,22 @@ const ReadChatPage = () => {
                 }
                 setIsClientSetup(true);
             });
-
+            client.on('disconnect', async () => {
+                console.log('WebSocket disconnected');
+                setIsConnected(false);
+                
+                // 尝试重新连接
+                try {
+                    await connectConversation();
+                    console.log('Successfully reconnected');
+                    // 重新设置client配置
+                    client.updateSession({ instructions: instruction });
+                    client.updateSession({ voice: 'alloy' });
+                    client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
+                } catch (error) {
+                    console.error('Failed to reconnect:', error);
+                }
+            });
             
             if (!client.isConnected()) {
                 await connectConversation();
@@ -1888,6 +1980,16 @@ const ReadChatPage = () => {
 
     // Add this new function before the return statement
     const sendResponse = async (client, evaluation, items) => {
+        const currentItems = client.conversation.getItems();
+        for (const item of currentItems) {
+            if ((item.status === 'in_progress' || item.status === 'pending') && 
+                !item.content[0]?.transcript?.startsWith('<eval>')) {
+                await client.realtime.send('response.cancel', {
+                    item_id: item.id
+                });
+            }
+        }
+
         switch (evaluation) {
             case 'perfect':
                 await client.realtime.send('response.create', {
@@ -2221,11 +2323,11 @@ const ReadChatPage = () => {
                             >
                                 {/* <FaMicrophone size={40} color='white'/> */}
                                 {isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb' }}>Talking...</h4>
+                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Talking...</h4>
                                 : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb' }}>Hold to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Hold to talk!</h4>
                                 </div>}
                             </button>
                         </div>

@@ -767,7 +767,7 @@ button {
   position: absolute;
   width: calc(100% - 12px);
   height: calc(100% - 12px);
-  z-index: 1;
+  z-index: 5;
 }
 
 #recording-box-2 {
@@ -778,7 +778,7 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 5;
 }
 
 #chat-end {

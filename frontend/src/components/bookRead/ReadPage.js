@@ -1287,8 +1287,10 @@ const ReadChatPage = () => {
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         3. the evaluation of the child's latest response: ${evaluation};
 
-        Since the evaluation of the child's response is 'invalid', you should respond with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
+        **Instructions for Response**:
+        - Since the evaluation of the child's response is 'invalid', you should respond with a friendly line, such as "I didn't hear your answer, can you say it again?", or "Oh I didn't catch that, can you say it again?".
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
         `;
         console.log(instruction4Invalid);
         return instruction4Invalid;

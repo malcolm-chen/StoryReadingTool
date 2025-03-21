@@ -77,7 +77,7 @@ const GreetPage = () => {
             client.reset();
             setIsClientSetup(false);
         }
-        
+
         navigate('/read', { state: {
             title: title,
             user: user
@@ -517,7 +517,7 @@ const GreetPage = () => {
             const itemDict = {
                 id: item.id,
                 role: item.role,
-                content: item.content[0].transcript,
+                content: item?.content?.[0]?.transcript,
             }
             formData.append(`${prefix}_dict`, JSON.stringify(itemDict));
             if (item.role === 'user' && item.formatted?.file?.blob) {
@@ -590,7 +590,7 @@ const GreetPage = () => {
                             </Box>
                         )}
                         {chatHistory.filter(msg => msg.type === 'message').map((msg, index) => (
-                            msg.content[0].transcript !== '' && (
+                            msg.content?.[0]?.transcript !== '' && (
                             <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                 {msg.role === 'user' ? (
                                     // if message is loading, add a loading icon
@@ -602,8 +602,8 @@ const GreetPage = () => {
                                             WebkitUserSelect: 'none',
                                             userSelect: 'none'
                                         }}>
-                                            {msg.content[0].transcript !== null ? (
-                                                <h3 level='body-lg' style={{margin: '0px'}}>{msg.content[0].transcript}</h3>
+                                            {msg.content?.[0]?.transcript !== null ? (
+                                                <h3 level='body-lg' style={{margin: '0px'}}>{msg.content?.[0]?.transcript}</h3>
                                             ) : (
                                                 <AiOutlineLoading id='loading-icon' size={20} color='#7AA2E3' />
                                             )}

@@ -1301,7 +1301,10 @@ const ReadChatPage = () => {
         const instruction4ConvEnd = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. 
         Now your task is to keep the focus of the conversation on the story and end the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
-        Do not include any question marks in your response.
+        
+        **Instructions for Response**:
+        - DO NOT INCLUDE ANY QUESTION IN YOUR RESPONSE.
+        - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
         `;
         console.log(instruction4ConvEnd);
         return instruction4ConvEnd;

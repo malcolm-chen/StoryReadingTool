@@ -346,13 +346,64 @@ const ReadChatPage = () => {
             client.inputAudioBuffer = new Int16Array(0);
             await client.realtime.send('response.create', {
                 response: {
-                    "modalities": ["text"],
+                    "modalities": ["text", "audio"],
                     "instructions": getInstruction4Evaluation(items),
                 }
             });
             isWaitingForEvaluationRef.current = true;
             responseResendRef.current = false;
-        }
+            // Add timeout check for evaluation response
+            const timeoutDuration = 4000; // 4 seconds
+            const startTime = Date.now();
+            const checkEvalStatus = setInterval(async () => {
+                const currentItems = client.conversation.getItems();
+                const lastItem = currentItems[currentItems.length - 1];
+                console.log('lastItem', lastItem);
+                console.log('isWaitingForEvaluationRef.current', isWaitingForEvaluationRef.current);
+                // If we've waited more than 4 seconds and status is still incomplete/in_progress
+                if (Date.now() - startTime >= timeoutDuration && 
+                    lastItem && 
+                    isWaitingForEvaluationRef.current &&
+                    !lastItem.content[0]?.transcript?.startsWith('<eval>')) {
+                    
+                    clearInterval(checkEvalStatus);
+                    console.log('Evaluation response timeout - retrying');
+                    
+                    // Cancel the current response
+                    if (lastItem.id && isWaitingForEvaluationRef.current) {
+                        console.log('now deleting/canceling the response using last item', lastItem);
+                        if (lastItem.status === 'in_progress') {
+                            await client.realtime.send('response.cancel', {
+                                item_id: lastItem.id
+                            });
+                        } else {
+                            await client.realtime.send('conversation.item.delete', {
+                                item_id: lastItem.id
+                            });
+                        }
+                        // Retry sending the evaluation request
+                        setTimeout(async () => {
+                            if (isWaitingForEvaluationRef.current) {
+                            await client.realtime.send('response.create', {
+                                response: {
+                                        "modalities": ["text", "audio"],
+                                        "instructions": getInstruction4Evaluation(items),
+                                    }
+                                });
+                                responseResendRef.current = true;
+                                itemToRespondRef.current = null;
+                                isWaitingForEvaluationRef.current = true;
+                            }
+                        }, 1000);
+                    }
+                }
+                
+                // Clear interval if status is completed or if 8 seconds have passed
+                if (lastItem?.status === 'completed' || Date.now() - startTime >= 12000) {
+                    clearInterval(checkEvalStatus);
+                }
+            }, 1000);
+         } 
         // else {
         //     client.createResponse();
         // }
@@ -646,29 +697,29 @@ const ReadChatPage = () => {
         *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider both the child's previous responses on this page and their latest response to determine whether they accurately address the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
-        - Correct answer: Consider the child's all responses in the conversation history so far. If their answers closely align with the provided answer, then consider the child has answered the question correctly. 
-        - Correct but incomplete answer: Consider the child's responses on this page so far. If their answers include correct components but still lack a couple of key elements from the given answer, then consider the child has answered the question correctly, but incompletely.
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider both the child's previous responses on this page and their latest response to determine whether they accurately address the main question. The evaluation should take into account all of the child's responses to determine whether they collectively form the most accurate answer to the main question.
+        - Perfect answer: The response is fully accurate, and directly aligns with the provided answer. 
+        - Correct but incomplete answer: The response is accurate but lacks the details needed to fully represent the most precise and complete answer. 
         - Factually incorrect answer: The response contains incorrect information
         - Irrelevant response: The response is unrelated to the question or the story context.
         - Uncertainty answer: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
                     
         **Response Format**:
-        Return the evaluation result in a json format.
+        Precede each evaluation with the tag <eval>. Do not include any other text apart from the tag and evaluation. 
         Below are the examples of your output, reply with one of these only:
-        1. {"evaluation": "invalid"}
-        2. {"evaluation": "conv end"}
-        3. {"evaluation": "child asks question"}
-        4. {"evaluation": "correct"}
-        5. {"evaluation": "correct but incomplete"}
-        6. {"evaluation": "factually incorrect"}
-        7. {"evaluation": "irrelevant response"}
-        8. {"evaluation": "uncertainty"}
+        - <eval>invalid</eval>
+        - <eval>conv end</eval>
+        - <eval>child asks question</eval>
+        - <eval>perfect</eval>
+        - <eval>correct but incomplete</eval>
+        - <eval>factually incorrect</eval>
+        - <eval>irrelevant response</eval>
+        - <eval>uncertainty</eval>
 
         **Important Reminder**:
-        - Only reply within the json format. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
-        - YOU MUST REPLY WITH CONTENT IN THE JSON FORMAT. 
-        - DO NOT REPLY WITH EMPTY CONTENT.
+        - Only reply within the format of <eval>...</eval>. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
+        - Only reply within the format of <eval>...</eval>. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
+        - Only reply within the format of <eval>...</eval>. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
         `;
         console.log(instruction4Evaluation);
         return instruction4Evaluation;
@@ -695,8 +746,8 @@ const ReadChatPage = () => {
         return instruction4Guiding;
     }
 
-    const getInstruction4Correct = (items, evaluation) => {
-        const instruction4Correct = `
+    const getInstruction4Perfect = (items, evaluation) => {
+        const instruction4Perfect = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
         2. Conversation history: 
@@ -710,24 +761,24 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history.
-        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
+        - Since the evaluation of the child's response is 'perfect', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging, and under 20 words.
-        - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
+        - Since the evaluation of the child's response is 'perfect', provide a concise explanation to deepen their understanding.
 
     **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
        
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
-        return instruction4Correct;
+        return instruction4Perfect;
     }
 
     const getInstruction4Incomplete = (items, evaluation) => {
@@ -752,12 +803,12 @@ const ReadChatPage = () => {
         - Do not include the explicit correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
-        - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating the correct answer.
+        - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating them.
                         
     **Instructions for Pose a Follow-up Question**:
         - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-        - DO NOT ask a question that is beyond the main question.
+        - DO NOT ask question that beyond the main question.
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -780,7 +831,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -799,11 +850,11 @@ const ReadChatPage = () => {
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'perfect' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 4) {
             console.log('instruction4Incomplete1');
             return instruction4Incomplete1;
         } else {
@@ -829,18 +880,18 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
+- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
 
     **Instructions for hint**:
         - Do not include the explicit correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
-        - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating the correct answer.
+        - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
                         
     **Instructions for Pose a Follow-up Question**:
         - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-        - DO NOT ask a question that is beyond the main question.
+        - DO NOT ask question that beyond the main question.
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -863,7 +914,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'factually incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -882,12 +933,12 @@ const ReadChatPage = () => {
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'perfect' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
 
-        if (sumCount < 3) {
+        if (sumCount < 4) {
             console.log('instruction4FactuallyIncorrect1');
             return instruction4FactuallyIncorrect1;
         } else {
@@ -912,8 +963,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the child’s response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let’s think about what the question is asking,' 'That’s an interesting idea! Let’s focus on what we’re really looking for,' and other similar acknowledgments).
-
+- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let's think about what the question is asking,' 'That's an interesting idea! Let's focus on what we're really looking for,' and other similar acknowledgments).
 
     **Instructions for hint**:
         - Do not include the explicit correct answer in the hint.
@@ -924,7 +974,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-        - DO NOT ask a question that is beyond the main question.
+        - DO NOT ask question that beyond the main question.
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -947,7 +997,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'irrelevant', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -966,11 +1016,11 @@ const ReadChatPage = () => {
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'perfect' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 4) {
             console.log('instruction4IrrelevantResponse1');
             return instruction4IrrelevantResponse1;
         } else {
@@ -996,7 +1046,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the child’s response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That’s okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That’s alright. I’m here to help', ‘Let’s think together’, and other similar acknowledgments).
+        - Since the child's response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That's okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That's alright. I'm here to help', 'Let's think together', and other similar acknowledgments).
 
     **Instructions for hint**:
         - Do not include the explicit correct answer in the hint.
@@ -1007,7 +1057,7 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-        - DO NOT ask a question that is beyond the main question.
+        - DO NOT ask question that beyond the main question.
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
@@ -1030,7 +1080,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'uncertainty', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -1050,11 +1100,11 @@ const ReadChatPage = () => {
         
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'perfect' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 4) {
             console.log('instruction4Uncertainty1');
             return instruction4Uncertainty1;
         } else {
@@ -1063,6 +1113,91 @@ const ReadChatPage = () => {
         }
         
         
+    }
+
+
+    const getInstruction4Incorrect = (items, evaluation) => {
+        const instruction4Incorrect1 = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        5. the evaluation of the child's latest response: ${evaluation};
+
+    Your response should contain three parts: 1. acknowledgement, 2. hint, and 3. one follow-up question.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'incorrect', you should acknowledge their effort and tailor your acknowledgement to the context (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", and more).
+
+    **Instructions for hint**:
+        - Do NOT explicitly include the correct answer in the hint. 
+        - DO NOT REVEAL THE ANSWER.
+        - Your hint should IMPLICITLY guide the child to think about some elements of the correct answer.
+        - Your hint should not include any question.
+        - Keep your hint simple, engaging and under 20 words.
+                
+    **Instructions for Pose ONE Follow-up Question**:
+        - Based on your hint, reask the main question again in the context (question: ${knowledgeRef.current[currentPageRef.current]?.question})
+        - The follow-up question should guide the child to come up with the correct answer without revealing the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - The follow-up question should only include ONE question sentence. Keep it simple, engaging and under 20 words.
+        - Do NOT ask the question that starts with "Can you tell me", "Do you know", "Do you remember", etc. The question should be open-ended, not a yes/no question.
+    
+    **Instructions for Whole Response**:
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
+        - Do not end the conversation.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not reveal the answer. You should hint the child to think in the explanation part.
+        `
+        const instruction4Incorrect2 = `
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        1. conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        2. the evaluation of the child's latest response: ${evaluation};
+        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+
+    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Since the evaluation of the child's response is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+
+    **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Explain the answer here with easy-to-understand words.
+        - Keep your explanation simple, engaging and under 20 words. 
+
+    **Instructions for Conclusion**:
+        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+        - Keep the conclusion part concise, under 15 words. 
+        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include the ONLY ONE question "Do you have any questions about this page?")
+ 
+    **Instructions for Whole Response**:
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        `
+        let sumCount = 0;
+        for (const answer of answerRecord) {
+            if (answer === 'incorrect' || answer === 'correct') {
+                sumCount++;
+            }
+        }
+
+        if (sumCount < 4) {
+            console.log('instruction4Incorrect1');
+            return instruction4Incorrect1;
+        } else {
+            console.log('instruction4Incorrect2');
+            return instruction4Incorrect2;
+        }
     }
 
     const getInstruction4ChildQuestion = (items, evaluation) => {
@@ -1092,8 +1227,8 @@ const ReadChatPage = () => {
     **Instructions for Pose a Follow-up Question**:
         - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-        - DO NOT ask a question that is beyond the main question.
-
+        - DO NOT ask question that beyond the main question.
+        
     **Instructions for Whole Response**:
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
@@ -1134,11 +1269,11 @@ const ReadChatPage = () => {
             if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
                 sumCount++;
             }
-            if (answer === 'correct') {
+            if (answer === 'perfect') {
                 correctCount++;
             }
         }
-        if (sumCount > 2 || correctCount > 0) {
+        if (sumCount > 3 || correctCount > 0) {
             console.log('instruction4ChildQuestion2');
             return instruction4ChildQuestion2;
         } else {
@@ -1168,11 +1303,9 @@ const ReadChatPage = () => {
     const getInstruction4ConvEnd = (items, evaluation) => {
         const instruction4ConvEnd = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. 
-        Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
+        Now your task is to keep the focus of the conversation on the story and end the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
         
         **Instructions for Response**:
-        - If the child asks a question, acknowledge their curiosity and steer the conversation back to the story.
-        - End your response with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
         - DO NOT INCLUDE ANY QUESTION IN YOUR RESPONSE.
         - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
         `;
@@ -1180,101 +1313,77 @@ const ReadChatPage = () => {
         return instruction4ConvEnd;
     }
 
-    const getInstruction4FollowUp = (items, evaluation) => {
-        const instruction4FollowUp1 = `
+    const getInstruction4OffTopic = (items, evaluation) => {
+        const instruction4OffTopic = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
         2. Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        3. the evaluation of the child's latest response: ${evaluation};
 
-        You should first evaluate the child's latest response based on the main question and the answer, and then generate a response based on the evaluation.
+        Start by acknowledging the child's response (e.g., "Interesting idea!"). Then guide the conversation back to the original question you asked or conclude the interaction if the conversation has gone beyond three rounds.
+        - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
+        `;
+        console.log(instruction4OffTopic);
+        return instruction4OffTopic;
+    }
 
-        **Instructions for Evaluation**:
-        *Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
-        *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        Step 1: Read the conversation history, compare the child's latest response with the main question and the answer, and determine whether the child's latest response accurately addresses the main question (e.g., contains the key elements in the answer).
-        Step 2: - If the child's response is CORRECT, your response should include three parts: acknowledgement, explanation, and conclusion.
-                - In ALL OTHER CASES, including factually incorrect, irrelevant response, and uncertain answers (such as 'I don't know'), your response should include three parts: acknowledgement, hint, and ONE follow-up question.
+    const getInstruction4FollowUp = (items, evaluation) => {
+        const instruction4FollowUp = `
+        You need to pose a follow-up question based on the following information: 
+        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        2. Conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        3. The child's latest response: the most recent input from the child (user).
 
-        **Instructions for Response to Correct Answer**:
-        - Your response should include three parts: acknowledgement, explanation, and conclusion.
-        1. Acknowledgement:
-            - For acknowledgement, your acknowledgment should be friendly, non-repetitive, and under 25 words.
-            - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-            - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history.
-            - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
-        2. Explanation:
-            - Your explanation should be suitable for children aged 6 to 8.
-            - Keep your explanation simple, engaging, and under 20 words.
-            - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
-        3. Conclusion:
-            - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
-            - Keep the conclusion part concise, under 15 words. 
-            - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes and ends with ONE question sentence, which is the question "Do you have any questions about this page?"
+        Follow the following instructions:
+        Your response should contain three parts: acknowledgement, explanation, and follow-up question or conclusion.
+        The total number of conversation rounds should be 4.
 
-        **Instructions for Response to Answers that are not correct**:
-        - Your response should include two parts: acknowledgement, hint, and ONE follow-up question.
-        1. Acknowledgement:
-            - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
-            - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-            - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-            - Since the evaluation of the child's response is 'incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
-        2. Hint:
-            - Do not include the explicit correct answer in the hint.
-            - Your hint should be suitable for children aged 6 to 8.
-            - Keep your hint simple, engaging and under 20 words.
-            - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
-        3. Follow-up Question:
-            - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
-            - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
-            - DO NOT ask a question that is beyond the main question.
+        **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements tailored to the context. Do not repeat the same acknowledgement as in the conversation history. 
+        - Here are different situations for acknowledgement based on the child's response:
+            1. If the evaluation is 'invalid', reply with a friendly line (e.g., "I didn't hear your answer, can you say it again?", "Oh I didn't catch that, can you say it again?")
+            2. If the evaluation is 'incorrect', you should first provide encouraging feedback (e.g., "Let's try again!", "Let's think about it together!", "It's okay if you don't remember!", "Let's think again!", "Aha! You jumped ahead of me a little bit, but that's okay.")
+            3. If the evaluation is 'partially correct', you should first provide encouraging feedback (e.g., "That's a good try!", "Aha! You're on the right track!"), then hint the child to think about the correct answer.
+            4. If the evaluation is 'child asks question', you should acknowledge their question (e.g., "Good question!", "Oh it's an interesting question!")
+            5. If the evaluation of the child's response is 'off-topic', you should steer the conversation back to the original topic.
+        
+        **Instructions for Explanation**:
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+        - Here are different situations for explanation based on the child's response:
+            1. If the evaluation is 'correct', provide a concise explanation to deepen their understanding.
+            2. If the evaluation is 'incorrect', hint the child to think to get the correct answer (without explicitly telling the correct answer)
+            3. If the evaluation is 'child asks question', answer the child's question using simple words and steer the conversation back to the original question.
+
+        **Situations for Not Posing a Follow-up Question**:
+        - You do not need to pose a follow-up question if:
+            1. The child answers the question correctly.
+            2. The conversation has more than 4 rounds.
+        In these cases, you can end the conversation (refer to **Instructions for Conclusion**). 
+        
+        **Instructions for Pose a Follow-up Question**:
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - DO NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
+        - DO NOT ask question that beyond the main question.
+
+        **Instructions for Conclusion**:
+        - Do not use question marks in the conclusion.
+        - You cannot conclude the conversation if you're posing a follow-up question.
+        - If you are not asking a question, after the explanation, transition to a conclusion. 
+        - Keep the conclusion part concise, under 15 words.
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
 
         **Instructions for Whole Response**:
-            - If the child's response is CORRECT, make sure to only include and end with your response with ONE question "Do you have any questions about this page?" in the whole response.
-            - If the child's response is NOT correct, make sure your response ends with ONLY ONE follow-up question (RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question})).
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - If your response includes a question, you can't conclude the conversation. You need to address the question first.
+        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         `;
-
-        const instruction4FollowUp2 = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. 
-        Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
-        
-        **Instructions for Response**:
-        Step 1: Evaluate the child's latest response based on the following information: 
-            1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-            2. Conversation history: 
-            ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-            3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-            4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-            5. the evaluation of the child's latest response: ${evaluation};
-        Step 2: Generate a response based on the evaluation.
-            - If the child asks a question, acknowledge their curiosity and steer the conversation back to the story.
-            - If the child answers the question correctly, acknowledge their answer and provide a concise explanation to deepen their understanding.
-            - If the child answers the question incorrectly, acknowledge their efforts and explain the correct answer.
-        Step 3: End the conversation:
-            - End your response with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
-        
-        **Important Reminder**:
-        - DO NOT INCLUDE ANY QUESTION IN YOUR RESPONSE.
-        - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
-        - END THE CONVERSATION WITH A FRIENDLY, DECLARATIVE LINE, SUCH AS "It was fun chatting with you! Let's continue reading the story."
-        `;
-
-        let sumCount = 0;
-        for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
-                sumCount++;
-            }
-        }
-        if (sumCount < 3) {
-            console.log('instruction4FollowUp1');
-            return instruction4FollowUp1;
-        } else {
-            console.log('instruction4FollowUp2');
-            return instruction4FollowUp2;
-        }
+        console.log(instruction4FollowUp);
+        return instruction4FollowUp;
     }
 
     const getInstruction4NoResponse = () => {
@@ -1381,108 +1490,128 @@ const ReadChatPage = () => {
                 // console.log('item', item);
                 if(timerRef.current) clearInterval(timerRef.current);
                 // if the item starts with <eval>, delete it
-                if (delta?.transcript) {
-                    // setChatHistory(items);
-                    setCurrentPageChatHistory(items);
-                    // chatHistoryRef.current[currentPageRef.current] = items;
-                    // check if the chat-window element exists
-                    const chatWindow = document.getElementById('chat-window');
-                    if (chatWindow) {
-                        chatWindow.scrollTop = chatWindow.scrollHeight;
-                    }
-                }
-                if (delta?.audio) {
-                    wavStreamPlayer.add16BitPCM(delta.audio, item.id);
-                }
-                // the evaluation failed
-                console.log('waiting for evaluation', isWaitingForEvaluationRef.current);
-                if (item.status === 'incomplete' && item.role === 'assistant' && isWaitingForEvaluationRef.current) {
-                    console.log('incomplete item', item);
-                    try {
-                        await client.realtime.send('response.cancel');
-                    } catch (error) {
-                        console.error('Error deleting item:', error);
-                    }
-                    if (!resendFlagRef.current) {
+                if (item?.content[0]?.transcript?.startsWith('<eval>')) {
+                    // keep the item id, and when the item status is completed, delete it
+                    setItemToDelete(item.id);
+                    console.log('evaluation result and status', item.content[0]?.transcript, item.status);
+                    if ((item.status === 'completed' || item.status === 'incomplete') && !deletedItemsRef.current.has(item.id)) {
+                        console.log('!!! deleting item', item);
+                        isWaitingForEvaluationRef.current = false;
                         try {
-                            console.log('resending response');
-                            const currentItems = client.conversation.getItems();
-                            await client.realtime.send('response.create', {
-                                response: {
-                                    "modalities": ["text", "audio"],
-                                    "instructions": getInstruction4Evaluation(currentItems)
-                                }
+                            await client.realtime.send('conversation.item.delete', {
+                                item_id: item.id
                             });
-                            resendFlagRef.current = true;
-                        } catch (error) {
-                            console.error('Error deleting item:', error);
-                        }
-                    } else {
-                        console.log('second time, do not resend');
-                        const evaluation = getEvaluation('follow up');
-                        try {
-                            isWaitingForResponseRef.current = false;
+                            // 添加到已删除集合中
+                            deletedItemsRef.current.add(item.id);
+                            console.log('items length', items.length);
+                            console.log('noReponseCnt', noReponseCntRef.current);
                             const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                             
                             if (answerOrder > answerRecord.length - 1) {
-                                answerRecord.push(evaluation);
+                                answerRecord.push(item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim());
                             }
                             console.log('answerRecord', answerRecord);
-                            await sendResponse(client, evaluation, items);
                         } catch (error) {
-                            console.error('Error sending response:', error);
+                            console.log('error', error);
                         }
-                    }
-                }
-                console.log('item.id, item to respond', item.id, itemToRespondRef.current);
-                console.log('item status', item.status);
-                console.log('item', item);
-                if (item.status === 'completed') {
-                    if (isWaitingForEvaluationRef.current) {
-                        if (item.content.length === 0 && item.role === 'assistant' && item.id !==itemToRespondRef.current) {
-                            console.log('item content is empty');
-                            itemToRespondRef.current = item.id;
-                            try {
-                                await client.realtime.send('conversation.item.delete', {
-                                    item_id: item.id
-                                });
-                                console.log('follow up response for empty evaluation');
-                                // another method is to use the follow up prompt
-                                const evaluation = getEvaluation('follow up');
-                                isWaitingForEvaluationRef.current = false;
-                                await sendResponse(client, evaluation, items);
-                                // await client.realtime.send('response.create', {
-                                //     response: {
-                                //         "modalities": ["text", "audio"],
-                                //         "instructions": getInstruction4Evaluation(items)
-                                //     }
-                                // });
-                            } catch (error) {
-                                console.error('Error sending response:', error);
-                            }
-                        }
-                        else if (item.content[0]?.text && item.role === 'assistant' && item.id !==itemToRespondRef.current) {
-                            console.log('evaluation item', item.content[0]?.text);
-                            const evaluation = getEvaluation(item.content[0]?.text);
-                            itemToRespondRef.current = item.id;
-                            try {
-                                await client.realtime.send('conversation.item.delete', {
-                                    item_id: item.id
-                                });
-                                isWaitingForEvaluationRef.current = false;
-                                const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
-                                
-                                if (answerOrder > answerRecord.length - 1) {
-                                    answerRecord.push(evaluation);
+                        console.log('items', items);
+                        console.log('items to delete', itemToDelete);
+                    
+                        // only update answerRecord after the item is deleted
+                        // if this is the first completed item for the item id, send a response
+                    // after item is deleted, create a new response
+                    console.log('item status', item.status);
+                    console.log('item.id', item.id);
+                    console.log('itemToRespondRef.current', itemToRespondRef.current);
+                    if (evalStatus(item.content[0]?.transcript) && item.role === 'assistant') {
+                        console.log('now generating response for', item.content[0]?.transcript.replace('<eval>', '').trim());
+                        itemToRespondRef.current = item.id;
+                        // send this instruction after the item is completed
+                        setTimeout(async () => {
+                            // if the string has </eval>, remove it
+                            const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                            console.log('evaluation', evaluation);
+
+                            // Check if there's an active response
+                            const hasActiveResponse = client.conversation.getItems().some(item => 
+                                item.status === 'in_progress' || item.status === 'pending'
+                            );
+
+                            if (hasActiveResponse) {
+                                console.log('There is an active response, waiting before sending new one');
+                                resendFlagRef.current = true;
+                                const items = client.conversation.getItems();
+                                for (const item of items) {
+                                    if (item.status === 'in_progress' || item.status === 'pending') {
+                                        await client.realtime.send('response.cancel', {
+                                            item_id: item.id
+                                        });
+                                    }
                                 }
-                                console.log('answerRecord', answerRecord);
+                                // Wait for 2 seconds and try again
+                                // setTimeout(async () => {
+                                //     try {
+                                //         if (resendFlagRef.current) {
+                                //             console.log('sending initial response request after 4 seconds');
+                                //             await sendResponse(client, evaluation, items);
+                                //         }
+                                //     } catch (error) {
+                                //         console.error('Error sending response after retry:', error);
+                                //     }
+                                // }, 4000);
+                            }
+                            try {
                                 await sendResponse(client, evaluation, items);
                             } catch (error) {
                                 console.error('Error sending response:', error);
                             }
+                        }, 1000);
+                    }
+                    // else if (resendFlagRef.current && item.id === itemToRespondRef.current) {
+                    //     if (item.status === 'in_progress') {
+                    //         await client.realtime.send('response.cancel', {
+                    //             item_id: item.id
+                    //         });
+                    //         client.realtime.send('response.create', {
+                    //             response: {
+                    //                 "modalities": ["text", "audio"],
+                    //                 "instructions": getInstruction4Evaluation(items),
+                    //             }
+                    //         })
+                    //     } else {
+                    //         console.log('resending response, after this resendFlag is set to false', item.content[0]?.transcript);
+                    //         resendFlagRef.current = false;
+                    //         const evaluation = item.content[0]?.transcript.replace('<eval>', '').replace('</eval>', '').trim();
+                    //         console.log('evaluation', evaluation);
+                    //         try {
+                    //             await sendResponse(client, evaluation, items);
+                    //         } catch (error) {
+                    //             console.error('Error sending response:', error);
+                    //         }
+                    //     }
+                    // }
+                }
+            }
+                else if (item.role === 'user' || (!isWaitingForEvaluationRef.current && (!deletedItemsRef.current.has(item.id) || (!item.content[0]?.transcript?.startsWith('<'))))) {
+                    // console.log('logging this item: ', item.content[0]?.transcript);
+                    if (!item.content[0]?.transcript?.startsWith('<') && item.role === 'assistant' && resendFlagRef.current) {
+                        console.log('resending response set to false', item.content[0]?.transcript);
+                        resendFlagRef.current = false;
+                    }
+                    if (delta?.transcript) {
+                        // setChatHistory(items);
+                        setCurrentPageChatHistory(items);
+                        // chatHistoryRef.current[currentPageRef.current] = items;
+                        // check if the chat-window element exists
+                        const chatWindow = document.getElementById('chat-window');
+                        if (chatWindow) {
+                            chatWindow.scrollTop = chatWindow.scrollHeight;
                         }
                     }
-                    if (item.formatted.audio?.length) {
+                    if (delta?.audio) {
+                        wavStreamPlayer.add16BitPCM(delta.audio, item.id);
+                    }
+                    if (item.status === 'completed' && item.formatted.audio?.length) {
                         console.log('current item', item);
                         const wavFile = await WavRecorder.decode(
                             item.formatted.audio,
@@ -1526,8 +1655,9 @@ const ReadChatPage = () => {
                             setIsFirstTime(false);
                         }
                     }
+                    setItems(items);
                 }
-                setItems(items);
+                setIsClientSetup(true);
             });
             client.on('disconnect', async () => {
                 console.log('WebSocket disconnected');
@@ -1567,35 +1697,13 @@ const ReadChatPage = () => {
     }, [isConversationEnded]);
 
     const evalStatus = (transcript) => {
-        if (transcript.includes('correct') || transcript.includes('correct but incomplete') || transcript.includes('factually incorrect') || transcript.includes('irrelevant') || transcript.includes('uncertainty') || transcript.includes('child asks question') || transcript.includes('invalid') || transcript.includes('conv end')) {
+        if (!transcript.includes('<eval>') || !transcript.includes('</eval>')) {
+            return false;
+        }
+        if (transcript.includes('perfect') || transcript.includes('correct but incomplete') || transcript.includes('factually incorrect') || transcript.includes('irrelevant') || transcript.includes('uncertainty') || transcript.includes('child asks question') || transcript.includes('invalid') || transcript.includes('conv end')) {
             return true;
         }
         return false;
-    }
-
-    const getEvaluation = (transcript) => {
-        if (transcript.includes('correct but incomplete')) {
-            return 'correct but incomplete';
-        }
-        if (transcript.includes('factually incorrect')) {
-            return 'factually incorrect';
-        }
-        if (transcript.includes('irrelevant')) {
-            return 'irrelevant';
-        }
-        if (transcript.includes('uncertainty')) {
-            return 'uncertainty';
-        }
-        if (transcript.includes('child asks question')) {
-            return 'child asks question';
-        }
-        if (transcript.includes('invalid')) {
-            return 'invalid';
-        }
-        if (transcript.includes('conv end')) {
-            return 'conv end';
-        }
-        return 'follow up';
     }
 
     const handleCaptionToggle = () => {
@@ -1877,8 +1985,8 @@ const ReadChatPage = () => {
 
     const getInstruction4Response = (items, evaluation) => {
         switch (evaluation) {
-            case 'correct':
-                return getInstruction4Correct(items, evaluation);
+            case 'perfect':
+                return getInstruction4Perfect(items, evaluation);
             case 'correct but incomplete':
                 return getInstruction4Incomplete(items, evaluation);
             case 'factually incorrect':
@@ -1902,7 +2010,8 @@ const ReadChatPage = () => {
     const sendResponse = async (client, evaluation, items) => {
         const currentItems = client.conversation.getItems();
         for (const item of currentItems) {
-            if ((item.status === 'in_progress' || item.status === 'failed') && evalStatus(item.content?.[0]?.transcript)) {
+            if ((item.status === 'in_progress' || item.status === 'pending') && 
+                !item.content[0]?.transcript?.startsWith('<eval>')) {
                 await client.realtime.send('response.cancel', {
                     item_id: item.id
                 });
@@ -1910,11 +2019,11 @@ const ReadChatPage = () => {
         }
 
         switch (evaluation) {
-            case 'correct':
+            case 'perfect':
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4Correct(items, evaluation)
+                        "instructions": getInstruction4Perfect(items, evaluation)
                     }
                 });
                 userRespondedRef.current = false;

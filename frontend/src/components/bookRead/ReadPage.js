@@ -749,13 +749,14 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'correct but incomplete', you should acknowledge the correct part and tailor your acknowledgment to the context (e.g., "Great start!", "Nice work! There's more to it", "Almost there", and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Do not include the explicit correct answer in the hint.
+        - DO NOT include the explicit correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
+        - DO NOT include any question in the hint.
         - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
         - DO NOT ask a question that is beyond the main question.
 
@@ -765,7 +766,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -832,13 +833,14 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Do not include the explicit correct answer in the hint.
+        - DO NOT include the explicit correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
+        - DO NOT include any question in the hint.
         - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
         - DO NOT ask a question that is beyond the main question.
 
@@ -848,7 +850,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -914,15 +916,15 @@ const ReadChatPage = () => {
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         - Since the child’s response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let’s think about what the question is asking,' 'That’s an interesting idea! Let’s focus on what we’re really looking for,' and other similar acknowledgments).
 
-
     **Instructions for hint**:
-        - Do not include the explicit correct answer in the hint.
+        - DO NOT include the explicit correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
+        - DO NOT include any question in the hint.
         - Since the child's response is irrelevant, provide an implicit hint to guide them toward the context and correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
         - DO NOT ask a question that is beyond the main question.
 
@@ -932,7 +934,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -999,13 +1001,14 @@ const ReadChatPage = () => {
         - Since the child’s response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That’s okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That’s alright. I’m here to help', ‘Let’s think together’, and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Do not include the explicit correct answer in the hint.
+        - DO NOT include the explicit correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
+        - DO NOT include any question in the hint.
         - Since the child's response is uncertain, provide an implicit hint to guide them toward the correct answer without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
         - DO NOT ask a question that is beyond the main question.
 
@@ -1015,7 +1018,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -1090,7 +1093,7 @@ const ReadChatPage = () => {
         - Since the child poses a question, answer the question with easy-to-understand words.
 
     **Instructions for Pose a Follow-up Question**:
-        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+        - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
         - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
         - DO NOT ask a question that is beyond the main question.
 
@@ -1228,7 +1231,7 @@ const ReadChatPage = () => {
             - Keep your hint simple, engaging and under 20 words.
             - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
         3. Follow-up Question:
-            - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question such as "So, based on that......", "Since we now know....";
+            - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
             - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    
             - DO NOT ask a question that is beyond the main question.
 
@@ -1419,24 +1422,23 @@ const ReadChatPage = () => {
                         }
                     } else {
                         console.log('second time, do not resend');
-                        const evaluation = getEvaluation('follow up');
                         try {
                             isWaitingForResponseRef.current = false;
                             const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                             
                             if (answerOrder > answerRecord.length - 1) {
-                                answerRecord.push(evaluation);
+                                answerRecord.push('follow up');
                             }
                             console.log('answerRecord', answerRecord);
-                            await sendResponse(client, evaluation, items);
+                            await sendResponse(client, 'follow up', items);
                         } catch (error) {
                             console.error('Error sending response:', error);
                         }
                     }
                 }
-                console.log('item.id, item to respond', item.id, itemToRespondRef.current);
-                console.log('item status', item.status);
-                console.log('item', item);
+                // console.log('item.id, item to respond', item.id, itemToRespondRef.current);
+                // console.log('item status', item.status);
+                // console.log('item', item);
                 if (item.status === 'completed') {
                     if (isWaitingForEvaluationRef.current) {
                         if (item.content.length === 0 && item.role === 'assistant' && item.id !==itemToRespondRef.current) {
@@ -1448,9 +1450,8 @@ const ReadChatPage = () => {
                                 });
                                 console.log('follow up response for empty evaluation');
                                 // another method is to use the follow up prompt
-                                const evaluation = getEvaluation('follow up');
                                 isWaitingForEvaluationRef.current = false;
-                                await sendResponse(client, evaluation, items);
+                                await sendResponse(client, 'follow up', items);
                                 // await client.realtime.send('response.create', {
                                 //     response: {
                                 //         "modalities": ["text", "audio"],
@@ -1463,7 +1464,7 @@ const ReadChatPage = () => {
                         }
                         else if (item.content[0]?.text && item.role === 'assistant' && item.id !==itemToRespondRef.current) {
                             console.log('evaluation item', item.content[0]?.text);
-                            const evaluation = getEvaluation(item.content[0]?.text);
+                            let evaluation = getEvaluation(item.content[0]?.text);
                             itemToRespondRef.current = item.id;
                             try {
                                 await client.realtime.send('conversation.item.delete', {
@@ -1483,7 +1484,7 @@ const ReadChatPage = () => {
                         }
                     }
                     if (item.formatted.audio?.length) {
-                        console.log('current item', item);
+                        // console.log('current item', item);
                         const wavFile = await WavRecorder.decode(
                             item.formatted.audio,
                             24000,
@@ -1576,6 +1577,9 @@ const ReadChatPage = () => {
     const getEvaluation = (transcript) => {
         if (transcript.includes('correct but incomplete')) {
             return 'correct but incomplete';
+        }
+        if (transcript.includes('correct')) {
+            return 'correct';
         }
         if (transcript.includes('factually incorrect')) {
             return 'factually incorrect';

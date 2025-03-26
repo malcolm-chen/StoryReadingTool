@@ -337,10 +337,9 @@ const ReadChatPage = () => {
         await wavRecorder.pause();
         recorderControls.stopRecording();
         console.log('stop recording');
+        isWaitingForResponseRef.current = false;
         if (isKnowledge) {
             const items = client.conversation.getItems();
-        
-            
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
             client.inputAudioBuffer = new Int16Array(0);
@@ -635,20 +634,19 @@ const ReadChatPage = () => {
         If the response is empty, cannot be recognized due to noise, is too short, or sent by mistake, mark it as "invalid".
        
         Step 2: Check the status of the conversation
-        If the assistant has asked a question like 'Do you have any questions about this page?', and the child does not have any questions, mark it as "conv end".
-        If the child asks more than one question, also mark it as "conv end".
+        As long as the assistant has asked a question like 'Do you have any questions about this page?', no matter if the child asks a question or not, mark it as "conv end".
         
         Step 3: Check if the child asks a question
-        As long as the child asks a question, no matter if it is off-topic or not, mark it as "child asks question".
+        If the assistant has NOT asked a question like 'Do you have any questions about this page?', and the child asks a question, no matter if it is off-topic or not, mark it as "child asks question".
         
         Step 4: Evaluate Valid Responses
         For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
         *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider both the child's previous responses on this page and their latest response to determine whether they accurately address the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
-        - Correct answer: Consider the child's all responses in the conversation history so far. If their answers closely align with the provided answer, then consider the child has answered the question correctly. 
-        - Correct but incomplete answer: Consider the child's responses on this page so far. If their answers include correct components but still lack a couple of key elements from the given answer, then consider the child has answered the question correctly, but incompletely.
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider both the child's previous responses on this page and their latest response to determine whether they accurately address answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
+        - Correct answer: Consider the child's all responses in the conversation history so far. If their answers closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
+        - Correct but incomplete answer: Consider the child's responses on this page so far. If their answers include correct components but still lack a couple of key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information
         - Irrelevant response: The response is unrelated to the question or the story context.
         - Uncertainty answer: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
@@ -765,8 +763,7 @@ const ReadChatPage = () => {
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with and include ONLY ONE question. The follow-up question focuses on the main question (${knowledgeRef.current[currentPageRef.current]?.question}). The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -849,8 +846,7 @@ const ReadChatPage = () => {
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes ONE question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with and include ONLY ONE question. The follow-up question focuses on the main question (${knowledgeRef.current[currentPageRef.current]?.question}). The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -934,7 +930,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with and include ONLY ONE question. The follow-up question focuses on the main question (${knowledgeRef.current[currentPageRef.current]?.question}). The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -1018,7 +1014,7 @@ const ReadChatPage = () => {
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
-        - Your response should end with ONLY ONE follow-up question. The follow-up question focuses on the main question. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with and include ONLY ONE question. The follow-up question focuses on the main question (${knowledgeRef.current[currentPageRef.current]?.question}). The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -1174,7 +1170,9 @@ const ReadChatPage = () => {
         Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
         
         **Instructions for Response**:
-        - If the child asks a question, acknowledge their curiosity and steer the conversation back to the story.
+        - If the child asks a question, acknowledge their curiosity.
+        - If the child asks a question and the asked question is about the story, provide a concise answer.
+        - If the child asks a question and the asked question is not about the story, steer the conversation back to the story.
         - End your response with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
         - DO NOT INCLUDE ANY QUESTION IN YOUR RESPONSE.
         - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
@@ -1212,6 +1210,7 @@ const ReadChatPage = () => {
             - Your explanation should be suitable for children aged 6 to 8.
             - Keep your explanation simple, engaging, and under 20 words.
             - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
+            - Do not include a question in the explanation.
         3. Conclusion:
             - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
             - Keep the conclusion part concise, under 15 words. 
@@ -1229,6 +1228,7 @@ const ReadChatPage = () => {
             - Do not include the explicit correct answer in the hint.
             - Your hint should be suitable for children aged 6 to 8.
             - Keep your hint simple, engaging and under 20 words.
+            - Do not include a question in the hint.
             - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
         3. Follow-up Question:
             - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
@@ -1281,18 +1281,28 @@ const ReadChatPage = () => {
     }
 
     const getInstruction4NoResponse = () => {
-        const instruction4NoResponse = `
-        **Instructions**:
-        1. Read the chat history to find the last question the assistant asked.
-        2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question asked in the chat history.
-        3. If the last question is "Do you have any questions about this page?", you should ask the question "Do you have any questions about this page?" again, instead the main question in the chat history.
-        4. Do not ask a question that is not the last question in the chat history.
-        
-        **Important Reminder**:
-        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
-        `;
-        console.log(instruction4NoResponse);
-        return instruction4NoResponse;
+        const lastQuestion = items[items.length - 1]?.content[0]?.transcript;
+        console.log('lastQuestion', lastQuestion);
+        if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+            const instruction4NoResponse1 = `
+**Instructions**:
+    1. Ignore the chat history. Say "Hey, I didn't hear your answer. Do you have any questions about this page?"
+**Important Reminder**:
+    - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.`;
+            console.log(instruction4NoResponse1);
+            return instruction4NoResponse1;
+        } else {
+            const instruction4NoResponse2 = `
+**Instructions**:
+    1. Find the last question the assistant asked in the previous round of the conversation: ${lastQuestion}
+    2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question asked in the chat history.
+    3. Do not ask a question that is not the last question in the chat history.
+**Important Reminder**:
+    - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
+            `;
+            console.log(instruction4NoResponse2);
+            return instruction4NoResponse2;
+        }
     }
 
     const updateClientInstruction = async (instruction) => {
@@ -1423,7 +1433,7 @@ const ReadChatPage = () => {
                     } else {
                         console.log('second time, do not resend');
                         try {
-                            isWaitingForResponseRef.current = false;
+                            isWaitingForEvaluationRef.current = false;
                             const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                             
                             if (answerOrder > answerRecord.length - 1) {
@@ -1654,15 +1664,15 @@ const ReadChatPage = () => {
 
         // If clicking on the currently playing message
         if (replayingIndex === index) {
-            if (replayAudio.paused) {
+            if (isReplayingRef.current) {
+                replayAudio.pause();
+                isReplayingRef.current = false;
+            }
+            else {
                 // Resume playing
                 await wavStreamPlayer.interrupt();
                 replayAudio.play();
                 isReplayingRef.current = true;
-            } else {
-                // Pause playing
-                replayAudio.pause();
-                isReplayingRef.current = false;
             }
             return;
         }

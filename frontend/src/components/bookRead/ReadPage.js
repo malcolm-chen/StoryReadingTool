@@ -199,7 +199,7 @@ const ReadChatPage = () => {
                 const storyText = await response.json();
                 storyTextRef.current = storyText;
                 const loadedPages = Array.from({ length: storyText.length }, (_, index) => ({
-                    image: `files/books/${title}/pages/page${index}.png`,
+                    image: `files/books/${title}/pages/page${index}.jpg`,
                     text: storyText[index]
                 }));
                 setPages(loadedPages);

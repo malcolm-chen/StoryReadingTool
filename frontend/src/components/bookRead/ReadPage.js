@@ -644,7 +644,7 @@ const ReadChatPage = () => {
         *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider both the child's previous responses on this page and their latest response to determine whether they accurately address answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider both the child's previous responses on this page and their latest response to determine whether they accurately address the answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
         - Correct answer: Consider the child's all responses in the conversation history so far. If their answers closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's responses on this page so far. If their answers include correct components but still lack a couple of key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information
@@ -861,7 +861,7 @@ const ReadChatPage = () => {
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'factually incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        - Since the evaluation of the child's response is 'factually incorrect', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", etc.).
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -1195,7 +1195,7 @@ const ReadChatPage = () => {
         **Instructions for Evaluation**:
         *Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        Step 1: Read the conversation history, compare the child's latest response with the main question and the answer, and determine whether the child's latest response accurately addresses the main question (e.g., contains the key elements in the answer).
+        Step 1: Read the conversation history, compare the child's latest response with the answer, and determine whether the child's latest response accurately addresses the main question (e.g., contains the key elements in the answer).
         Step 2: - If the child's response is CORRECT, your response should include three parts: acknowledgement, explanation, and conclusion.
                 - In ALL OTHER CASES, including factually incorrect, irrelevant response, and uncertain answers (such as 'I don't know'), your response should include three parts: acknowledgement, hint, and ONE follow-up question.
 
@@ -1217,19 +1217,19 @@ const ReadChatPage = () => {
             - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
         - When organizing all the elements above to form a whole response, make sure the whole response only includes and ends with ONE question sentence, which is the question "Do you have any questions about this page?"
 
-        **Instructions for Response to Answers that are not correct**:
+        **Instructions for Response to Answers that are NOT correct**:
         - Your response should include two parts: acknowledgement, hint, and ONE follow-up question.
         1. Acknowledgement:
             - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
             - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
             - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-            - Since the evaluation of the child's response is 'incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
+            - Since the evaluation of the child's response is 'incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together!", and other similar acknowledgments).
         2. Hint:
             - Do not include the explicit correct answer in the hint.
             - Your hint should be suitable for children aged 6 to 8.
             - Keep your hint simple, engaging and under 20 words.
             - Do not include a question in the hint.
-            - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating it.
+            - Since the child's response is not correct, provide an implicit hint that guides them toward the correct answer without directly stating it.
         3. Follow-up Question:
             - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
             - Do NOT ask the question in the form of "Can you xxx?", or "Do you xxx?" The follow-up question should be open-ended instead of in the form of a yes/no question.    

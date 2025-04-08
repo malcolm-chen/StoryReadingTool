@@ -625,7 +625,7 @@ const ReadChatPage = () => {
         You need to evaluate the child's response based on the following inputs:
         - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
         - Child's Latest Response: The most recent input from the child.
-        - Story Context: ${pages[currentPageRef.current]?.text.join(' ')}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story Context: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
@@ -680,7 +680,7 @@ const ReadChatPage = () => {
         
         **Story Information**:
         - Story Title: ${title}
-        - Story Text: ${pages[currentPageRef.current]?.text.join(' ')}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story Text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - First Question: ${knowledgeRef.current[currentPageRef.current]?.question}
 
         **Instructions for initiating the Conversation**:
@@ -696,12 +696,12 @@ const ReadChatPage = () => {
     const getInstruction4Correct = (items, evaluation) => {
         const instruction4Correct = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        5. the evaluation of the child's latest response: ${evaluation};
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
     **Instructions for acknowledgment**:
@@ -731,12 +731,12 @@ const ReadChatPage = () => {
     const getInstruction4Incomplete = (items, evaluation) => {
         const instruction4Incomplete1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        5. the evaluation of the child's latest response: ${evaluation};
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. one follow-up question.
 
@@ -751,7 +751,7 @@ const ReadChatPage = () => {
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
         - DO NOT include any question in the hint.
-        - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer without directly stating the correct answer.
+        - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer (${knowledgeRef.current[currentPageRef.current]?.answer}) without directly stating the correct answer.
                         
     **Instructions for Pose a Follow-up Question**:
         - RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and the follow-up question;
@@ -763,14 +763,14 @@ const ReadChatPage = () => {
         - Speak ${audioSpeed <= 1 ? 'slower' : 'faster'} than usual (like ${audioSpeed} of your normal speed) for improved understanding by children.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - Your response should end with and include ONLY ONE question. The follow-up question focuses on the main question (${knowledgeRef.current[currentPageRef.current]?.question}). The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
+        - Your response should end with and include ONLY ONE question. The follow-up question should FOCUS ON THE MAIN QUESTION: ${knowledgeRef.current[currentPageRef.current]?.question}. The follow-up question should NOT be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        - conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        - the evaluation of the child's latest response: ${evaluation};
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
 
     Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
@@ -814,12 +814,12 @@ const ReadChatPage = () => {
     const getInstruction4FactuallyIncorrect = (items, evaluation) => {
         const instruction4FactuallyIncorrect1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        5. the evaluation of the child's latest response: ${evaluation};
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. one follow-up question.
 
@@ -850,11 +850,11 @@ const ReadChatPage = () => {
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
-
+        - the evaluation of the child's latest response: ${evaluation};
+        
     Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
     **Instructions for acknowledgment**:
@@ -897,12 +897,12 @@ const ReadChatPage = () => {
     const getInstruction4IrrelevantResponse = (items, evaluation) => {
         const instruction4IrrelevantResponse1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        5. the evaluation of the child's latest response: ${evaluation};
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. one follow-up question.
 
@@ -934,10 +934,10 @@ const ReadChatPage = () => {
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
@@ -981,12 +981,12 @@ const ReadChatPage = () => {
     const getInstruction4Uncertainty = (items, evaluation) => {
         const instruction4Uncertainty1 = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        5. the evaluation of the child's latest response: ${evaluation};
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. one follow-up question.
 
@@ -1018,10 +1018,9 @@ const ReadChatPage = () => {
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        2. the evaluation of the child's latest response: ${evaluation};
-        3. story text: ${pages[currentPageRef.current]?.text.join(' ')}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        - the evaluation of the child's latest response: ${evaluation};
 
     Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
@@ -1067,11 +1066,11 @@ const ReadChatPage = () => {
     const getInstruction4ChildQuestion = (items, evaluation) => {
         const instruction4ChildQuestion1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. child's latest response: the most recent input from the child.
-        4. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - child's latest response: the most recent input from the child.
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         
     Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. follow-up question
 
@@ -1101,10 +1100,10 @@ const ReadChatPage = () => {
 
         const instruction4ChildQuestion2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. child's latest response: the most recent input from the child (user).
+        - child's latest response: the most recent input from the child (user).
 
     Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion
 
@@ -1149,10 +1148,10 @@ const ReadChatPage = () => {
     const getInstruction4Invalid = (items, evaluation) => {
         const instruction4Invalid = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the evaluation of the child's latest response: ${evaluation};
+        - the evaluation of the child's latest response: ${evaluation};
 
         **Instructions for Response**:
         - Since the evaluation of the child's response is 'invalid', you should respond with a friendly line, such as "I didn't hear your answer, can you say it again?", or "Oh I didn't catch that, can you say it again?".
@@ -1184,11 +1183,11 @@ const ReadChatPage = () => {
     const getInstruction4FollowUp = (items, evaluation) => {
         const instruction4FollowUp1 = `
         You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-        2. Conversation history: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-        3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
 
         You should first evaluate the child's latest response based on the main question and the answer, and then generate a response based on the evaluation.
 
@@ -1246,12 +1245,12 @@ const ReadChatPage = () => {
         
         **Instructions for Response**:
         Step 1: Evaluate the child's latest response based on the following information: 
-            1. Story text: ${pages[currentPageRef.current]?.text.join(' ')}
-            2. Conversation history: 
+            ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+            - Conversation history: 
             ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
-            3. the question: ${knowledgeRef.current[currentPageRef.current]?.question}
-            4. the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-            5. the evaluation of the child's latest response: ${evaluation};
+            - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
+            - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+            - the evaluation of the child's latest response: ${evaluation};
         Step 2: Generate a response based on the evaluation.
             - If the child asks a question, acknowledge their curiosity and steer the conversation back to the story.
             - If the child answers the question correctly, acknowledge their answer and provide a concise explanation to deepen their understanding.

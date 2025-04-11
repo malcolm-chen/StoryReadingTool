@@ -1887,7 +1887,7 @@ const ReadChatPage = () => {
                 return getInstruction4Incomplete(items, evaluation);
             case 'factually incorrect':
                 return getInstruction4FactuallyIncorrect(items, evaluation);
-            case 'irrelevant response':
+            case 'irrelevant':
                 return getInstruction4IrrelevantResponse(items, evaluation);
             case 'uncertainty':
                 return getInstruction4Uncertainty(items, evaluation);
@@ -1941,7 +1941,7 @@ const ReadChatPage = () => {
                 });
                 userRespondedRef.current = false;
                 break;
-            case 'irrelevant response':
+            case 'irrelevant':
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],

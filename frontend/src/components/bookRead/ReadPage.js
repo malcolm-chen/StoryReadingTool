@@ -684,6 +684,7 @@ const ReadChatPage = () => {
 
         **Instructions for initiating the Conversation**:
             You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, share with me what you think" + first question; "xxx, let's chat about what you just read!" + first question; etc. 
+            **Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. DO NOT ASK ANYTHING ELSE.**
             *DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
         `;
         

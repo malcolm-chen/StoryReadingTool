@@ -1587,25 +1587,25 @@ const ReadChatPage = () => {
         if (transcript.includes('correct but incomplete')) {
             return 'correct but incomplete';
         }
-        if (transcript.includes('correct')) {
-            return 'correct';
-        }
-        if (transcript.includes('factually incorrect')) {
+        else if (transcript.includes('factually incorrect')) {
             return 'factually incorrect';
         }
-        if (transcript.includes('irrelevant')) {
+        else if (transcript.includes('correct')) {
+            return 'correct';
+        }
+        else if (transcript.includes('irrelevant')) {
             return 'irrelevant';
         }
-        if (transcript.includes('uncertainty')) {
+        else if (transcript.includes('uncertainty')) {
             return 'uncertainty';
         }
-        if (transcript.includes('child asks question')) {
+        else if (transcript.includes('child asks question')) {
             return 'child asks question';
         }
-        if (transcript.includes('invalid')) {
+        else if (transcript.includes('invalid')) {
             return 'invalid';
         }
-        if (transcript.includes('conv end')) {
+        else if (transcript.includes('conv end')) {
             return 'conv end';
         }
         return 'follow up';
@@ -1718,6 +1718,12 @@ const ReadChatPage = () => {
         setIsExpandedChat(false);
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
+    }
+
+    const handlePenguinClick = () => {
+        if (isMinimizedChat) {
+            setIsMinimizedChat(false);
+        }
     }
 
     const handleAutoPageToggle = () => {
@@ -2090,7 +2096,7 @@ const ReadChatPage = () => {
                 </div>
                 }
                 {/* shake the penguin image at the first page, after 13 seconds */}
-                <div id='penguin-box'>
+                <div id='penguin-box' onClick={handlePenguinClick}>
                     <img
                     src='./files/imgs/penguin.svg'
                     alt='penguin'

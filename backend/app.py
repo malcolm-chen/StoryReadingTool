@@ -186,12 +186,16 @@ def evaluate_response():
 
     ** Evaluation Criteria **
     If the child's response correctly addresses the question and matches most of the ideas in the answer, the evaluation result should be correct.
+    If the child's response is not relevant to the question, the evaluation result should be off-topic.
+    If the child's response is unsure about the answer, such as "I don't know" or "I have no idea", the evaluation result should be uncertainty.
     In all other cases, the evaluation result should be incorrect.
 
     ** Output **
-    Return only one word: correct or incorrect.
+    Return only one word: correct / off-topic / uncertainty / incorrect.
     Output Example:
     correct
+    off-topic
+    uncertainty
     incorrect
     """
     print('prompt', prompt)

@@ -356,9 +356,9 @@ const ReadChatPage = () => {
                         noReponseCntRef.current = 0;
                         setCurrentPageChatHistory([]);
                         if (!hasAskedRef.current) {
-                            console.log('start guiding');
+                            console.log('start guiding'); 
                             setTimeout(() => {
-                                playQuestion();
+                                playOpening();
                             }, 500);
                         }
                     } else {
@@ -375,6 +375,10 @@ const ReadChatPage = () => {
             playNextSentence();
         }
     };
+
+    useEffect(() => {
+        console.log('currentPageChatHistory', currentPageChatHistory);
+    }, [currentPageChatHistory]);
     
     useEffect(() => {
         console.log('playPageSentences', currentPageRef.current, sentenceIndexRef.current, knowledgeRef.current.length);
@@ -411,6 +415,7 @@ const ReadChatPage = () => {
             currentPageRef.current = newPage;
             sentenceIndexRef.current = 0;
             setCurrentSentence(0);
+            if (timerRef.current) clearInterval(timerRef.current);
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0
             playPageSentences();  
@@ -439,6 +444,7 @@ const ReadChatPage = () => {
         currentPageRef.current = newPage;
         setCurrentSentence(0);
         sentenceIndexRef.current = 0;
+        if (timerRef.current) clearInterval(timerRef.current);
         localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
         localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
         playPageSentences();  
@@ -451,8 +457,13 @@ const ReadChatPage = () => {
             // console.log('chat history', chatHistoryRef.current);
             setCurrentPageChatHistory(prevHistory => {
                 const updatedHistory = [...prevHistory];
+                console.log('updatedHistory when showing words', updatedHistory);
                 if (updatedHistory.length > 0) {
                     updatedHistory[updatedHistory.length - 1].status = 'completed';
+                    if (!updatedHistory[updatedHistory.length - 1].audio.includes(convAudio._src)) {
+                        console.log('adding convAudio._src to the audio array');
+                        updatedHistory[updatedHistory.length - 1].audio.push(convAudio._src);
+                    }
                 } else {
                     updatedHistory.push({
                         role: 'assistant',
@@ -489,29 +500,98 @@ const ReadChatPage = () => {
         }
     }
 
+    const playOpening = () => {
+        console.log('chat history', chatHistoryRef.current);
+        console.log('currentPageChatHistory', currentPageChatHistory);
+        const openingIndex = Math.floor(Math.random() * 6);
+        const openingAudioSrc = `/files/books/${title}/conv_audio/opening_${openingIndex}.mp3`;
+        const convAudio = new Howl({
+            src: [openingAudioSrc],
+            onplay: () => {
+                showWords(convAudio, timestampsRef.current['opening'][openingIndex]);
+            },
+            onend: () => {
+                setTimeout(() => {
+                    playQuestion();
+                }, 100); // Small delay to ensure state is updated
+            }
+        });
+        // Ensure chat history is updated before playing question
+        currentWordIndexRef.current = 0;
+        currentTranscriptRef.current = '';
+
+        const updatedChatHistory = [];
+        updatedChatHistory.push({
+            role: 'assistant',
+            content: currentTranscriptRef.current,
+            audio: [openingAudioSrc],
+            status: 'in_progress'
+        });
+        setCurrentPageChatHistory(updatedChatHistory);
+        console.log('updatedChatHistory', updatedChatHistory);
+        console.log('currentPageChatHistory after updating', currentPageChatHistory);
+        convAudio.play();
+    }
+
+    const playNoAnswer = () => {
+        console.log('playNoAnswer called');
+        const noAnswerAudioSrc = `/files/books/${title}/conv_audio/no_answer_0.mp3`;
+        const convAudio = new Howl({
+            src: [noAnswerAudioSrc],
+            onplay: () => {
+                showWords(convAudio, timestampsRef.current['no-answer']);
+            },
+            onend: () => {
+                playQuestion();
+            }
+        });
+        currentWordIndexRef.current = 0;
+        currentTranscriptRef.current = '';
+        currentPageChatHistory.push({
+            role: 'assistant',
+            content: currentTranscriptRef.current,
+            audio: [noAnswerAudioSrc],
+            status: 'in_progress'
+        });
+        setCurrentPageChatHistory([...currentPageChatHistory]);
+        convAudio.play();
+    }
+
     const playQuestion = () => {
-        console.log('playQuestion called'); // Log when playQuestion is called
+        console.log('playQuestion called');
         const questionAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_question.mp3`;
-        console.log('Question audio source:', questionAudioSrc);
         const convAudio = new Howl({
             src: [questionAudioSrc],
             onplay: () => {
                 console.log('Audio started playing');
                 showWords(convAudio, timestampsRef.current[currentPageRef.current]['question']);
+            },
+            onend: () => {
+                if (currentPageChatHistory.length < 2) {
+                    startResponseTimer();
+                }
             }
         });
         currentWordIndexRef.current = 0;
-        currentTranscriptRef.current = '';
-        // add the a new message to chatHistoryRef
-        const updatedChatHistory = [];
-        updatedChatHistory.push({
-            role: 'assistant',
-            content: currentTranscriptRef.current,
-            audio: questionAudioSrc,
-            status: 'in_progress'
+        const previousContent = currentTranscriptRef.current;
+        currentTranscriptRef.current = previousContent + ' ';
+        
+        setCurrentPageChatHistory(prevHistory => {
+            console.log('Previous chat history in question:', prevHistory);
+            if (prevHistory.length > 0) {
+                const lastMessage = prevHistory[0];
+                console.log('Last message:', lastMessage);
+                const updatedChatHistory = {
+                    ...lastMessage,
+                    content: currentTranscriptRef.current,
+                    audio: lastMessage.audio ? [...lastMessage.audio, questionAudioSrc] : [questionAudioSrc],
+                    status: 'in_progress'
+                };
+                console.log('Updated chat history:', updatedChatHistory);
+                return [updatedChatHistory];
+            }
+            return prevHistory;
         });
-
-        setCurrentPageChatHistory(updatedChatHistory);
         
         convAudio.play();
         hasAskedRef.current = true;
@@ -522,13 +602,39 @@ const ReadChatPage = () => {
     // }, [currentPageChatHistory]);
 
     const playResponseAudio = (response) => {
-        const responseAudioSrc = response === 'correct' ?
-            `/files/books/${title}/conv_audio/page_${currentPageRef.current}_correct_answer.mp3` :
-            `/files/books/${title}/conv_audio/page_${currentPageRef.current}_incorrect_answer.mp3`;
+        let responseAudioSrc;
+        switch (response) {
+            case 'correct':
+                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_correct_answer.mp3`;
+                break;
+            case 'incorrect':
+                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_incorrect_answer.mp3`;
+                break;
+            case 'off-topic':
+                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_off_topic_answer.mp3`;
+                break;
+            case 'uncertainty':
+                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_uncertainty_answer.mp3`;
+                break;
+        }
         const convAudio = new Howl({
             src: [responseAudioSrc],
             onplay: () => {
-                const timestampsKey = response === 'correct' ? 'correct_answer' : 'incorrect_answer';
+                let timestampsKey;
+                switch (response) {
+                    case 'correct':
+                        timestampsKey = 'correct_answer';
+                        break;
+                    case 'incorrect':
+                        timestampsKey = 'incorrect_answer';
+                        break;
+                    case 'off-topic':
+                        timestampsKey = 'off_topic_answer';
+                        break;
+                    case 'uncertainty':
+                        timestampsKey = 'uncertainty_answer';
+                        break;
+                }
                 showWords(convAudio, timestampsRef.current[currentPageRef.current][timestampsKey]);
             },
             onend: () => {
@@ -542,7 +648,7 @@ const ReadChatPage = () => {
         currentPageChatHistory.push({
             role: 'assistant',
             content: currentTranscriptRef.current,
-            audio: responseAudioSrc,
+            audio: [responseAudioSrc],
             status: 'in_progress'
         });
         setCurrentPageChatHistory([...currentPageChatHistory]);
@@ -574,7 +680,7 @@ const ReadChatPage = () => {
           console.log('User did not respond in 15 seconds. Sending another message...');
           console.log('isWaitingForResponse', isWaitingForResponseRef.current);
           // play the question again
-          playQuestion();
+          playNoAnswer();
           if (timerRef.current) clearInterval(timerRef.current); // 停止计时器
         }
     }, [timer, userRespondedRef.current]);
@@ -630,9 +736,15 @@ const ReadChatPage = () => {
         }
     };
 
-    const handleReplay = async (index, audioSrc) => {
+    const handleReplay = async (index, audioSources) => {
+        console.log('handleReplay', index, audioSources);
+        if (!Array.isArray(audioSources)) {
+            audioSources = [audioSources];
+        }
+
         const replayAudio = replayAudioRef.current;
-        console.log('handleReplay', index, audioSrc);
+        console.log('handleReplay', index, audioSources);
+
         // If clicking on a different message while another is playing
         if (replayingIndex !== null && replayingIndex !== index) {
             replayAudio.pause();
@@ -647,42 +759,37 @@ const ReadChatPage = () => {
                 replayAudio.pause();
                 isReplayingRef.current = false;
             }
-            else {
-                // Resume playing
-                replayAudio.play();
-                isReplayingRef.current = true;
-            }
             return;
         }
 
-        // Start playing a new message
-        replayAudio.src = audioSrc;
-        replayAudio.currentTime = 0;
-        try {
-            await replayAudio.play();
-            setReplayingIndex(index);
-            isReplayingRef.current = true;
-            
-            // 添加暂停事件监听器
-            replayAudio.onpause = () => {
-                isReplayingRef.current = false;
-            };
-    
-            // 添加播放事件监听器
-            replayAudio.onplay = () => {
-                isReplayingRef.current = true;
-            };
-            
-            replayAudio.onended = () => {
-                console.log('replay ended');
+        // Function to play audio sources sequentially
+        const playSequentially = async (sources, currentIndex = 0) => {
+            if (currentIndex >= sources.length) {
                 isReplayingRef.current = false;
                 setReplayingIndex(null);
-            };
-        } catch (error) {
-            console.error('Error playing audio:', error);
-            isReplayingRef.current = false;
-            setReplayingIndex(null);
-        }
+                return;
+            }
+
+            replayAudio.src = sources[currentIndex];
+            replayAudio.currentTime = 0;
+            
+            try {
+                await replayAudio.play();
+                setReplayingIndex(index);
+                isReplayingRef.current = true;
+
+                replayAudio.onended = () => {
+                    playSequentially(sources, currentIndex + 1);
+                };
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                isReplayingRef.current = false;
+                setReplayingIndex(null);
+            }
+        };
+
+        // Start playing the sequence
+        playSequentially(audioSources);
     }
 
     const handleExpandChat = () => {
@@ -694,6 +801,12 @@ const ReadChatPage = () => {
     const handleMinimizeChat = async () => {
         setIsMinimizedChat(!isMinimizedChat);
         setIsExpandedChat(false);
+    }
+
+    const handlePenguinClick = () => {
+        if (isMinimizedChat) {
+            setIsMinimizedChat(false);
+        }
     }
 
     const toggleSpeedClick = () => {
@@ -906,7 +1019,7 @@ const ReadChatPage = () => {
                 </div>
                 }
                 {/* shake the penguin image at the first page, after 13 seconds */}
-                <div id='penguin-box'>
+                <div id='penguin-box' onClick={handlePenguinClick}>
                     <img
                     src='./files/imgs/penguin.svg'
                     alt='penguin'

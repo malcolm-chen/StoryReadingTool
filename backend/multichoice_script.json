@@ -1,0 +1,113 @@
+{
+  "pages": {
+    "4": {
+      "question": "Were the forefathers of frogs fish with legs or crocodiles?",
+      "answer": "The forefathers of frogs are fish with legs.",
+      "feedback": {
+        "correct": "That’s right! The forefathers of frogs are fish with legs.",
+        "incorrect": "Good try! The forefathers of frogs are fish with legs.",
+        "uncertainty": "I see you are wondering. The forefathers of frogs are fish with legs.",
+        "off-topic": "Hmm, that’s a cool sharing. The forefathers of frogs are fish with legs."
+      }
+    },
+    "5": {
+      "question": "Do amphibians live in water or on land?",
+      "answer": "Amphibians live both on land and in water.",
+      "feedback": {
+        "correct": "Good job! Amphibians do live both on land and in water.",
+        "incorrect": "Not quite! Amphibians live both on land and in water.",
+        "uncertainty": "That’s ok! Amphibians live both on land and in water.",
+        "off-topic": "Thanks for sharing! Amphibians live both on land and in water."
+      }
+    },
+    "6": {
+      "question": "Does a frog breathe through its lungs or its skin?",
+      "answer": "A frog breathes through both its skin and lungs.",
+      "feedback": {
+        "correct": "Excellent! A frog breathes through both its skin and lungs.",
+        "incorrect": "Good effort! A frog breathes through both its skin and lungs.",
+        "uncertainty": "Oh you don’t know? That’s ok. A frog breathes through both its skin and lungs.",
+        "off-topic": "Thanks for participating. A frog breathes through both its skin and lungs."
+      }
+    },
+    "7": {
+      "question": "During hibernation, does a frog dig into the mud or hardly breathe?",
+      "answer": "A frog hardly breathes during hibernation.",
+      "feedback": {
+        "correct": "Great job! A frog hardly breathes during hibernation.",
+        "incorrect": "Almost there! A frog hardly breathes during hibernation.",
+        "uncertainty": "It’s ok! A frog hardly breathes during hibernation.",
+        "off-topic": "Hmm, I am wondering about your sharing. A frog hardly breathes during hibernation."
+      }
+    },
+    "8": {
+      "question": "Are tadpoles frog babies or another name for frogs?",
+      "answer": "Tadpoles are frog babies.",
+      "feedback": {
+        "correct": "You got it! Tadpoles are frog babies.",
+        "incorrect": "That’s a good try! Tadpoles are frog babies.",
+        "uncertainty": "No worries! Tadpoles are frog babies.",
+        "off-topic": "I heard you are talking. Tadpoles are frog babies."
+      }
+    },
+    "9": {
+      "question": "Do all frogs have wet skin or dry skin?",
+      "answer": "All frogs have wet skin.",
+      "feedback": {
+        "correct": "Well done! All frogs have wet skin.",
+        "incorrect": "That’s a good try! All frogs have wet skin.",
+        "uncertainty": "That’s alright! All frogs have wet skin.",
+        "off-topic": "Thanks for participating! All frogs have wet skin."
+      }
+    },
+    "11": {
+      "question": "Do frogs use their voices to hunt for mates or attract insects?",
+      "answer": "Frogs use their voices to hunt for mates.",
+      "feedback": {
+        "correct": "Excellent! Frogs use their voices to hunt for mates.",
+        "incorrect": "Good effort. Frogs use their voices to hunt for mates.",
+        "uncertainty": "This question may be a bit tricky. Frogs use their voices to hunt for mates.",
+        "off-topic": "I appreciate you letting me know! Frogs use their voices to hunt for mates."
+      }
+    },
+    "13": {
+      "question": "Can a frog see in all directions or stare while blinking?",
+      "answer": "A frog can see in all directions.",
+      "feedback": {
+        "correct": "Well done! A frog can see in all directions.",
+        "incorrect": "You are really close! A frog can see in all directions.",
+        "uncertainty": "I see you are unsure! A frog can see in all directions.",
+        "off-topic": "Thanks for sharing! A frog can see in all directions."
+      }
+    },
+    "15": {
+      "question": "Is a frog's tongue attached to the front or the back of its mouth?",
+      "answer": "A frog’s tongue is attached to the front of its mouth.",
+      "feedback": {
+        "correct": "You’re paying great attention! A frog’s tongue is attached to the front of its mouth.",
+        "incorrect": "Almost there! A frog’s tongue is attached to the front of its mouth.",
+        "uncertainty": "Oh you don’t know? That’s okay. A frog’s tongue is attached to the front of its mouth.",
+        "off-topic": "Thanks for sharing! A frog’s tongue is attached to the front of its mouth."
+      }
+    }
+  },
+  "opening": [
+    "Hey!",
+    "Hey friend!",
+    "Hey buddy!",
+    "Interesting!",
+    "That’s cool!",
+    "That’s so interesting!"
+  ],
+  "closing": [
+    "Let’s move on to the next part of this book!",
+    "I hope you enjoyed reading this page. Let’s move on!",
+    "Let’s continue to read!",
+    "Let’s see what we are going to learn next!",
+    "Hope you learned something new!",
+    "Let’s move on to the next page."
+  ],
+  "no-answer": [
+    "Hey, I didn't hear your answer."
+  ]
+}

@@ -728,7 +728,7 @@ const ReadChatPage = () => {
 
     const getInstruction4Incomplete = (items, evaluation) => {
         const instruction4Incomplete1 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -745,12 +745,13 @@ const ReadChatPage = () => {
         - Since the evaluation of the child's response is 'correct but incomplete', you should acknowledge the correct part and tailor your acknowledgment to the context (e.g., "Great start!", "Nice work! There's more to it", "Almost there", and other similar acknowledgments).
 
     **Instructions for hint**:
-        - *DO NOT* include the explicit correct answer in the hint.
-        - Your hint should be suitable for children aged 6 to 8.Keep your hint simple, engaging and under 20 words.
+        - *DO NOT* include the correct answer in the hint.
+        - Your hint should be suitable for children aged 6 to 8. Keep your hint simple, engaging and under 20 words.
         - *DO NOT* include any question in the hint.
         - Since the child's response is correct but incomplete, provide an implicit hint to guide the child toward the missing parts of a correct answer (${knowledgeRef.current[currentPageRef.current]?.answer}) without directly stating the correct answer.
+- *DO NOT* draw on specific details from the correct answer. Provide hints that guide children to think in the right direction without giving away the answer.
                         
-    **Instructions for Restate the Main Question**:
+    **Instructions for Restating the Main Question**:
         - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
@@ -758,7 +759,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Do not reveal the answer. You should hint the child to think in the explanation part.
+        - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question*, which is THE RESTATED MAIN QUESTION: ${knowledgeRef.current[currentPageRef.current]?.question}. The restated question should *NOT* be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Incomplete2 = `
@@ -808,7 +809,7 @@ const ReadChatPage = () => {
 
     const getInstruction4FactuallyIncorrect = (items, evaluation) => {
         const instruction4FactuallyIncorrect1 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -819,17 +820,17 @@ const ReadChatPage = () => {
     Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
 
     **Instructions for acknowledgment**:
-        - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
+        - Your acknowledgment should be friendly, non-repetitive, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         - Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
 
     **Instructions for hint**:
-        - DO NOT include the explicit correct answer in the hint.
+        - DO NOT include the correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
         - DO NOT include any question in the hint.
         - Since the child's response is factually incorrect, first gently correct the misunderstanding, then provide an implicit hint that guides them toward the correct answer without directly stating the correct answer.
+- *DO NOT* draw on specific details from the correct answer. Provide hints that guide children toward the core concept, helping them think in the right direction without giving away the answer
                         
     **Instructions for Restate the Main Question**:
         - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
@@ -839,7 +840,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Do not reveal the answer. You should hint the child to think in the explanation part.
+        - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question*, which is THE RESTATED MAIN QUESTION: ${knowledgeRef.current[currentPageRef.current]?.question}. The restated question should *NOT* be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4FactuallyIncorrect2 = `
@@ -889,7 +890,7 @@ const ReadChatPage = () => {
 
     const getInstruction4IrrelevantResponse = (items, evaluation) => {
         const instruction4IrrelevantResponse1 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -902,26 +903,25 @@ const ReadChatPage = () => {
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         - Since the child’s response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let’s think about what the question is asking,' 'That’s an interesting idea! Let’s focus on what we’re really looking for,' and other similar acknowledgments).
 
     **Instructions for hint**:
-        - DO NOT include the explicit correct answer in the hint.
+        - DO NOT include the correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.
         - Keep your hint simple, engaging and under 20 words.
         - DO NOT include any question in the hint.
         - Since the child's response is irrelevant, provide an implicit hint to guide them toward the context and correct answer without directly stating the correct answer.
+- *DO NOT* draw on specific details from the correct answer. Provide hints that guide children toward the core concept, helping them think in the right direction without giving away the answer
                         
     **Instructions for Restate the Main Question**:
         - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
     
-    **Instructions for Whole Response**:
+   **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question*, which is THE RESTATED MAIN QUESTION: ${knowledgeRef.current[currentPageRef.current]?.question}. The restated question should *NOT* be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4IrrelevantResponse2 = `
@@ -971,7 +971,7 @@ const ReadChatPage = () => {
 
     const getInstruction4Uncertainty = (items, evaluation) => {
         const instruction4Uncertainty1 = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -984,25 +984,24 @@ const ReadChatPage = () => {
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         - Since the child’s response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That’s okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That’s alright. I’m here to help', ‘Let’s think together’, and other similar acknowledgments).
 
     **Instructions for hint**:
-        - *DO NOT* include the explicit correct answer in the hint.
+        - *DO NOT* include the correct answer in the hint.
         - Your hint should be suitable for children aged 6 to 8.Keep your hint simple, engaging and under 20 words.
         - *DO NOT* include any question in the hint.
         - Since the child's response is uncertain, provide an implicit hint to guide them toward the correct answer without directly stating the correct answer.
+- *DO NOT* draw on specific details from the correct answer. Provide hints that guide children toward the core concept, helping them think in the right direction without giving away the answer
                         
     **Instructions for Restate the Main Question**:
         - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
     
-    **Instructions for Whole Response**:
+   **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Do not reveal the answer. You should hint the child to think in the explanation part.
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence.
+        - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question*, which is THE RESTATED MAIN QUESTION: ${knowledgeRef.current[currentPageRef.current]?.question}. The restated question should *NOT* be in the form of "Can you xxx?", or "Do you xxx?"
         `
         const instruction4Uncertainty2 = `

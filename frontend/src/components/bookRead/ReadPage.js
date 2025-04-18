@@ -64,6 +64,7 @@ const ReadChatPage = () => {
     const resendFlagRef = useRef(false);
     const responseResendRef = useRef(false);
     // const [evaluation, setEvaluation] = useState(null);
+    const [isImageLoading, setIsImageLoading] = useState(false);
     
     const penguin = './files/imgs/penguin1.svg';
 
@@ -425,7 +426,7 @@ const ReadChatPage = () => {
                             if (!clientRef.current.realtime.isConnected()) {
                                 handleNextPage();
                             }
-                        }, 3000);
+                        }, 1000);
                     }
                     else {
                         setIsKnowledge(false);
@@ -440,6 +441,11 @@ const ReadChatPage = () => {
             };
             playNextSentence();
         }
+    };
+
+    const handleImageLoad = () => {
+        setIsImageLoading(false);
+        playPageSentences();
     };
     
     useEffect(() => {
@@ -485,7 +491,7 @@ const ReadChatPage = () => {
             setCurrentSentence(0);
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0
-            playPageSentences();  
+            // playPageSentences();  
         }
     };
 
@@ -519,7 +525,7 @@ const ReadChatPage = () => {
         sentenceIndexRef.current = 0;
         localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
         localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
-        playPageSentences();  
+        // playPageSentences();  
     };
 
     const getFirstQuestion = async () => {
@@ -2052,9 +2058,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                             </div>
                         )}
 
-                    <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
-                        <img src={pages[currentPageRef.current]?.image} alt={`Page ${currentPageRef.current + 1}`}/>
-                    </Box>
+                        <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
+                            <img 
+                                src={pages[currentPageRef.current]?.image} 
+                                alt={`Page ${currentPageRef.current + 1}`}
+                                onLoad={handleImageLoad}
+                            />
+                        </Box>
 
                     <IconButton
                         id="next-btn"
@@ -2181,7 +2191,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                                                     {msg.content?.[0]?.transcript}
                                                 </h5>
                                             )}
-                                            {msg.status === 'completed' && !msg.content?.[0]?.transcript?.startsWith('<') && (
+                                            {msg.status === 'completed' && !msg.content?.[0]?.transcript?.startsWith('<') && msg.content?.[0]?.transcript !== '' && (
                                                 <Box sx={{ display: 'flex', gap: 1, position: 'absolute', right: '8px', bottom: '8px' }}>
                                                     {/* <IconButton 
                                                         variant='plain' 

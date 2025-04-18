@@ -24,6 +24,8 @@ const LandingPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
+        setResponseMessage("");
         if (!username) {
             setError("Username cannot be empty.");
             return;
@@ -49,10 +51,10 @@ const LandingPage = () => {
                 navigate('/select', { state: { user: username } });
             } else {
                 setError(data.message);
-                return;
             }
           } catch (error) {
             console.error('Error:', error);
+            setError('Network error. Please try again.');
             setResponseMessage('Error sending data');
         }
     };

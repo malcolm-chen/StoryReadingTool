@@ -144,12 +144,22 @@ def add_users(user_dict):
 # write a function to read a user's chat history
 def read_chat_history(username):
     user = users.find_one({"username": username})
-    chat_history_object = user["chat_history"]['Why Frogs are Wet']['3'][0]
-    print(chat_history_object)
-    # find the file based on object id
     fs = gridfs.GridFS(client.get_database("StoryBook"))
-    # load the file in json format
-    chat_history_file = fs.find_one({"_id": chat_history_object})
-    return json.loads(chat_history_file.read().decode('utf-8'))
+    book_chat_history = {}
+    for key, value in user["chat_history"]["Why Frogs are Wet"].items():
+        print(key, value)
+        chat_history_object = user["chat_history"]['Why Frogs are Wet'][key][0]
+        print(chat_history_object)
+        # find the file based on object id
+        
+        # load the file in json format
+        chat_history_file = fs.find_one({"_id": chat_history_object})
+        chat_history_file = json.loads(chat_history_file.read().decode('utf-8'))
+        book_chat_history[key] = chat_history_file
+    return book_chat_history
 
-print(read_chat_history("jiaju"))
+def save_json_to_file(data, filename):
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
+
+save_json_to_file(read_chat_history("Dominic "), "Dominic_chat_history.json")

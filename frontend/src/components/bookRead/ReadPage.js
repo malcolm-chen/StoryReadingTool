@@ -44,8 +44,6 @@ const ReadChatPage = () => {
     const [showCaption, setShowCaption] = useState(true);
     const [isExpandedChat, setIsExpandedChat] = useState(false);
     const [isMinimizedChat, setIsMinimizedChat] = useState(false);
-    const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
-    const [speedSliderValue, setSpeedSliderValue] = useState(audioSpeed);
     const [chatBoxSize, setChatBoxSize] = useState({ width: 400, height: 300 });
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -80,8 +78,6 @@ const ReadChatPage = () => {
         new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766' } )
     );
 
-    const audioRef = useRef(new Audio());
-    const replayAudioRef = useRef(new Audio());
     const storyTextRef = useRef([]);
     const currentPageRef = useRef(localStorage.getItem(`${title}-currentPage`) ? parseInt(localStorage.getItem(`${title}-currentPage`), 10) : 0);
     const sentenceIndexRef = useRef(0);
@@ -97,6 +93,7 @@ const ReadChatPage = () => {
     const itemToRespondRef = useRef(null);
     const deletedItemsRef = useRef(new Set());
     const isWaitingForEvaluationRef = useRef(false);
+    const replayAudioRef = useRef(new Audio());
 
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
@@ -140,16 +137,6 @@ const ReadChatPage = () => {
     //     console.log('savedPage', savedPage);
     //     return savedPage ? parseInt(savedPage, 10) : 0;
     // });
-
-    const [audioPage, setAudioPage] = useState(() => {
-        const savedPage = localStorage.getItem(`${title}-currentPage`);
-        return savedPage ? parseInt(savedPage, 10) : 0;
-    });
-
-    const [currentSentence, setCurrentSentence] = useState(() => {
-        const savedSentence = localStorage.getItem(`${title}-currentSentence`);
-        return savedSentence ? parseInt(savedSentence, 10) : 0;
-    });
 
     const [pages, setPages] = useState([]);
 
@@ -213,9 +200,11 @@ const ReadChatPage = () => {
         loadStory();
         loadDictionary();
         // loadAskedQuestions();
-        audioRef.current.play();
-        audioRef.current.playbackRate = audioSpeed;
     }, []);
+
+    useEffect(() => {
+        console.log('isKnowledge has changed', isKnowledge);
+    }, [isKnowledge]);
 
     // useEffect(() => {
     //     console.log('isFirstTime', isFirstTime);
@@ -358,94 +347,9 @@ const ReadChatPage = () => {
         // }
     };
 
-    const togglePlayPause = () => {
-        if (isPlaying) {
-            audioRef.current.pause();
-        } else {
-            // if in a new page, play the new page audio
-            // extract the page number between 'p' and 'sec': `/files/books/${title}/audio/p${currentPage}sec${sentenceIndex}.mp3`;
-            if (audioPage !== currentPageRef.current) {
-                audioRef.current.src = `/files/books/${title}/audio/p${currentPageRef.current}sec0.mp3`;
-                setAudioPage(currentPageRef.current);
-            }
-            audioRef.current.play();
-            audioRef.current.playbackRate = audioSpeed;
-        }
-        setIsPlaying(!isPlaying);
-    };
-
-
-    const playPageSentences = () => {
-        if (pages[currentPageRef.current]?.text) {
-            sentenceIndexRef.current = 0;
-            const audio = audioRef.current;
-            const playNextSentence = async () => {
-                setAudioPage(currentPageRef.current);
-                if (sentenceIndexRef.current < pages[currentPageRef.current].text.length) {
-                    setCurrentSentence(sentenceIndexRef.current);
-                    audio.src = `/files/books/${title}/audio/p${currentPageRef.current}sec${sentenceIndexRef.current}.mp3`;
-
-                    audio.onended = () => {
-                        // console.log('end');
-                        sentenceIndexRef.current += 1;
-                        playNextSentence();
-                    };
-                    try {
-                        await audio.play();
-                        const currentSpeed = parseFloat(localStorage.getItem(`${title}-audioSpeed`)) || 1;
-                        audio.playbackRate = currentSpeed;
-                        setIsPlaying(true);
-                    } catch (error) {
-                        console.error('Error playing audio:', error);
-                    }
-                } else {
-                    // setIsPlaying(false);
-                    if (currentPageRef.current in knowledgeRef.current) {
-                        console.log('currentPage in knowledge', currentPageRef.current);
-                        setIsKnowledge(true);
-                        audio.pause();
-                        setIsPlaying(false);
-                        setIsConversationEnded(false);
-                        setAnswerRecord([]);
-                        noReponseCntRef.current = 0;
-                        setCurrentPageChatHistory([]);
-                        // check if the client is not setup for guiding
-                        if (!clientRef.current.realtime.isConnected()) {
-                            console.log('setting up client for guiding');
-                            setupClient(await getInstruction4Guiding());
-                            setIsClientSetup(true);
-                        } else {
-                            console.log('resetting client for guiding');
-                            updateClientInstruction(await getInstruction4Guiding());
-                        }
-                    } else if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') { 
-                        setIsKnowledge(false);
-
-                        // wait for 2 seconds, if the user does not click the next page button, move to the next page
-                        setTimeout(() => {
-                            if (!clientRef.current.realtime.isConnected()) {
-                                handleNextPage();
-                            }
-                        }, 1000);
-                    }
-                    else {
-                        setIsKnowledge(false);
-                        if (currentPageRef.current < pages.length - 1) {
-                            handleNextPage();
-                        } else {
-                            audioRef.current.pause();
-                            setIsPlaying(false);
-                        }
-                    }
-                }
-            };
-            playNextSentence();
-        }
-    };
-
     const handleImageLoad = () => {
         setIsImageLoading(false);
-        playPageSentences();
+        // playPageSentences();
     };
     
     useEffect(() => {
@@ -455,7 +359,7 @@ const ReadChatPage = () => {
             // setIsPlaying(false);
             if (isPlaying && !isFirstTime) {
                 console.log('playing page sentences', currentPageRef.current);
-                playPageSentences();  
+                // playPageSentences();  
             }
         }
     }, [pages]);
@@ -463,9 +367,6 @@ const ReadChatPage = () => {
     const handlePrevPage = async () => {
         console.log('moving to previous page', currentPageRef.current);
         if (currentPageRef.current > 0) {
-            audioRef.current.pause();
-            //setIsPlaying(false);
-            audioRef.current.currentTime = 0;
             setIsKnowledge(false);
             // setIsAsking(false);
             isAskingRef.current = false;
@@ -488,44 +389,56 @@ const ReadChatPage = () => {
             //setCurrentPage(newPage);
             currentPageRef.current = newPage;
             sentenceIndexRef.current = 0;
-            setCurrentSentence(0);
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0
-            // playPageSentences();  
         }
     };
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        // setIsPlaying(false);
-        setIsKnowledge(false);
-        // setIsAsking(false);
-        isAskingRef.current = false;
-        setIsAsked(false);
-        setIsMinimizedChat(false);
-        setIsExpandedChat(false);
-        setAnswerRecord([]);
-        noReponseCntRef.current = 0;
-        // setChatHistory([]);
-        isWaitingForResponseRef.current = false;
-        if (clientRef.current.realtime.isConnected()) {
-            console.log('disconnecting conversation');
-            // deleteConversationItem(items[0].id);
-            await disconnectConversation();
-            const client = clientRef.current;
-            client.reset();
-            setIsClientSetup(false);
+        if (currentPageRef.current in knowledgeRef.current && !isKnowledge) {
+            console.log('currentPage in knowledge', currentPageRef.current);
+            setIsKnowledge(true);
+            setIsConversationEnded(false);
+            setAnswerRecord([]);
+            noReponseCntRef.current = 0;
+            setCurrentPageChatHistory([]);
+            // check if the client is not setup for guiding
+            if (!clientRef.current.realtime.isConnected()) {
+                console.log('setting up client for guiding');
+                setupClient(await getInstruction4Guiding());
+                setIsClientSetup(true);
+            } else {
+                console.log('resetting client for guiding');
+                updateClientInstruction(await getInstruction4Guiding());
+            }
+        } else {
+            setIsKnowledge(false);
+            // setIsAsking(false);
+            isAskingRef.current = false;
+            setIsAsked(false);
+            setIsMinimizedChat(false);
+            setIsExpandedChat(false);
+            setAnswerRecord([]);
+            noReponseCntRef.current = 0;
+            // setChatHistory([]);
+            isWaitingForResponseRef.current = false;
+            if (clientRef.current.realtime.isConnected()) {
+                console.log('disconnecting conversation');
+                // deleteConversationItem(items[0].id);
+                await disconnectConversation();
+                const client = clientRef.current;
+                client.reset();
+                setIsClientSetup(false);
+            }
+            const newPage = ( currentPageRef.current + 1 ) % pages.length;
+            // setCurrentPage(newPage);
+            currentPageRef.current = newPage;
+            sentenceIndexRef.current = 0;
+            localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
+            localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
+            // playPageSentences();  
         }
-        const newPage = ( currentPageRef.current + 1 ) % pages.length;
-        // setCurrentPage(newPage);
-        currentPageRef.current = newPage;
-        setCurrentSentence(0);
-        sentenceIndexRef.current = 0;
-        localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
-        localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
-        // playPageSentences();  
     };
 
     const getFirstQuestion = async () => {
@@ -650,7 +563,7 @@ const ReadChatPage = () => {
         *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response to determine whether all of the child’s responses, when taken together, accurately address the answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response to determine whether all of the child's responses, when taken together, accurately address the answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
         - Correct answer: Consider the child's all responses in the conversation history so far. If their answers closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's responses on this page so far. If their answers include correct components but still lack a couple of key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information
@@ -670,7 +583,7 @@ const ReadChatPage = () => {
         8. {"evaluation": "uncertainty"}
 
         **Important Reminder**:
-        - Your evaluation should consider whether all of the child’s responses, when taken together, match the provided answer. If they do, the response should be marked as correct.
+        - Your evaluation should consider whether all of the child's responses, when taken together, match the provided answer. If they do, the response should be marked as correct.
         - Only reply within the JSON format. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
         - YOU MUST REPLY WITH VALID CONTENT IN THE JSON FORMAT. DO NOT REPLY WITH EMPTY CONTENT.
         `;
@@ -689,7 +602,7 @@ const ReadChatPage = () => {
         - First Question: ${knowledgeRef.current[currentPageRef.current]?.question}
 
         **Instructions for initiating the Conversation**:
-            You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, share with me what you think" + first question; "xxx, let's chat about what you just read!" + first question; etc. 
+            You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, before we move to the next page, share with me what you think" + first question; "xxx, before we move to the next page, let's chat about what you just read!" + first question; etc. 
             **Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. DO NOT ASK ANYTHING ELSE.**
             *DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
         `;
@@ -834,7 +747,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. First gently correct the child’s misunderstanding. Then provide an implicit hint that guides children toward the core concept, helping them think in the right direction without giving away the answer.
+        - *DO NOT* draw on specific details from the correct answer. First gently correct the child's misunderstanding. Then provide an implicit hint that guides children toward the core concept, helping them think in the right direction without giving away the answer.
 
     **Instructions for Restate the Main Question**:
         - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
@@ -909,7 +822,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Since the child’s response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let’s think about what the question is asking,' 'That’s an interesting idea! Let’s focus on what we’re really looking for,' and other similar acknowledgments).
+        - Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let's think about what the question is asking,' 'That's an interesting idea! Let's focus on what we're really looking for,' and other similar acknowledgments).
 
     **Instructions for hint**:
         - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
@@ -989,7 +902,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Since the child’s response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That’s okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That’s alright. I’m here to help', ‘Let’s think together’, and other similar acknowledgments).
+        - Since the child's response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That's okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That's alright. I'm here to help', 'Let's think together', and other similar acknowledgments).
 
     **Instructions for hint**:
         - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
@@ -1715,31 +1628,6 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         }
     }
 
-    const handleAutoPageToggle = () => {
-        setAutoPage((prev) => !prev);
-    };
-
-    const toggleSpeedClick = () => {
-        setShowSpeedSlider(!showSpeedSlider);
-    };
-
-    const handleSpeedChange = (event, newValue) => {
-        if (newValue === 0.5) {
-            setAudioSpeed(0.7);
-            setSpeedSliderValue(0.5);
-        }
-        else {
-            setAudioSpeed(newValue);
-            setSpeedSliderValue(newValue);
-        }
-    };
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.playbackRate = audioSpeed;
-        }
-        localStorage.setItem(`${title}-audioSpeed`, audioSpeed);
-    }, [audioSpeed]);
 
     const processChatHistory = (chatHistory) => {
         const formData = new FormData();
@@ -1795,25 +1683,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             // setIsAsking(false);
             isAskingRef.current = false;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
-            if (sentenceIndexRef.current === pages[currentPageRef.current]?.text.length) {
-                setIsPlaying(true);
-                handleNextPage();
-            } else {
-                audioRef.current.play();
-                audioRef.current.playbackRate = audioSpeed;
-                setIsPlaying(true);
-            }
         }
     }
 
-
-    useEffect(() => {
-        // Cleanup function to pause audio when component unmounts
-        return () => {
-            audioRef.current.pause();
-            setIsPlaying(false);
-        };
-    }, []);
 
     // if the 'clientsetup' changes, console log the change
     useEffect(() => {
@@ -1824,27 +1696,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     // useEffect(() => {
     //     console.log('currentPage changed', currentPage);
     // }, [currentPage]);
-    useEffect(() => {
-        // Check if it's the first page
-        if (currentPageRef.current === 0) {
-            // Set a timeout to start shaking after 13 seconds
-            const startShakeTimer = setTimeout(() => {
-                setIsShaking(true);
-                console.log('shaking');
-                // Set another timeout to stop shaking after 1 second
-                const stopShakeTimer = setTimeout(() => {
-                    setIsShaking(false);
-                    console.log('not shaking');
-                }, 1000);
 
-                // Cleanup the stop shake timer
-                return () => clearTimeout(stopShakeTimer);
-            }, 6500*audioSpeed);
-
-            // Cleanup the start shake timer on component unmount or when the page changes
-            return () => clearTimeout(startShakeTimer);
-        }
-    }, [currentPageRef.current]);
 
     const handleRegenerate = async (index) => {
         const client = clientRef.current;
@@ -2016,47 +1868,6 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         >
                             <MdArrowCircleLeft size={60} color='#7AA2E3'/>
                         </IconButton>
-                        <div id='caption-btn-box'>
-                            <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
-                                <FaRegClosedCaptioning />
-                            </IconButton>
-                        </div>
-                        <div id='play-btn-box'>
-                            <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
-                                {isPlaying ? <FaPause /> : <FaPlay />}
-                            </IconButton>
-                        </div>
-                        <div id='speed-btn-box'>
-                            <IconButton id='speed-btn' variant='plain' onClick={toggleSpeedClick} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
-                                <RiSpeedUpFill />
-                            </IconButton>
-                        </div>
-                        {showSpeedSlider && (
-                            <div id='speed-slider-box'>
-                                <Slider
-                                    value={speedSliderValue}
-                                    onChange={handleSpeedChange}
-                                    min={0.5}
-                                    max={1.5}
-                                    step={0.5}
-                                    marks={[{ value: 0.5, label: 'slow' }, { value: 1, label: 'normal' }, { value: 1.5, label: 'fast' }]}
-                                    // set label size to 12px
-                                    sx={{
-                                        width: '120px',
-                                        height: '30px',
-                                        '--Slider-trackSize': '12px',
-                                        "--Slider-markSize": "8px",
-                                        '& .MuiSlider-markLabel': {
-                                            fontSize: '16px',
-                                            color: '#3F150B',
-                                            fontFamily: 'BM Jua',
-                                            textStroke: '1px #FFFFFF'
-                                        },
-                                        zIndex: 100
-                                    }}
-                                />
-                            </div>
-                        )}
 
                         <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
                             <img 
@@ -2077,17 +1888,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 </Box>            
             </div>
             <div id='bottom-box'>
-                {showCaption && 
-                    <div id='caption-box'>
-                        {/* keep the caption at the center of the caption-box */}
-                    <h4 id="caption">
-                        {/* <Button onClick={togglePlayPause} variant="contained" color="primary">
-                            {isPlaying ? <FaPause /> : <FaPlay />}
-                        </Button> */}
-                        {pages[currentPageRef.current]?.text[sentenceIndexRef.current]}
-                    </h4>
-                </div>
-                }
+                
                 {/* shake the penguin image at the first page, after 13 seconds */}
                 <div id='penguin-box' onClick={handlePenguinClick}>
                     <img

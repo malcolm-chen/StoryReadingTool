@@ -1677,7 +1677,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                     setIsPlaying(true);
                     handleNextPage();
                 }
-            }, 500);
+            }, 100);
         }
         else {
             // setIsAsking(false);

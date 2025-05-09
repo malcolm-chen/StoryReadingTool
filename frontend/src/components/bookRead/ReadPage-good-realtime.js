@@ -1059,8 +1059,6 @@ const ReadChatPage = () => {
             console.log('instruction4Uncertainty2');
             return instruction4Uncertainty2;
         }
-        
-        
     }
 
     const getInstruction4ChildQuestion = (items, evaluation) => {

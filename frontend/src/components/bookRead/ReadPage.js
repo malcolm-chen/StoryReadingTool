@@ -603,8 +603,9 @@ const ReadChatPage = () => {
 
         **Instructions for initiating the Conversation**:
             You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, before we move to the next page, share with me what you think" + first question; "xxx, before we move to the next page, let's chat about what you just read!" + first question; etc. 
-            **Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. DO NOT ASK ANYTHING ELSE.**
+            ** Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. **
             *DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
+            ** Only ask one question, which is the provided first question. DO NOT ASK ANYTHING ELSE. **
         `;
         
         console.log(instruction4Guiding);
@@ -664,13 +665,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the evaluation of the child's response is 'correct but incomplete', you should acknowledge the correct part and tailor your acknowledgment to the context (e.g., "Great start!", "Nice work! There's more to it", "Almost there", and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
+        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the missing parts of the answer. You should help them think in the right direction without giving away the answer.
+        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the missing parts of the answer. You should help them think in the right direction without revealing the core elements of the provided correct answer.
                         
     **Instructions for Restating the Main Question**:
-        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
+        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child using a natural, conversational tone that flows smoothly and avoids robotic repetition.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
         - Ask exactly *ONE* question.
@@ -744,13 +745,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together! "That's a good try!", and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
+        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
         - *DO NOT* draw on specific details from the correct answer. First gently correct the child's misunderstanding. Then provide an implicit hint that guides children toward the core concept, helping them think in the right direction without giving away the answer.
 
     **Instructions for Restate the Main Question**:
-        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
+        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child using a natural, conversational tone that flows smoothly and avoids robotic repetition.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
         - Ask exactly *ONE* question.
@@ -825,13 +826,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let's think about what the question is asking,' 'That's an interesting idea! Let's focus on what we're really looking for,' and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
+        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the context and core concept, helping them think in the right direction without giving away the answer.
+        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the context and core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
+
                         
     **Instructions for Restate the Main Question**:
-        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
+        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child using a natural, conversational tone that flows smoothly and avoids robotic repetition.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
         - Ask exactly *ONE* question.
@@ -905,13 +907,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the child's response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That's okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That's alright. I'm here to help', 'Let's think together', and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Your hint should be simple, engaging, under 20 words, and suitable for children aged 6 to 8.
+        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the core concept, helping them think in the right direction without giving away the answer.
+        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
                         
     **Instructions for Restate the Main Question**:
-        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
+        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child using a natural, conversational tone that flows smoothly and avoids robotic repetition.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is not the main question.
         - Ask exactly *ONE* question.
@@ -993,7 +995,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the child poses a question, answer the question with easy-to-understand words.
 
     **Instructions for Restate the Main Question**:
-        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
+        - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child using a natural, conversational tone that flows smoothly and avoids robotic repetition.
         - *Do NOT* ask the question in the form of "Can you xxx?", or "Do you xxx?" The restated question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a question that is beyond the main question.
 
@@ -1128,11 +1130,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             - Since the evaluation of the child's response is 'incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., "Let's try it again, "Let's think about it together!", and other similar acknowledgments).
         2. Hint:
             - *DO NOT* include the explicit correct answer in the hint.
-            - Your hint should be suitable for children aged 6 to 8. Keep your hint simple, engaging and under 20 words.
+            - Your hint should be suitable for children aged 6 to 8. Keep your hint indirect, simple, engaging and under 20 words.
             - *DO NOT* include a question in the hint.
             - Since the child's response is not correct, provide an implicit hint that guides them toward the correct answer without directly stating it.
         3. Restated Question:
-            - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child naturally, i.e., use a natural transition between the hint and this restated question;
+            - Restate the main question (${knowledgeRef.current[currentPageRef.current]?.question}) to the child using a natural, conversational tone that flows smoothly and avoids robotic repetition.
             - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The restated question should be open-ended instead of in the form of a yes/no question.    
             - *DO NOT* ask a question that is not the main question.
 

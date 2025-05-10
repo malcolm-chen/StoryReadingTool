@@ -1,4 +1,5 @@
 import pymongo
+from pymongo.server_api import ServerApi
 import sys
 import os
 import gridfs
@@ -7,19 +8,35 @@ import json
 import requests
 load_dotenv()
 
-
+# MongoDB connection options
+client_options = {
+    "serverSelectionTimeoutMS": 5000,  # 5 second timeout
+    "connectTimeoutMS": 10000,
+    "retryWrites": True,
+    "retryReads": True
+}
 
 try:
-    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
-    client.admin.command("ping")  # 测试连接
-except pymongo.errors.ConfigurationError:
-    print("An Invalid URI host error was received. Is your Atlas host name correct in your connection string?")
+    client = pymongo.MongoClient(
+        os.getenv("MONGO_URI"),
+        **client_options
+    )
+    # Test connection with timeout
+    client.admin.command("ping")
+except pymongo.errors.ConfigurationError as e:
+    print(f"MongoDB Configuration Error: {str(e)}")
+    print("Please check your MongoDB URI and internet connection.")
     sys.exit(1)
-except pymongo.errors.ConnectionFailure:
+except pymongo.errors.ConnectionFailure as e:
+    print(f"MongoDB Connection Error: {str(e)}")
     print("Failed to connect to MongoDB. Check your internet connection or server status.")
     sys.exit(1)
-except pymongo.errors.OperationFailure:
+except pymongo.errors.OperationFailure as e:
+    print(f"MongoDB Operation Error: {str(e)}")
     print("Authentication failed. Please check your username and password.")
+    sys.exit(1)
+except Exception as e:
+    print(f"Unexpected error: {str(e)}")
     sys.exit(1)
 
 print("Connected to MongoDB")
@@ -113,7 +130,7 @@ def reset_the_user(username):
     users.delete_one({"username": username})
     fs = gridfs.GridFS(client.get_database("StoryBook"))
     # Find all files matching the username pattern
-    files = fs.find({"filename": {"$regex": f"{username}_"}})
+    files = fs.find({"filename": {"$regex": f"^{username}-"}})
     
     # Delete each file individually
     for file in files:
@@ -162,4 +179,37 @@ def save_json_to_file(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
-save_json_to_file(read_chat_history("Dominic "), "Dominic_chat_history.json")
+# save_json_to_file(read_chat_history("Dominic "), "Dominic_chat_history.json")
+
+def delete_user_files(username):
+    """
+    Delete all files associated with a specific user from GridFS.
+    
+    Args:
+        username (str): The username whose files need to be deleted
+        
+    Returns:
+        int: Number of files deleted
+    """
+    try:
+        fs = gridfs.GridFS(client.get_database("StoryBook"))
+        # Find all files matching the username pattern
+        files = fs.find({"filename": {"$regex": f"^{username}-"}})
+        
+        deleted_count = 0
+        # Delete each file individually
+        for file in files:
+            fs.delete(file._id)
+            deleted_count += 1
+            print(f"Deleted file {file.filename}")
+            
+        # Also delete any chunks associated with these files
+        client.get_database("StoryBook")['fs.chunks'].delete_many({"files_id": {"$in": [file._id for file in files]}})
+        print(f"Deleted {deleted_count} files for user {username}")
+        return deleted_count
+    except Exception as e:
+        print(f"Error deleting files for user {username}: {e}")
+        return 0
+
+if __name__ == "__main__":
+    delete_user_files("jiaju")

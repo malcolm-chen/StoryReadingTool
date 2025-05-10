@@ -605,7 +605,7 @@ const ReadChatPage = () => {
             You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, before we move to the next page, share with me what you think" + first question; "xxx, before we move to the next page, let's chat about what you just read!" + first question; etc. 
             ** Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. **
             *DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
-            ** Only ask one question, which is the provided first question. DO NOT ASK ANYTHING ELSE. **
+            ** Only ask ONE question (${knowledgeRef.current[currentPageRef.current]?.question})). DO NOT ASK MORE THAN ONE QUESTION. **
         `;
         
         console.log(instruction4Guiding);
@@ -622,7 +622,7 @@ const ReadChatPage = () => {
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
@@ -656,7 +656,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -681,6 +681,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question* (i.e., the restated main question: ${knowledgeRef.current[currentPageRef.current]?.question}. *DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - *Do Not* ask more than one question.
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -689,7 +690,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - the evaluation of the child's latest response: ${evaluation};
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
 
-    Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -737,7 +738,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, non-repetitive, and under 25 words.
@@ -756,12 +757,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* ask a question that is not the main question.
         - Ask exactly *ONE* question.
 
-
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question* (i.e., the restated main question: ${knowledgeRef.current[currentPageRef.current]?.question}. *DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - *Do Not* ask more than one question.
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -770,7 +771,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
         
-    Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -818,7 +819,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -843,6 +844,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question* (i.e., the restated main question: ${knowledgeRef.current[currentPageRef.current]?.question}. *DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - *Do Not* ask more than one question.
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -851,7 +853,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -899,7 +901,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -923,6 +925,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. You should hint the child to think in the right direction.
         - The whole response should only include and end with *ONE question* (i.e., the restated main question: ${knowledgeRef.current[currentPageRef.current]?.question}. *DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - *Do Not* ask more than one question.
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -930,7 +933,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
 
-    Your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -979,7 +982,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - child's latest response: the most recent input from the child.
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. restate the main question
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. restate the main question
 
     **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
@@ -1011,7 +1014,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - child's latest response: the most recent input from the child (user).
 
-    Your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion
+    Building on previous conversation history, your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion
 
     **Instructions for Acknowledgement**:
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.

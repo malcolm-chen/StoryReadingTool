@@ -602,10 +602,11 @@ const ReadChatPage = () => {
         - First Question: ${knowledgeRef.current[currentPageRef.current]?.question}
 
         **Instructions for initiating the Conversation**:
-            You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question; "Hey xxx, before we move to the next page, share with me what you think" + first question; "xxx, before we move to the next page, let's chat about what you just read!" + first question; etc. 
+            You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "Hey xxx, before we move to the next page, share with me what you think" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "xxx, before we move to the next page, let's chat about what you just read!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); etc. 
             ** Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. **
-            *DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
-            ** Only ask ONE question (${knowledgeRef.current[currentPageRef.current]?.question})). DO NOT ASK MORE THAN ONE QUESTION. **
+            **DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
+           ** Your first question must be identical to the provided main question, meaning that you should not substitute any keyword.
+            ** Must ask only ONE question (${knowledgeRef.current[currentPageRef.current]?.question})). DO NOT ASK MORE THAN ONE QUESTION. **
         `;
         
         console.log(instruction4Guiding);
@@ -683,8 +684,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
-        - The whole response should only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?")
-        - *Do Not* ask more than one question.
+        - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -765,8 +766,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
-        - The whole response should only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?")
-        - *Do Not* ask more than one question.
+        - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
+
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -847,8 +849,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
-        - The whole response should only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?")
-        - *Do Not* ask more than one question.
+        - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
+
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -929,8 +932,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
-        - The whole response should only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?")
-        - *Do Not* ask more than one question.
+        - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
+        - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
+
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 

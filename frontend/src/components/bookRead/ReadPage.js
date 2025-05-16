@@ -675,7 +675,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -686,6 +686,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
+        - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -757,7 +758,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
   
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -768,7 +769,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
-
+        - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -840,7 +841,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -851,7 +852,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
-
+        - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
@@ -923,7 +924,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -934,7 +935,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
-
+        - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 

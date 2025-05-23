@@ -47,7 +47,6 @@ const ReadChatPage = () => {
     const [isPlaying, setIsPlaying] = useState(true);
     const [replayingIndex, setReplayingIndex] = useState(null);
     // const [isAsking, setIsAsking] = useState(false);
-    const [isAsked, setIsAsked] = useState(false);
     const [showSpeedSlider, setShowSpeedSlider] = useState(false);
     const recorderControls = useVoiceVisualizer();
     const [itemToDelete, setItemToDelete] = useState(null);
@@ -85,6 +84,7 @@ const ReadChatPage = () => {
     const userRespondedRef = useRef(false);
     const chatHistoryRef = useRef([]);
     const isAskingRef = useRef(false);
+    const isAskedRef = useRef(false);
     const isReplayingRef = useRef(false);
     const noReponseCntRef = useRef(0);
     const [regenerateIndex, setRegenerateIndex] = useState(null);
@@ -297,6 +297,7 @@ const ReadChatPage = () => {
         replayAudioRef.current.pause();
         setReplayingIndex(null);
         isReplayingRef.current = false;
+        noResponseReminderCountRef.current = 0; // 重置无响应提醒计数器
         
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
@@ -371,7 +372,7 @@ const ReadChatPage = () => {
             setIsKnowledge(false);
             // setIsAsking(false);
             isAskingRef.current = false;
-            setIsAsked(false);
+            isAskedRef.current = false;
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
             setAnswerRecord([]);
@@ -397,31 +398,32 @@ const ReadChatPage = () => {
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
-        if (isKnowledge) {
+        if (isKnowledge && !isAskedRef.current) {
+            console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
             return;
-        // }
-        // if (currentPageRef.current in knowledgeRef.current && !isKnowledge) {
-        //     console.log('currentPage in knowledge', currentPageRef.current);
-        //     setIsKnowledge(true);
-        //     setIsConversationEnded(false);
-        //     setAnswerRecord([]);
-        //     noReponseCntRef.current = 0;
-        //     setCurrentPageChatHistory([]);
-        //     // check if the client is not setup for guiding
-        //     if (!clientRef.current.realtime.isConnected()) {
-        //         console.log('setting up client for guiding');
-        //         setupClient(await getInstruction4Guiding());
-        //         setIsClientSetup(true);
-        //     } else {
-        //         console.log('resetting client for guiding');
-        //         updateClientInstruction(await getInstruction4Guiding());
-        //     }
-        // } 
+        }
+        if (currentPageRef.current in knowledgeRef.current && !isKnowledge && !isAskedRef.current) {
+            console.log('currentPage in knowledge', currentPageRef.current);
+            setIsKnowledge(true);
+            setIsConversationEnded(false);
+            setAnswerRecord([]);
+            noReponseCntRef.current = 0;
+            setCurrentPageChatHistory([]);
+            // check if the client is not setup for guiding
+            if (!clientRef.current.realtime.isConnected()) {
+                console.log('setting up client for guiding');
+                setupClient(await getInstruction4Guiding());
+                setIsClientSetup(true);
+            } else {
+                console.log('resetting client for guiding');
+                updateClientInstruction(await getInstruction4Guiding());
+            }
         } else {
+            console.log('really moving to next page', currentPageRef.current);
             setIsKnowledge(false);
             // setIsAsking(false);
             isAskingRef.current = false;
-            setIsAsked(false);
+            isAskedRef.current = false;
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
             setAnswerRecord([]);
@@ -1202,27 +1204,72 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     }
 
     const getInstruction4NoResponse = () => {
-        const lastQuestion = items[items.length - 1]?.content[0]?.transcript;
-        console.log('lastQuestion', lastQuestion);
-        if (lastQuestion.toLowerCase().includes('do you have any questions')) {
-            const instruction4NoResponse1 = `
-**Instructions**:
-    1. Ignore the chat history. Say "Hey, I didn't hear your answer. Do you have any questions about this page?"
-**Important Reminder**:
-    - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.`;
-            console.log(instruction4NoResponse1);
-            return instruction4NoResponse1;
+        if (noResponseReminderCountRef.current == 1) {
+            const lastQuestion = items[items.length - 1]?.content[0]?.transcript;
+            console.log('lastQuestion', lastQuestion);
+            if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+                const instruction4NoResponse1_1 = `
+    **Instructions**:
+        1. Ignore the chat history. Say "Hey, I didn't hear your answer. Do you have any questions about this page?"
+    **Important Reminder**:
+        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.`;
+                console.log(instruction4NoResponse1_1);
+                return instruction4NoResponse1_1;
+            } else {
+                const instruction4NoResponse2_1 = `
+    **Instructions**:
+        1. Find the last question the assistant asked in the previous round of the conversation: ${lastQuestion}
+        2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question asked in the chat history.
+        3. Do not ask a question that is not the last question in the chat history.
+    **Important Reminder**:
+        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
+                `;
+                console.log(instruction4NoResponse2_1);
+                return instruction4NoResponse2_1;
+            }
+        } else if (noResponseReminderCountRef.current == 2) {
+            const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
+            console.log('lastQuestion', lastQuestion);
+            if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+                const instruction4NoResponse1_2 = `
+    **Instructions**:
+        1. Ignore the chat history. Say "Hey, are you still there? Do you have any questions about this page?"
+    **Important Reminder**:
+        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.`;
+                console.log(instruction4NoResponse1_2);
+                return instruction4NoResponse1_2;
+            } else {
+                const instruction4NoResponse2_2 = `
+    **Instructions**:
+        1. Find the last question the assistant asked in the previous round of the conversation: ${lastQuestion}
+        2. Ignore the chat history. Say "Hey, are you still there?" and ADD the last question asked in the chat history.
+        3. Do not ask a question that is not the last question in the chat history.
+    **Important Reminder**:
+        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
+                `;
+                console.log(instruction4NoResponse2_2);
+                return instruction4NoResponse2_2;
+            }
         } else {
-            const instruction4NoResponse2 = `
-**Instructions**:
-    1. Find the last question the assistant asked in the previous round of the conversation: ${lastQuestion}
-    2. Ignore the chat history. Say "Hey, I didn't hear your answer." and ADD the last question asked in the chat history.
-    3. Do not ask a question that is not the last question in the chat history.
-**Important Reminder**:
-    - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
-            `;
-            console.log(instruction4NoResponse2);
-            return instruction4NoResponse2;
+            const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
+            console.log('lastQuestion', lastQuestion);
+            if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+                const instruction4NoResponse1_3 = `
+        **Instructions**:
+            1. Ignore the chat history. Say "Hey, let's continue reading the story."
+        **Important Reminder**:
+            - You must not say or ask anything else.`;
+                    console.log(instruction4NoResponse1_3);
+                    return instruction4NoResponse1_3;
+                } else {
+                    const instruction4NoResponse2_3 = `
+       **Instructions**:
+            1. Ignore the chat history. Say "Hey, the answer is ${knowledgeRef.current[currentPageRef.current]?.answer}. Let's continue reading the story."
+        **Important Reminder**:
+            - You must not say or ask anything else.`;
+                    console.log(instruction4NoResponse2_3);
+                    return instruction4NoResponse2_3;
+                }
         }
     }
 
@@ -1237,7 +1284,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         // update the response timer every 1 second
         console.log('startResponseTimer');
         userRespondedRef.current = false;
-        isWaitingForResponseRef.current = true;
+        if (noResponseReminderCountRef.current < 3) {
+            isWaitingForResponseRef.current = false;
+        } else {
+            isWaitingForResponseRef.current = true;
+        }
         setTimer(0); // 计时器从 0 开始
         if (timerRef.current) clearInterval(timerRef.current); 
         // if the user clicks replay during the timer, clear the timer, and wait until the replay is finished and start the timer again
@@ -1253,25 +1304,39 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         }, 1000);
     }
 
+    // 添加新的useRef追踪当前无响应提醒次数
+    const noResponseReminderCountRef = useRef(0);
+    
     useEffect(() => {
         if (timer >= 15 && !userRespondedRef.current && isKnowledge) {
           console.log('User did not respond in 15 seconds. Sending another message...');
           console.log('isWaitingForResponse', isWaitingForResponseRef.current);
           const client = clientRef.current;
+          
           // if the client is connected, send a message
-          if (isClientSetup && isWaitingForResponseRef.current) {
+          if (isClientSetup) {
             noReponseCntRef.current = noReponseCntRef.current + 1;
+            noResponseReminderCountRef.current += 1;
+            
             client.realtime.send('response.create', {
                 response: {
                     "modalities": ["text", "audio"],
                     "instructions": getInstruction4NoResponse()
                 }
             });
+            
+            console.log(`No response reminder count: ${noResponseReminderCountRef.current}`);
+            
+            // 重置计时器以便下一个15秒计时
+            setTimer(0);
+            
+            // 只有在发送了3次提醒后才停止计时器
+            if (noResponseReminderCountRef.current >= 3) {
+              if (timerRef.current) clearInterval(timerRef.current);
+            }
           }
-          if (timerRef.current) clearInterval(timerRef.current); // 停止计时器
         }
     }, [timer, userRespondedRef.current]);
-    // clear the timer when page changes
 
     useEffect(() => {
         return () => {
@@ -1301,6 +1366,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 }
                 userRespondedRef.current = true;
                 isWaitingForResponseRef.current = false;
+                noResponseReminderCountRef.current = 0; // 重置无响应提醒计数器
                 if (timerRef.current) clearInterval(timerRef.current);
                 setTimer(0);
             });
@@ -1677,7 +1743,6 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         console.log('handleCloseChat');
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
-        setIsAsked(true);
         // send the chat history to backend
         // console.log('chatHistory to save', chatHistory);
         const formData = processChatHistory(currentPageChatHistory);
@@ -1692,6 +1757,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         }
         if (isKnowledge) {
             setIsKnowledge(false);
+            isAskedRef.current = true;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             setTimeout(() => {
                 // audioRef.current.play();
@@ -2068,7 +2134,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                     {canPushToTalk && !isEnding && (
                         <div id='recording-box'>
                             {/* only show these boxes when recording */}
-                            {isRecording && (
+                            { isRecording && (
                                 <>
                                     <div id='recording-box-1' />
                                     <div id='recording-box-2' />
@@ -2097,11 +2163,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                             >
                                 {/* <FaMicrophone size={40} color='white'/> */}
                                 {isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Talking...</h4>
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Talking...</h4>
                                 : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Hold to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Hold to talk!</h4>
                                 </div>}
                             </button>
                         </div>

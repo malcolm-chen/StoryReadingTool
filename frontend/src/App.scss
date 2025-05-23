@@ -770,8 +770,8 @@ button {
   border: 2px solid rgba(246, 191, 69, 0.5);
   border-radius: 50px;
   position: absolute;
-  width: calc(90% - 12px);
-  height: calc(100% - 12px);
+  width: calc(100% - 10% - 12px);
+  height: calc(100% - 3px);
   z-index: 5;
 }
 
@@ -779,10 +779,10 @@ button {
   border: 2px solid rgba(246, 191, 69, 0.2);
   border-radius: 50px;
   position: absolute;
-  top: 0;
-  left: 0;
+  // top: 0;
+  // left: 0;
   width: 90%;
-  height: 100%;
+  height: 110%;
   z-index: 5;
 }
 

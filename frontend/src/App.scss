@@ -687,7 +687,7 @@ button {
   flex-grow: 1;
   justify-content: center;
   position: relative;
-  margin-top: 28px;
+  margin-top: 38px;
   padding: 0 16px;
   z-index: 100;
 }
@@ -770,7 +770,7 @@ button {
   border: 2px solid rgba(246, 191, 69, 0.5);
   border-radius: 50px;
   position: absolute;
-  width: calc(100% - 12px);
+  width: calc(90% - 12px);
   height: calc(100% - 12px);
   z-index: 5;
 }
@@ -781,7 +781,7 @@ button {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 90%;
   height: 100%;
   z-index: 5;
 }

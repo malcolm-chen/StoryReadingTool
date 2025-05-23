@@ -399,23 +399,24 @@ const ReadChatPage = () => {
         console.log('moving to next page', currentPageRef.current);
         if (isKnowledge) {
             return;
-        }
-        if (currentPageRef.current in knowledgeRef.current && !isKnowledge) {
-            console.log('currentPage in knowledge', currentPageRef.current);
-            setIsKnowledge(true);
-            setIsConversationEnded(false);
-            setAnswerRecord([]);
-            noReponseCntRef.current = 0;
-            setCurrentPageChatHistory([]);
-            // check if the client is not setup for guiding
-            if (!clientRef.current.realtime.isConnected()) {
-                console.log('setting up client for guiding');
-                setupClient(await getInstruction4Guiding());
-                setIsClientSetup(true);
-            } else {
-                console.log('resetting client for guiding');
-                updateClientInstruction(await getInstruction4Guiding());
-            }
+        // }
+        // if (currentPageRef.current in knowledgeRef.current && !isKnowledge) {
+        //     console.log('currentPage in knowledge', currentPageRef.current);
+        //     setIsKnowledge(true);
+        //     setIsConversationEnded(false);
+        //     setAnswerRecord([]);
+        //     noReponseCntRef.current = 0;
+        //     setCurrentPageChatHistory([]);
+        //     // check if the client is not setup for guiding
+        //     if (!clientRef.current.realtime.isConnected()) {
+        //         console.log('setting up client for guiding');
+        //         setupClient(await getInstruction4Guiding());
+        //         setIsClientSetup(true);
+        //     } else {
+        //         console.log('resetting client for guiding');
+        //         updateClientInstruction(await getInstruction4Guiding());
+        //     }
+        // } 
         } else {
             setIsKnowledge(false);
             // setIsAsking(false);

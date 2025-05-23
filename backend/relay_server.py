@@ -50,7 +50,7 @@ async def handler(websocket):
 async def main():
     """Start the WebSocket server."""
     server = await websockets.serve(
-        handler, "0.0.0.0", 8765,
+        handler, "0.0.0.0", 8766,
         subprotocols=[
             'realtime',
             'openai-insecure-api-key.123',

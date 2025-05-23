@@ -9,9 +9,7 @@ import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
 import Header from '../header';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 import { useSwipeable } from 'react-swipeable';
-import { Modal, ModalDialog, ModalClose } from '@mui/joy';
-import { AiOutlineShrink, AiOutlineExpand } from "react-icons/ai";
-import { FaRegClosedCaptioning } from "react-icons/fa6";
+import { FaCaretRight, FaCaretLeft } from "react-icons/fa6";
 import { FaPlay, FaPause, FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -365,6 +363,9 @@ const ReadChatPage = () => {
     }, [pages]);
 
     const handlePrevPage = async () => {
+        if (isKnowledge) {
+            return;
+        }
         console.log('moving to previous page', currentPageRef.current);
         if (currentPageRef.current > 0) {
             setIsKnowledge(false);
@@ -396,6 +397,9 @@ const ReadChatPage = () => {
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
+        if (isKnowledge) {
+            return;
+        }
         if (currentPageRef.current in knowledgeRef.current && !isKnowledge) {
             console.log('currentPage in knowledge', currentPageRef.current);
             setIsKnowledge(true);
@@ -564,7 +568,7 @@ const ReadChatPage = () => {
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
         When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response to determine whether all of the child's responses, when taken together, accurately address the answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
-        - Correct answer: Consider the child's all responses in the conversation history of the current page so far. If the child’s current response or combined responses across all turns  closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
+        - Correct answer: Consider the child's all responses in the conversation history of the current page so far. If the child's current response or combined responses across all turns  closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page so far. If the child's answers include some correct components but still lack one or more key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information
         - Irrelevant response: The response is unrelated to the question or the story context.
@@ -716,7 +720,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
-        `
+        `;
         let sumCount = 0;
         for (const answer of answerRecord) {
             if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
@@ -1627,14 +1631,16 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     const handleExpandChat = () => {
         setIsExpandedChat(!isExpandedChat);
         const chatContainer = document.getElementById('chat-container');
-        chatContainer.style.height = isExpandedChat ? '50%' : '80%';
+        chatContainer.style.height = isExpandedChat ? '35%' : '55%';
     }
     
     const handleMinimizeChat = async () => {
         setIsMinimizedChat(!isMinimizedChat);
         setIsExpandedChat(false);
-        const wavStreamPlayer = wavStreamPlayerRef.current;
-        await wavStreamPlayer.interrupt();
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.style.height = isMinimizedChat ? '30%' : '35%';
+        // const wavStreamPlayer = wavStreamPlayerRef.current;
+        // await wavStreamPlayer.interrupt();
     }
 
     const handlePenguinClick = () => {
@@ -1868,23 +1874,44 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         }
     };
 
+    // Define style objects for conditional rendering
+    const bookContentStyle = {
+        justifyContent: isKnowledge ? 'flex-start' : 'center'
+    };
+    
+    const bottomBoxStyle = {
+        flexBasis: isKnowledge ? '150px' : '100px'
+    };
+
+    const bookImgStyle = {
+        width: isKnowledge ? '80%' : '100%'
+    };
+
+    const chatContainerStyle = {
+        height: isKnowledge 
+            ? (currentPageRef.current === 2) ? '40%' : (currentPageRef.current === 5 || currentPageRef.current === 7)
+                ? '35%'
+                : '55%'
+            : chatBoxSize.height
+    };
+
     return (
         <Box className="background-container">
             <Header user={user} title={title} hasTitle={true} />
             <div id='main-container'>
                 <div id='book-container'>
-                    <Box id='book-content'>
+                    <Box id='book-content' style={bookContentStyle}>
                         <IconButton
                         id="prev-btn"
                         variant='plain'
                         onClick={handlePrevPage}
                         disabled={currentPageRef.current === 0}
-                        sx={{ opacity: 0 }}
+                        sx={{ opacity: 0.7 }}
                         >
-                            <MdArrowCircleLeft size={60} color='#7AA2E3'/>
+                            <FaCaretLeft size={60} color='#2A2278'/>
                         </IconButton>
 
-                        <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
+                        <Box id='book-img' {...swipeHandlers} onClick={handleImageClick} style={bookImgStyle}>
                             <img 
                                 src={pages[currentPageRef.current]?.image} 
                                 alt={`Page ${currentPageRef.current + 1}`}
@@ -1896,13 +1923,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
-                        sx={{ opacity: 0 }}
+                        sx={{ opacity: 0.7 }}
                         >
-                        <MdArrowCircleRight size={60} color='#7AA2E3'/>
+                        <FaCaretRight size={60} color='#2A2278'/>
                     </IconButton>
                 </Box>            
             </div>
-            <div id='bottom-box'>
+            <div id='bottom-box' style={bottomBoxStyle}>
                 
                 {/* shake the penguin image at the first page, after 13 seconds */}
                 <div id='penguin-box' onClick={handlePenguinClick}>
@@ -1914,8 +1941,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 />
                 </div>
             </div>
-            {(isAskingRef.current || isKnowledge) && !isMinimizedChat && (
-                    <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
+            {(isAskingRef.current || isKnowledge) && (
+                    <Box id='chat-container' style={chatContainerStyle} sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (
                             <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
@@ -1959,7 +1986,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                             {/* always set the backgroud to transparent */}
                             <FaMinusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }}/>
                         </IconButton>
-                        <IconButton 
+                        {/* <IconButton 
                             id='close-btn'
                             onClick={handleCloseChat}
                             onMouseOver={() => {
@@ -1972,9 +1999,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                                 zIndex: 1
                             }}
                         >
-                            {/* add a close icon */}
                             <IoMdCloseCircle size={36} color='#7AA2E3' />
-                        </IconButton>
+                        </IconButton> */}
                        
                     <Box className='chat-window'>
                         

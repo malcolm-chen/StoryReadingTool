@@ -639,7 +639,7 @@ const GreetPage = () => {
                             )))}
                     </Box>
                     {canPushToTalk && !isEnding && (
-                        <div id='recording-box'>
+                        <div id='recording-box' style={{height: '100px'}}>
                             {/* only show these boxes when recording */}
                             {isRecording && (
                                 <>
@@ -666,6 +666,7 @@ const GreetPage = () => {
                                     backgroundColor: '#F4A011',
                                     position: 'relative',
                                     width: '90%',
+                                    height: '100%',
                                     zIndex: 102
                                 }}
                             >

@@ -483,7 +483,7 @@ const ReadChatPage = () => {
 
     function getInstruction4Frogs() {
         const instruction4Frogs = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook about frogs. 
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. 
         This page illustrates different types of frogs. Your task is to answer the child's questions about the frogs.
         
         Here are the frogs information on this page:
@@ -601,7 +601,7 @@ const ReadChatPage = () => {
     // update the instruction4Guiding when the currentPageRef.current changes   
     async function getInstruction4Guiding() {
         const instruction4Guiding = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Your task is to initiate an interactive conversation based on the story information and instructions.
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Your task is to initiate an interactive conversation based on the story information and instructions.
         
         **Story Information**:
         - Story Title: ${title}
@@ -622,7 +622,7 @@ const ReadChatPage = () => {
 
     const getInstruction4Correct = (items, evaluation) => {
         const instruction4Correct = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -656,7 +656,7 @@ const ReadChatPage = () => {
 
     const getInstruction4Incomplete = (items, evaluation) => {
         const instruction4Incomplete1 = `
-You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -670,15 +670,15 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'correct but incomplete', you should acknowledge the correct part and tailor your acknowledgment to the context (e.g., "Great start!", "Nice work! There's more to it", "Almost there", and other similar acknowledgments).
-
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', etc.` : "- Since the evaluation of the child's response is 'correct but incomplete', you should acknowledge the correct part and tailor your acknowledgment to the context (e.g., 'Great start!', 'Nice work! There's more to it', 'Almost there', and other similar acknowledgments)."}
+    
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
         - *DO NOT* draw on specific details from the correct answer. 
         - Provide an implicit hint that guides children toward the missing parts of the answer. You should help them think in the right direction without revealing the core elements of the provided correct answer.
-- You should hint the child to think in the right direction rather than revealing the core elements of the provided correct answer.
+        - You should hint the child to think in the right direction rather than revealing the core elements of the provided correct answer.
                         
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -696,7 +696,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         - conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
@@ -708,7 +708,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', etc.` : "- Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., 'Let's try it again!', 'Let's think about it together!', 'That's a good try!', etc.)."}
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -742,7 +742,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     const getInstruction4FactuallyIncorrect = (items, evaluation) => {
         const instruction4FactuallyIncorrect1 = `
-You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -779,7 +779,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4FactuallyIncorrect2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -825,7 +825,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     const getInstruction4IrrelevantResponse = (items, evaluation) => {
         const instruction4IrrelevantResponse1 = `
-You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -838,7 +838,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        - Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let's think about what the question is asking,' 'That's an interesting idea! Let's focus on what we're really looking for,' and other similar acknowledgments).
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let's think about what the question is asking,' 'That's an interesting idea! Let's focus on what we're really looking for,' and other similar acknowledgments)."}
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
@@ -862,7 +862,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4IrrelevantResponse2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -874,7 +874,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        - Since the evaluation of the child's response is 'irrelevant', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Nice try! Let's think about what the question is asking,' 'That's an interesting idea! Let's focus on what we're really looking for,' and other similar acknowledgments)."}
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
@@ -908,7 +908,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     const getInstruction4Uncertainty = (items, evaluation) => {
         const instruction4Uncertainty1 = `
-You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -945,7 +945,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
         `
         const instruction4Uncertainty2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
@@ -992,7 +992,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     const getInstruction4ChildQuestion = (items, evaluation) => {
         const instruction4ChildQuestion1 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -1025,7 +1025,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         `;
 
         const instruction4ChildQuestion2 = `
-    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+    You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -1072,8 +1072,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     }
 
     const getInstruction4Invalid = (items, evaluation) => {
-        const instruction4Invalid = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        const instruction4Invalid1 = `
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -1083,14 +1083,57 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the evaluation of the child's response is 'invalid', you should respond with a friendly line, such as "I didn't hear your answer, can you say it again?", or "Oh I didn't catch that, can you say it again?".
         - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
         `;
-        console.log(instruction4Invalid);
-        return instruction4Invalid;
+
+        const instruction4Invalid2 = `
+You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - main question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - Conversation history: 
+        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        - child's latest response: the most recent input from the child (user).
+
+    Since the evaluation of the child's response is 'invalid', your response should include three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
+
+    **Instructions for Acknowledgement**:
+        - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
+        - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
+        - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
+        - Example: "Thanks for sharing! While I didn't hear your answer, ...", and move on to the explanation.
+    
+    **Instructions for Explanation**:
+        - Since the evaluation of the child's response is 'invalid', you should explain the answer to the child.
+        - Your explanation should be suitable for children aged 6 to 8.
+        - Keep your explanation simple, engaging and under 20 words.
+
+    **Instructions for Conclusion**:
+        - DO NOT use question marks in the conclusion.
+        - End the conversation with a declarative sentence.
+        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.)
+    
+    **Instructions for Whole Response**:
+        - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
+        `;
+
+        let invalidCount = 0;
+        for (const answer of answerRecord) {
+            if (answer === 'invalid') {
+                invalidCount++;
+            }
+        }
+        if (invalidCount > 1) {
+            console.log('instruction4Invalid2');
+            return instruction4Invalid2;
+        } else {
+            console.log('instruction4Invalid1');
+            return instruction4Invalid1;
+        }
     }
 
 
     const getInstruction4ConvEnd = (items, evaluation) => {
         const instruction4ConvEnd = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. 
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. 
         Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
         
         **Instructions for Response**:
@@ -1107,7 +1150,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     const getInstruction4FollowUp = (items, evaluation) => {
         const instruction4FollowUp1 = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
@@ -1164,7 +1207,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         `;
 
         const instruction4FollowUp2 = `
-        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook. 
+        You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. 
         Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
         
         **Instructions for Response**:

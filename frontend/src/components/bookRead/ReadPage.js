@@ -560,7 +560,7 @@ const ReadChatPage = () => {
         If the response is empty, cannot be recognized due to noise, is too short, or sent by mistake, mark it as "invalid".
        
         Step 2: Check the status of the conversation
-        As long as the assistant has asked a question like 'Do you have any questions about this page?', no matter if the child asks a question or not, mark it as "conv end".
+        As long as in the chat history, the assistant has asked a question like 'Do you have any questions about this page?', no matter if the child asks a question or not, mark it as "conv end". Ignore this step if the assistant has not asked the question yet.
         
         Step 3: Check if the child asks a question
         If the assistant has NOT asked a question like 'Do you have any questions about this page?', and the child asks a question, no matter if it is off-topic or not, mark it as "child asks question".

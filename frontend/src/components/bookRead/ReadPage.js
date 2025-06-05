@@ -574,7 +574,7 @@ const ReadChatPage = () => {
         - Correct answer: Consider the child's all responses in the conversation history of the current page so far. If the child's current response or combined responses across all turns  closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page so far. If the child's answers include some correct components but still lack one or more key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information
-        - Irrelevant response: The response is unrelated to the question or the story context.
+        - Irrelevant response: The response is unrelated to the question or the story context. If the response is invalid, do not mark it as irrelevant.
         - Uncertainty answer: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
                     
         **Response Format**:

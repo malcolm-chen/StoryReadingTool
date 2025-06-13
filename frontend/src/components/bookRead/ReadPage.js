@@ -557,24 +557,24 @@ const ReadChatPage = () => {
         
         **Steps for Evaluation**:
         Step 1: Check Response Validity
-        If the response is empty, cannot be recognized due to noise, is too short, or sent by mistake, mark it as "invalid".
+        If the response is empty, cannot be recognized due to noise, is too short, or sent by mistake, you must mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        As long as in the chat history, the assistant has asked a question like 'Do you have any questions about this page?', no matter if the child asks a question or not, mark it as "conv end". Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet.
+        As long as in the chat history, the assistant has asked a question like 'Do you have any questions about this page?', no matter if the child asks a question or not, mark it as "conv end". Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet. Jumping straight to **Response Format**.
         
         Step 3: Check if the child asks a question
-        If the assistant has NOT asked a question like 'Do you have any questions about this page?', and the child asks a question, no matter if it is off-topic or not, mark it as "child asks question".
+        If the assistant has NOT asked a question like 'Do you have any questions about this page?', and the child asks a question, no matter if it is off-topic or not, mark it as "child asks question". Jumping straight to **Response Format**.
         
         Step 4: Evaluate Valid Responses
         For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
         *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response to determine whether all of the child's responses, when taken together, accurately address the answer to the main question. The evaluation should consider all of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
-        - Correct answer: Consider the child's all responses in the conversation history of the current page so far. If the child's current response or combined responses across all turns  closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly. 
-        - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page so far. If the child's answers include some correct components but still lack one or more key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), then consider the child has answered the question correctly, but incompletely.
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response, to determine whether all of the child's responses, when taken together, accurately address the main question. The evaluation should consider ALL of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
+        - Correct answer: Consider the child's all responses in the conversation history of the current page. Only if the child's current response or combined responses across all turns closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
+        - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information
-        - Irrelevant response: The response is unrelated to the question or the story context. If the response is invalid, do not mark it as irrelevant.
+        - Irrelevant response: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
         - Uncertainty answer: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
                     
         **Response Format**:

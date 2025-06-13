@@ -573,7 +573,7 @@ const ReadChatPage = () => {
         When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response, to determine whether all of the child's responses, when taken together, accurately address the main question. The evaluation should consider ALL of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
         - Correct answer: Consider the child's all responses in the conversation history of the current page. Only if the child's current response or combined responses across all turns closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly, but incompletely.
-        - Factually incorrect answer: The response contains incorrect information
+        - Factually incorrect answer: The response contains incorrect information compared to the answer
         - Irrelevant response: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
         - Uncertainty answer: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
                     
@@ -640,7 +640,7 @@ const ReadChatPage = () => {
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging, and under 20 words.
-        - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
+        - Since the evaluation of the child's response is 'correct', provide a concise explanation covering key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to deepen their understanding.
 
     **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
@@ -712,7 +712,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Explain the answer here with easy-to-understand words.
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) here with easy-to-understand words.
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
@@ -795,7 +795,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Explain the answer here with easy-to-understand words.
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer})
         - Keep your explanation simple, engaging and under 20 words. 
 
    **Instructions for Conclusion**:
@@ -878,7 +878,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Explain the answer here with easy-to-understand words.
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer})
         - Keep your explanation simple, engaging and under 20 words. 
 
    **Instructions for Conclusion**:
@@ -960,7 +960,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Explain the answer here with easy-to-understand words.
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer})
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
@@ -1102,7 +1102,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Example: "Let me share with you! (If the child didn't say anything) / No worries! We are learning together! (If the child didn't say anything) + While I didn't hear your answer, ...", and move on to the explanation.
     
     **Instructions for Explanation**:
-        - Since the evaluation of the child's response is 'invalid', you should explain the answer to the child.
+        - Since the evaluation of the child's response is 'invalid', you should cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in your explanation
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
 

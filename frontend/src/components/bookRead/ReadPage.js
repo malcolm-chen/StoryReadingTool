@@ -571,7 +571,7 @@ const ReadChatPage = () => {
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
         When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response, to determine whether all of the child's responses, when taken together, accurately address the main question. The evaluation should consider ALL of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
-        - Correct answer: Consider the child's all responses in the conversation history of the current page. Only if the child's current response or combined responses across all turns closely align with the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
+        - Correct answer: Consider the child's all responses in the conversation history of the current page. Only if the child's current response or combined responses across all turns closely ALIGN WITH key elements of the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly, but incompletely.
         - Factually incorrect answer: The response contains incorrect information compared to the answer
         - Irrelevant response: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
@@ -612,7 +612,7 @@ const ReadChatPage = () => {
             You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "Hey xxx, before we move to the next page, share with me what you think" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "xxx, before we move to the next page, let's chat about what you just read!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); etc. 
             ** Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. **
             **DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
-           ** Your first question must be identical to the provided main question, meaning that you should not substitute any keyword.
+            ** Your first question must be identical to the provided main question, meaning that you should not substitute any keyword.
             ** Must ask only ONE question (${knowledgeRef.current[currentPageRef.current]?.question})). DO NOT ASK MORE THAN ONE QUESTION. **
         `;
         
@@ -674,15 +674,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer in the hint.
+        - *DO NOT* include the correct answer or details of the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. 
-        - Provide an implicit hint that guides children toward the missing parts of the answer. You should help them think in the right direction without revealing the core elements of the provided correct answer.
-        - You should hint the child to think in the right direction rather than revealing the core elements of the provided correct answer.
+        - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
                         
     **Instructions for Asking a Reprompt Question**:   
-        - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
+        - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. Do not make the question obvious about what the answer is.
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the goals of frogs using their voice." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -732,6 +731,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         }
         if (sumCount < 3) {
             console.log('instruction4Incomplete1');
+            console.log(instruction4Incomplete1)
             return instruction4Incomplete1;
         } else {
             console.log('instruction4Incomplete2');
@@ -759,13 +759,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer in the hint.
+        - *DO NOT* include the correct answer or details of the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. First gently correct the child's misunderstanding. Then provide an implicit hint that guides children toward the core concept, helping them think in the right direction without giving away the answer.
+        - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
   
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
+        - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details.
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the goals of frogs using their voice." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -842,9 +843,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer in the hint.
+        - *DO NOT* include the correct answer or details of the correct answer in the hint.
         - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the context and core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
+        - Provide an IMPLICIT hint that guides children toward the relevant context. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -931,7 +932,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. Do not include answer details in the reprompt question.
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the goals of frogs using their voice." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.

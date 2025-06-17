@@ -679,6 +679,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+        - *DO NOT* include the correct answer in your follow-up question. 
 
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
@@ -767,6 +768,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+        - *DO NOT* include the correct answer in your follow-up question. 
 
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -854,6 +856,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Provide an IMPLICIT hint that guides children toward the relevant context. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+        - *DO NOT* include the correct answer in your follow-up question. 
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -912,7 +915,6 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             console.log('instruction4IrrelevantResponse2');
             return instruction4IrrelevantResponse2;
         }
-
     }
 
     const getInstruction4Uncertainty = (items, evaluation) => {
@@ -939,6 +941,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+        - *DO NOT* include the correct answer in your follow-up question. 
      
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;

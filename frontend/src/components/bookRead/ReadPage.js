@@ -677,11 +677,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* include the correct answer or details of the correct answer in the hint.
         - *DO NOT* include any question in the hint.
         - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
-                        
+        - Your hints should avoid any phrasing that might directly suggest the answer.
+        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. Do not make the question obvious about what the answer is.
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the goals of frogs using their voice." : ''}
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER.
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
+        ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -689,7 +692,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
+        - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
@@ -711,7 +714,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) here with easy-to-understand words.
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) here with easy-to-understand words, excluding the acceptance criteria.
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
@@ -762,11 +765,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* include the correct answer or details of the correct answer in the hint.
         - *DO NOT* include any question in the hint.
         - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
-  
+        - Your hints should avoid any phrasing that might directly suggest the answer.
+        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details.
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the goals of frogs using their voice." : ''}
+        - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
+        ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -774,7 +780,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
+        - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
@@ -796,7 +802,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer})
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
         - Keep your explanation simple, engaging and under 20 words. 
 
    **Instructions for Conclusion**:
@@ -846,10 +852,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* include the correct answer or details of the correct answer in the hint.
         - *DO NOT* include any question in the hint.
         - Provide an IMPLICIT hint that guides children toward the relevant context. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
+        - Your hints should avoid any phrasing that might directly suggest the answer.
+        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -857,7 +865,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
+        - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
@@ -879,7 +887,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer})
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
         - Keep your explanation simple, engaging and under 20 words. 
 
    **Instructions for Conclusion**:
@@ -929,11 +937,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* include the correct answer in the hint.
         - *DO NOT* include any question in the hint.
         - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
-                        
+        - Your hints should avoid any phrasing that might directly suggest the answer.
+        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
+     
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. Do not include answer details in the reprompt question.
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the goals of frogs using their voice." : ''}
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not divert the question to the page details. Do not include answer details in the reprompt question.
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
+        ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -941,7 +952,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Your response should *not* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
+        - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) instead of diverging the page content details to the importance of something.
@@ -962,7 +973,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer})
+        - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
@@ -1104,7 +1115,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Example: "Let me share with you! (If the child didn't say anything) / No worries! We are learning together! (If the child didn't say anything) + While I didn't hear your answer, ...", and move on to the explanation.
     
     **Instructions for Explanation**:
-        - Since the evaluation of the child's response is 'invalid', you should cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in your explanation
+        - Since the evaluation of the child's response is 'invalid', you should cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in your explanation, excluding the acceptance criteria.
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
 
@@ -1364,7 +1375,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             client.realtime.send('response.create', {
                 response: {
                     "modalities": ["text", "audio"],
-                    "instructions": getInstruction4NoResponse()
+                    "instructions": getInstruction4NoResponse(),
+                    "temperature": 0.7
                 }
             });
             
@@ -1905,7 +1917,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4Correct(items, evaluation)
+                        "instructions": getInstruction4Correct(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1914,7 +1927,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4Incomplete(items, evaluation)
+                        "instructions": getInstruction4Incomplete(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1923,7 +1937,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4FactuallyIncorrect(items, evaluation)
+                        "instructions": getInstruction4FactuallyIncorrect(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1932,7 +1947,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4IrrelevantResponse(items, evaluation)
+                        "instructions": getInstruction4IrrelevantResponse(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1941,7 +1957,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4Uncertainty(items, evaluation)
+                        "instructions": getInstruction4Uncertainty(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1950,7 +1967,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4ChildQuestion(items, evaluation)
+                        "instructions": getInstruction4ChildQuestion(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1959,7 +1977,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4Invalid(items, evaluation)
+                        "instructions": getInstruction4Invalid(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1968,7 +1987,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4ConvEnd(items, evaluation)
+                        "instructions": getInstruction4ConvEnd(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 break;
@@ -1976,7 +1996,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],
-                        "instructions": getInstruction4FollowUp(items, evaluation)
+                        "instructions": getInstruction4FollowUp(items, evaluation),
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -1999,7 +2020,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     const chatContainerStyle = {
         height: isKnowledge 
-            ? (currentPageRef.current === 2) ? '40%' : (currentPageRef.current === 5 || currentPageRef.current === 7)
+            ? (currentPageRef.current === 2 || currentPageRef.current === 5) ? '40%' : (currentPageRef.current === 7)
                 ? '35%'
                 : '55%'
             : chatBoxSize.height

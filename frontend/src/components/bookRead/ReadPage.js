@@ -92,6 +92,7 @@ const ReadChatPage = () => {
     const deletedItemsRef = useRef(new Set());
     const isWaitingForEvaluationRef = useRef(false);
     const replayAudioRef = useRef(new Audio());
+    const askedPageRef = useRef([]);
 
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
@@ -402,7 +403,7 @@ const ReadChatPage = () => {
             console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
             return;
         }
-        if (currentPageRef.current in knowledgeRef.current && !isKnowledge && !isAskedRef.current) {
+        if (currentPageRef.current in knowledgeRef.current && !isKnowledge && !isAskedRef.current && !askedPageRef.current.includes(currentPageRef.current)) {
             console.log('currentPage in knowledge', currentPageRef.current);
             setIsKnowledge(true);
             setIsConversationEnded(false);
@@ -422,6 +423,9 @@ const ReadChatPage = () => {
             console.log('really moving to next page', currentPageRef.current);
             setIsKnowledge(false);
             // setIsAsking(false);
+            if (!askedPageRef.current.includes(currentPageRef.current)) {
+                askedPageRef.current.push(currentPageRef.current);
+            }
             isAskingRef.current = false;
             isAskedRef.current = false;
             setIsMinimizedChat(false);
@@ -586,7 +590,7 @@ const ReadChatPage = () => {
         4. {"evaluation": "correct"}
         5. {"evaluation": "correct but incomplete"}
         6. {"evaluation": "factually incorrect"}
-        7. {"evaluation": "irrelevant response"}
+        7. {"evaluation": "irrelevant"}
         8. {"evaluation": "uncertainty"}
 
         **Important Reminder**:
@@ -657,7 +661,7 @@ const ReadChatPage = () => {
     const getInstruction4Incomplete = (items, evaluation) => {
         const instruction4Incomplete1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 && currentPageRef.current !==  7 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - Conversation history: 
         ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the main question: ${knowledgeRef.current[currentPageRef.current]?.question}
@@ -729,7 +733,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         `;
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -759,7 +763,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'Let's try it again', 'Let's think about it together!', 'That's a good try!', and other similar acknowledgments)."}
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'Let's think about it together!', 'That's a good try!', 'Let's try it again', and other similar acknowledgments)."}
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
@@ -818,7 +822,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -847,7 +851,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Let’s think about what the question is asking,' 'Thanks for sharing that! Let’s focus on what we are reading here,' 'I heard you! Let’s think about what the question is asking' and other similar acknowledgments)."}
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Great Thinking!', 'Let’s think about what the question is asking,' 'Thanks for sharing that! Let’s focus on what we are reading here,' 'I heard you! Let’s think about what the question is asking' and other similar acknowledgments)."}
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
@@ -904,7 +908,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -991,7 +995,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -1071,7 +1075,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         let sumCount = 0;
         let correctCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
             if (answer === 'correct') {
@@ -1247,7 +1251,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant response' || answer === 'uncertainty') {
+            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }

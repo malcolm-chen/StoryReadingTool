@@ -564,7 +564,7 @@ const ReadChatPage = () => {
         If the response is empty, cannot be recognized due to noise, is too short, or sent by mistake, you must mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        As long as in the chat history, the assistant has asked a question like 'Do you have any questions about this page?', no matter if the child asks a question or not, mark it as "conv end". Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet. Jumping straight to **Response Format**.
+        As long as in the chat history, the assistant has asked a question like 'Do you have any questions about this page?', ignore the child's answer, mark the evaluation result as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet.
         
         Step 3: Check if the child asks a question
         If the assistant has NOT asked a question like 'Do you have any questions about this page?', and the child asks a question, no matter if it is off-topic or not, mark it as "child asks question". Jumping straight to **Response Format**.

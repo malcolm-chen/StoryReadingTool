@@ -645,7 +645,8 @@ const ReadChatPage = () => {
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging, and under 20 words.
         - Since the evaluation of the child's response is 'correct', provide a concise explanation covering key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to deepen their understanding.
-
+        ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
+        
     **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
         - Keep the conclusion part concise, under 15 words. 
@@ -720,6 +721,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) here with easy-to-understand words, excluding the acceptance criteria.
+        ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:
@@ -809,6 +811,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
+        ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
    **Instructions for Conclusion**:
@@ -895,6 +898,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
+        ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
    **Instructions for Conclusion**:
@@ -981,6 +985,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
         - Cover key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
+        ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
     **Instructions for Conclusion**:

@@ -46,6 +46,7 @@ const ReadChatPage = () => {
     const [autoPage, setAutoPage] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
     const [replayingIndex, setReplayingIndex] = useState(null);
+    const [isAsked, setIsAsked] = useState(false);
     // const [isAsking, setIsAsking] = useState(false);
     const [showSpeedSlider, setShowSpeedSlider] = useState(false);
     const recorderControls = useVoiceVisualizer();
@@ -60,7 +61,8 @@ const ReadChatPage = () => {
     const responseResendRef = useRef(false);
     // const [evaluation, setEvaluation] = useState(null);
     const [isImageLoading, setIsImageLoading] = useState(false);
-    
+    const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
+    const [speedSliderValue, setSpeedSliderValue] = useState(audioSpeed);
     const penguin = './files/imgs/penguin1.svg';
 
     // currentPage = localStorage.getItem(`${title}-currentPage`) ? parseInt(localStorage.getItem(`${title}-currentPage`), 10) : 0;
@@ -93,6 +95,18 @@ const ReadChatPage = () => {
     const isWaitingForEvaluationRef = useRef(false);
     const replayAudioRef = useRef(new Audio());
     const askedPageRef = useRef([]);
+    const audioRef = useRef(new Audio());
+
+
+    const [audioPage, setAudioPage] = useState(() => {
+        const savedPage = localStorage.getItem(`${title}-currentPage`);
+        return savedPage ? parseInt(savedPage, 10) : 0;
+    });
+
+    const [currentSentence, setCurrentSentence] = useState(() => {
+        const savedSentence = localStorage.getItem(`${title}-currentSentence`);
+        return savedSentence ? parseInt(savedSentence, 10) : 0;
+    });
 
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
@@ -352,6 +366,91 @@ const ReadChatPage = () => {
         // playPageSentences();
     };
     
+    const togglePlayPause = () => {
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            // if in a new page, play the new page audio
+            // extract the page number between 'p' and 'sec': `/files/books/${title}/audio/p${currentPage}sec${sentenceIndex}.mp3`;
+            if (audioPage !== currentPageRef.current) {
+                audioRef.current.src = `/files/books/${title}/audio/p${currentPageRef.current}sec0.mp3`;
+                setAudioPage(currentPageRef.current);
+            }
+            audioRef.current.play();
+            audioRef.current.playbackRate = audioSpeed;
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+
+    const playPageSentences = () => {
+        if (pages[currentPageRef.current]?.text) {
+            sentenceIndexRef.current = 0;
+            const audio = audioRef.current;
+            const playNextSentence = async () => {
+                setAudioPage(currentPageRef.current);
+                if (sentenceIndexRef.current < pages[currentPageRef.current].text.length) {
+                    setCurrentSentence(sentenceIndexRef.current);
+                    audio.src = `/files/books/${title}/audio/p${currentPageRef.current}sec${sentenceIndexRef.current}.mp3`;
+
+                    audio.onended = () => {
+                        // console.log('end');
+                        sentenceIndexRef.current += 1;
+                        playNextSentence();
+                    };
+                    try {
+                        await audio.play();
+                        const currentSpeed = parseFloat(localStorage.getItem(`${title}-audioSpeed`)) || 1;
+                        audio.playbackRate = currentSpeed;
+                        setIsPlaying(true);
+                    } catch (error) {
+                        console.error('Error playing audio:', error);
+                    }
+                } else {
+                    // setIsPlaying(false);
+                    if (currentPageRef.current in knowledgeRef.current) {
+                        console.log('currentPage in knowledge', currentPageRef.current);
+                        setIsKnowledge(true);
+                        audio.pause();
+                        setIsPlaying(false);
+                        setIsConversationEnded(false);
+                        setAnswerRecord([]);
+                        noReponseCntRef.current = 0;
+                        setCurrentPageChatHistory([]);
+                        // check if the client is not setup for guiding
+                        if (!clientRef.current.realtime.isConnected()) {
+                            console.log('setting up client for guiding');
+                            setupClient(await getInstruction4Guiding());
+                            setIsClientSetup(true);
+                        } else {
+                            console.log('resetting client for guiding');
+                            updateClientInstruction(await getInstruction4Guiding());
+                        }
+                    } else if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') { 
+                        setIsKnowledge(false);
+
+                        // wait for 2 seconds, if the user does not click the next page button, move to the next page
+                        setTimeout(() => {
+                            if (!clientRef.current.realtime.isConnected()) {
+                                handleNextPage();
+                            }
+                        }, 3000);
+                    }
+                    else {
+                        setIsKnowledge(false);
+                        if (currentPageRef.current < pages.length - 1) {
+                            handleNextPage();
+                        } else {
+                            audioRef.current.pause();
+                            setIsPlaying(false);
+                        }
+                    }
+                }
+            };
+            playNextSentence();
+        }
+    };
+    
     useEffect(() => {
         console.log('playPageSentences', currentPageRef.current, sentenceIndexRef.current, knowledgeRef.current.length);
         if (pages.length > 0) {
@@ -359,7 +458,7 @@ const ReadChatPage = () => {
             // setIsPlaying(false);
             if (isPlaying && !isFirstTime) {
                 console.log('playing page sentences', currentPageRef.current);
-                // playPageSentences();  
+                playPageSentences();  
             }
         }
     }, [pages]);
@@ -397,59 +496,93 @@ const ReadChatPage = () => {
         }
     };
 
+    // const handleNextPage = async () => {
+    //     console.log('moving to next page', currentPageRef.current);
+    //     if (isKnowledge && !isAskedRef.current) {
+    //         console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
+    //         return;
+    //     }
+    //     if (currentPageRef.current in knowledgeRef.current && !isKnowledge && !isAskedRef.current && !askedPageRef.current.includes(currentPageRef.current)) {
+    //         console.log('currentPage in knowledge', currentPageRef.current);
+    //         setIsKnowledge(true);
+    //         setIsConversationEnded(false);
+    //         setAnswerRecord([]);
+    //         noReponseCntRef.current = 0;
+    //         setCurrentPageChatHistory([]);
+    //         // check if the client is not setup for guiding
+    //         if (!clientRef.current.realtime.isConnected()) {
+    //             console.log('setting up client for guiding');
+    //             setupClient(await getInstruction4Guiding());
+    //             setIsClientSetup(true);
+    //         } else {
+    //             console.log('resetting client for guiding');
+    //             updateClientInstruction(await getInstruction4Guiding());
+    //         }
+    //     } else {
+    //         console.log('really moving to next page', currentPageRef.current);
+    //         setIsKnowledge(false);
+    //         // setIsAsking(false);
+    //         if (!askedPageRef.current.includes(currentPageRef.current)) {
+    //             askedPageRef.current.push(currentPageRef.current);
+    //         }
+    //         isAskingRef.current = false;
+    //         isAskedRef.current = false;
+    //         setIsMinimizedChat(false);
+    //         setIsExpandedChat(false);
+    //         setAnswerRecord([]);
+    //         noReponseCntRef.current = 0;
+    //         isWaitingForResponseRef.current = false;
+    //         if (clientRef.current.realtime.isConnected()) {
+    //             console.log('disconnecting conversation');
+    //             await disconnectConversation();
+    //             const client = clientRef.current;
+    //             client.reset();
+    //             setIsClientSetup(false);
+    //         }
+    //         const newPage = ( currentPageRef.current + 1 ) % pages.length;
+    //         currentPageRef.current = newPage;
+    //         sentenceIndexRef.current = 0;
+    //         localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
+    //         localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
+    //         playPageSentences();  
+    //     }
+    // };
+
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
         if (isKnowledge && !isAskedRef.current) {
             console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
             return;
         }
-        if (currentPageRef.current in knowledgeRef.current && !isKnowledge && !isAskedRef.current && !askedPageRef.current.includes(currentPageRef.current)) {
-            console.log('currentPage in knowledge', currentPageRef.current);
-            setIsKnowledge(true);
-            setIsConversationEnded(false);
-            setAnswerRecord([]);
-            noReponseCntRef.current = 0;
-            setCurrentPageChatHistory([]);
-            // check if the client is not setup for guiding
-            if (!clientRef.current.realtime.isConnected()) {
-                console.log('setting up client for guiding');
-                setupClient(await getInstruction4Guiding());
-                setIsClientSetup(true);
-            } else {
-                console.log('resetting client for guiding');
-                updateClientInstruction(await getInstruction4Guiding());
-            }
-        } else {
-            console.log('really moving to next page', currentPageRef.current);
-            setIsKnowledge(false);
-            // setIsAsking(false);
-            if (!askedPageRef.current.includes(currentPageRef.current)) {
-                askedPageRef.current.push(currentPageRef.current);
-            }
-            isAskingRef.current = false;
-            isAskedRef.current = false;
-            setIsMinimizedChat(false);
-            setIsExpandedChat(false);
-            setAnswerRecord([]);
-            noReponseCntRef.current = 0;
-            // setChatHistory([]);
-            isWaitingForResponseRef.current = false;
-            if (clientRef.current.realtime.isConnected()) {
-                console.log('disconnecting conversation');
-                // deleteConversationItem(items[0].id);
-                await disconnectConversation();
-                const client = clientRef.current;
-                client.reset();
-                setIsClientSetup(false);
-            }
-            const newPage = ( currentPageRef.current + 1 ) % pages.length;
-            // setCurrentPage(newPage);
-            currentPageRef.current = newPage;
-            sentenceIndexRef.current = 0;
-            localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
-            localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
-            // playPageSentences();  
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        // setIsPlaying(false);
+        setIsKnowledge(false);
+        // setIsAsking(false);
+        isAskingRef.current = false;
+        isAskedRef.current = false;
+        setIsMinimizedChat(false);
+        setIsExpandedChat(false);
+        setAnswerRecord([]);
+        noReponseCntRef.current = 0;
+        // setChatHistory([]);
+        isWaitingForResponseRef.current = false;
+        if (clientRef.current.realtime.isConnected()) {
+            console.log('disconnecting conversation');
+            // deleteConversationItem(items[0].id);
+            await disconnectConversation();
+            const client = clientRef.current;
+            client.reset();
+            setIsClientSetup(false);
         }
+        const newPage = ( currentPageRef.current + 1 ) % pages.length;
+        // setCurrentPage(newPage);
+        currentPageRef.current = newPage;
+        setCurrentSentence(0);
+        sentenceIndexRef.current = 0;
+        localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
+        localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0  
+        playPageSentences();  
     };
 
     const getFirstQuestion = async () => {
@@ -2029,12 +2162,27 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         width: isKnowledge ? '80%' : '100%'
     };
 
+    const toggleSpeedClick = () => {
+        setShowSpeedSlider(!showSpeedSlider);
+    };
+
     const chatContainerStyle = {
         height: isKnowledge 
             ? (currentPageRef.current === 2 || currentPageRef.current === 5) ? '40%' : (currentPageRef.current === 7)
                 ? '35%'
                 : '55%'
             : chatBoxSize.height
+    };
+
+    const handleSpeedChange = (event, newValue) => {
+        if (newValue === 0.5) {
+            setAudioSpeed(0.7);
+            setSpeedSliderValue(0.5);
+        }
+        else {
+            setAudioSpeed(newValue);
+            setSpeedSliderValue(newValue);
+        }
     };
 
     return (
@@ -2069,6 +2217,42 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         >
                         <FaCaretRight size={60} color='#2A2278'/>
                     </IconButton>
+                    <div id='play-btn-box'>
+                            <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
+                                {isPlaying ? <FaPause /> : <FaPlay />}
+                            </IconButton>
+                    </div>
+                    <div id='speed-btn-box'>
+                            <IconButton id='speed-btn' variant='plain' onClick={toggleSpeedClick} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
+                                <RiSpeedUpFill />
+                            </IconButton>
+                        </div>
+                        {showSpeedSlider && (
+                            <div id='speed-slider-box'>
+                                <Slider
+                                    value={speedSliderValue}
+                                    onChange={handleSpeedChange}
+                                    min={0.5}
+                                    max={1.5}
+                                    step={0.5}
+                                    marks={[{ value: 0.5, label: 'slow' }, { value: 1, label: 'normal' }, { value: 1.5, label: 'fast' }]}
+                                    // set label size to 12px
+                                    sx={{
+                                        width: '120px',
+                                        height: '30px',
+                                        '--Slider-trackSize': '12px',
+                                        "--Slider-markSize": "8px",
+                                        '& .MuiSlider-markLabel': {
+                                            fontSize: '16px',
+                                            color: '#3F150B',
+                                            fontFamily: 'BM Jua',
+                                            textStroke: '1px #FFFFFF'
+                                        },
+                                        zIndex: 100
+                                    }}
+                                />
+                            </div>
+                        )}
                 </Box>            
             </div>
             <div id='bottom-box' style={bottomBoxStyle}>

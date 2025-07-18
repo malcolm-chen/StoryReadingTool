@@ -4,12 +4,12 @@
         "answer": "A long time ago, some fish grew lungs to breathe air. Later, some grew legs to move on land. Over time, these changes allowed them to live both on land and in water. They became the forefathers of frogs. (The acceptance criteria are to answer fish 1. grew legs and 2. grew lungs.)"
     },
     "3": {
-        "question": "What are “amphibians”?",
-        "answer": "Amphibians are special animals that can live in both water and on land, just like frogs! They can breathe through their wet skin or use their lungs, depending on where they are. (The acceptance criteria are to answer the two places where amphibians live)"
+        "question": "What are “amphibians'”'?",
+        "answer": "Amphibians are special animals that can live in both water and on land, just like frogs! They can breathe through their wet skin or use their lungs, depending on where they are. (The acceptance criteria are to answer the 1. two places where amphibians live (water and land) and 2. two ways how amphibians breathe (through skin in water and through lungs and skin on land))"
     },
     "4": {
         "question": "How does a frog breathe?",
-        "answer": "A frog breathes in two ways! Underwater, it breathes through its skin. On land, it breathes through its lungs and skin, but only if its skin is wet. (The acceptance criteria are to answer the TWO ways how frogs breathe: 1. use skin in water and 2. use lungs and skin on land)"
+        "answer": "A frog breathes in two ways! Underwater, it breathes through its skin. On land, it breathes through its lungs and skin, but only if its skin is wet. (The acceptance criteria are to answer the TWO ways how frogs breathe: 1. use skin in water and 2. use lungs and WET skin on land)"
     },
     "5": {
         "question": "What do frogs do during the winter?",
@@ -17,11 +17,11 @@
     },
     "6": {
         "question": "Why can’t the tadpole live on land?",
-        "answer": "A tadpole can't live on land because it needs water to breathe through its gills and doesn't have legs to walk on land."
+        "answer": "A tadpole can't live on land because it needs water to breathe through its gills and doesn't have legs to walk on land. (The acceptance criteria are to answer that tadpoles need 1. water to breathe and 2. legs to walk on land)"
     },
     "9": {
         "question": "What do frogs use their voices for?",
-        "answer": "Frogs use their voices to find mates and to scare others when frightened. (The acceptance criteria are to answer the two things that frogs use their voices for, i.e., 1. hunt for mates and 2. to scare others when frightened)"
+        "answer": "Frogs use their voices to find mates and to scare others when frightened. (The acceptance criteria are to answer the purpose of frogs' voice: 1. hunt for mates, and 2. scare others when frightened)"
     }, 
     "11": {
         "question": "How can frogs see what’s around them without moving?",
@@ -29,6 +29,6 @@
     },
     "13": {
         "question": "How does a frog’s tongue help them catch insects?",
-        "answer": "A frog’s tongue is sticky and can wrap around an insect. It flips forward very quickly to grab the insect and pull it back into the frog’s mouth."
+        "answer": "A frog’s tongue is sticky and can wrap around an insect. It flips forward very quickly to grab the insect and pull it back into the frog’s mouth. (The acceptance criteria are to answer frog's tongue 1. is sticky, 2. flips forward very quickly, 3. can wrap around an insect, 4. can pull it back into the frog’s mouth)"
     }
 }

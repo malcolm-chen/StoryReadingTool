@@ -2,148 +2,112 @@
     "2": {
         "question": [
             {
-                "word": "To",
+                "word": "Were",
                 "time": 0.0
             },
             {
-                "word": " become",
+                "word": " the",
                 "time": 0.14
             },
             {
-                "word": " the",
-                "time": 0.42
-            },
-            {
                 "word": " forefathers",
-                "time": 0.64
+                "time": 0.26
             },
             {
                 "word": " of",
-                "time": 1.18
+                "time": 0.94
             },
             {
-                "word": " frogs,",
-                "time": 1.4
-            },
-            {
-                "word": " do",
-                "time": 2.2
+                "word": " frogs",
+                "time": 1.14
             },
             {
                 "word": " fish",
-                "time": 2.26
+                "time": 1.64
             },
             {
-                "word": " grow",
-                "time": 2.58
+                "word": " with",
+                "time": 2.02
             },
             {
-                "word": " feathers,",
-                "time": 2.84
+                "word": " legs",
+                "time": 2.36
             },
             {
                 "word": " or",
-                "time": 3.68
+                "time": 2.64
             },
             {
-                "word": " do",
-                "time": 3.88
-            },
-            {
-                "word": " they",
-                "time": 4.04
-            },
-            {
-                "word": " grow",
-                "time": 4.18
-            },
-            {
-                "word": " lungs",
-                "time": 4.46
-            },
-            {
-                "word": " and",
-                "time": 4.78
-            },
-            {
-                "word": " legs?",
-                "time": 5.06
+                "word": " crocodiles?",
+                "time": 2.98
             }
         ],
         "correct_answer": [
             {
-                "word": "That's",
+                "word": " That's",
                 "time": 0.0
             },
             {
                 "word": " right,",
-                "time": 0.3
+                "time": 0.32
             },
             {
                 "word": " the",
-                "time": 0.96
+                "time": 0.7
             },
             {
                 "word": " forefathers",
-                "time": 1.06
+                "time": 0.78
             },
             {
                 "word": " of",
-                "time": 1.6
+                "time": 1.4
             },
             {
                 "word": " frogs",
-                "time": 1.84
+                "time": 1.62
             },
             {
                 "word": " are",
-                "time": 2.26
+                "time": 2.02
             },
             {
                 "word": " fish",
-                "time": 2.54
+                "time": 2.28
             },
             {
                 "word": " with",
-                "time": 2.84
-            },
-            {
-                "word": " lungs",
-                "time": 3.14
-            },
-            {
-                "word": " and",
-                "time": 3.4
+                "time": 2.6
             },
             {
                 "word": " legs.",
-                "time": 3.76
+                "time": 2.86
             }
         ],
         "incorrect_answer": [
             {
-                "word": "Good",
+                "word": " Good",
                 "time": 0.0
             },
             {
                 "word": " try.",
-                "time": 0.18
+                "time": 0.16
             },
             {
                 "word": " The",
-                "time": 0.96
+                "time": 0.98
             },
             {
                 "word": " forefathers",
-                "time": 1.04
+                "time": 1.08
             },
             {
                 "word": " of",
-                "time": 1.68
+                "time": 1.74
             },
             {
                 "word": " frogs",
-                "time": 1.9
+                "time": 1.92
             },
             {
                 "word": " are",
@@ -151,28 +115,20 @@
             },
             {
                 "word": " fish",
-                "time": 2.58
+                "time": 2.48
             },
             {
                 "word": " with",
-                "time": 2.88
-            },
-            {
-                "word": " lungs",
-                "time": 3.2
-            },
-            {
-                "word": " and",
-                "time": 3.48
+                "time": 2.74
             },
             {
                 "word": " legs.",
-                "time": 3.72
+                "time": 2.98
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "I",
+                "word": " I",
                 "time": 0.0
             },
             {
@@ -180,36 +136,32 @@
                 "time": 0.16
             },
             {
-                "word": " you",
-                "time": 0.38
-            },
-            {
-                "word": " are",
-                "time": 0.58
+                "word": " you're",
+                "time": 0.34
             },
             {
                 "word": " wondering,",
-                "time": 0.64
+                "time": 0.54
             },
             {
                 "word": " the",
-                "time": 1.42
+                "time": 1.34
             },
             {
                 "word": " forefathers",
-                "time": 1.5
+                "time": 1.42
             },
             {
                 "word": " of",
-                "time": 2.12
+                "time": 1.96
             },
             {
                 "word": " frogs",
-                "time": 2.34
+                "time": 2.16
             },
             {
                 "word": " are",
-                "time": 2.76
+                "time": 2.62
             },
             {
                 "word": " fish",
@@ -217,269 +169,119 @@
             },
             {
                 "word": " with",
-                "time": 3.38
-            },
-            {
-                "word": " lungs",
-                "time": 3.86
-            },
-            {
-                "word": " and",
-                "time": 4.24
+                "time": 3.42
             },
             {
                 "word": " legs.",
-                "time": 4.62
+                "time": 3.86
             }
         ],
         "off_topic_answer": [
             {
-                "word": "Hmm,",
+                "word": " Hmm,",
                 "time": 0.0
             },
             {
                 "word": " that's",
-                "time": 0.82
+                "time": 0.38
             },
             {
                 "word": " a",
-                "time": 1.04
+                "time": 0.6
             },
             {
                 "word": " cool",
-                "time": 1.08
+                "time": 0.66
             },
             {
                 "word": " sharing.",
-                "time": 1.3
+                "time": 0.82
             },
             {
                 "word": " The",
-                "time": 2.16
+                "time": 1.66
             },
             {
                 "word": " forefathers",
-                "time": 2.24
+                "time": 1.74
             },
             {
                 "word": " of",
-                "time": 2.82
+                "time": 2.36
             },
             {
                 "word": " frogs",
-                "time": 3.04
+                "time": 2.54
             },
             {
                 "word": " are",
-                "time": 3.42
+                "time": 2.96
             },
             {
                 "word": " fish",
-                "time": 3.64
+                "time": 3.24
             },
             {
                 "word": " with",
-                "time": 3.92
-            },
-            {
-                "word": " lungs",
-                "time": 4.3
-            },
-            {
-                "word": " and",
-                "time": 4.6
+                "time": 3.72
             },
             {
                 "word": " legs.",
-                "time": 4.84
+                "time": 4.12
             }
         ]
     },
     "3": {
         "question": [
             {
-                "word": "Do",
+                "word": " Do",
                 "time": 0.0
             },
             {
                 "word": " amphibians",
-                "time": 0.14
+                "time": 0.16
             },
             {
                 "word": " live",
-                "time": 0.7
+                "time": 0.74
             },
             {
                 "word": " in",
-                "time": 0.88
+                "time": 0.92
             },
             {
-                "word": " water,",
-                "time": 1.04
-            },
-            {
-                "word": " on",
-                "time": 1.64
-            },
-            {
-                "word": " land,",
-                "time": 1.74
+                "word": " water",
+                "time": 1.08
             },
             {
                 "word": " or",
-                "time": 2.26
+                "time": 1.38
             },
             {
-                "word": " both?",
-                "time": 2.32
+                "word": " on",
+                "time": 1.58
+            },
+            {
+                "word": " land?",
+                "time": 1.74
             }
         ],
         "correct_answer": [
             {
-                "word": "Good",
+                "word": " Good",
                 "time": 0.0
             },
             {
                 "word": " job,",
-                "time": 0.16
+                "time": 0.18
             },
             {
                 "word": " amphibians",
-                "time": 0.92
+                "time": 1.02
             },
             {
                 "word": " do",
-                "time": 1.44
-            },
-            {
-                "word": " live",
-                "time": 1.62
-            },
-            {
-                "word": " both",
-                "time": 1.86
-            },
-            {
-                "word": " on",
-                "time": 2.1
-            },
-            {
-                "word": " land",
-                "time": 2.3
-            },
-            {
-                "word": " and",
-                "time": 2.56
-            },
-            {
-                "word": " in",
-                "time": 2.74
-            },
-            {
-                "word": " water.",
-                "time": 2.86
-            }
-        ],
-        "incorrect_answer": [
-            {
-                "word": "Not",
-                "time": 0.0
-            },
-            {
-                "word": " quite,",
-                "time": 0.22
-            },
-            {
-                "word": " amphibians",
-                "time": 0.84
-            },
-            {
-                "word": " live",
-                "time": 1.4
-            },
-            {
-                "word": " both",
-                "time": 1.58
-            },
-            {
-                "word": " on",
-                "time": 1.88
-            },
-            {
-                "word": " land",
-                "time": 2.1
-            },
-            {
-                "word": " and",
-                "time": 2.4
-            },
-            {
-                "word": " in",
-                "time": 2.78
-            },
-            {
-                "word": " water.",
-                "time": 2.88
-            }
-        ],
-        "uncertainty_answer": [
-            {
-                "word": "That's",
-                "time": 0.0
-            },
-            {
-                "word": " okay.",
-                "time": 0.26
-            },
-            {
-                "word": " Amphibians",
-                "time": 1.08
-            },
-            {
-                "word": " live",
-                "time": 1.58
-            },
-            {
-                "word": " both",
-                "time": 1.74
-            },
-            {
-                "word": " on",
-                "time": 2.02
-            },
-            {
-                "word": " land",
-                "time": 2.24
-            },
-            {
-                "word": " and",
-                "time": 2.56
-            },
-            {
-                "word": " in",
-                "time": 2.82
-            },
-            {
-                "word": " water.",
-                "time": 2.94
-            }
-        ],
-        "off_topic_answer": [
-            {
-                "word": "Thanks",
-                "time": 0.0
-            },
-            {
-                "word": " for",
-                "time": 0.26
-            },
-            {
-                "word": " sharing.",
-                "time": 0.42
-            },
-            {
-                "word": " Amphibians",
-                "time": 1.16
+                "time": 1.52
             },
             {
                 "word": " live",
@@ -487,147 +289,227 @@
             },
             {
                 "word": " both",
-                "time": 1.88
+                "time": 1.92
             },
             {
                 "word": " on",
-                "time": 2.18
+                "time": 2.16
             },
             {
                 "word": " land",
-                "time": 2.42
+                "time": 2.38
             },
             {
                 "word": " and",
-                "time": 2.68
+                "time": 2.62
             },
             {
                 "word": " in",
-                "time": 3.1
+                "time": 2.86
             },
             {
                 "word": " water.",
-                "time": 3.3
+                "time": 2.96
+            }
+        ],
+        "incorrect_answer": [
+            {
+                "word": " Not",
+                "time": 0.0
+            },
+            {
+                "word": " quite,",
+                "time": 0.2
+            },
+            {
+                "word": " amphibians",
+                "time": 0.68
+            },
+            {
+                "word": " live",
+                "time": 1.22
+            },
+            {
+                "word": " both",
+                "time": 1.38
+            },
+            {
+                "word": " on",
+                "time": 1.62
+            },
+            {
+                "word": " land",
+                "time": 1.82
+            },
+            {
+                "word": " and",
+                "time": 2.06
+            },
+            {
+                "word": " in",
+                "time": 2.48
+            },
+            {
+                "word": " water.",
+                "time": 2.68
+            }
+        ],
+        "uncertainty_answer": [
+            {
+                "word": " That's",
+                "time": 0.0
+            },
+            {
+                "word": " okay,",
+                "time": 0.28
+            },
+            {
+                "word": " amphibians",
+                "time": 1.02
+            },
+            {
+                "word": " live",
+                "time": 1.56
+            },
+            {
+                "word": " both",
+                "time": 1.76
+            },
+            {
+                "word": " on",
+                "time": 2.06
+            },
+            {
+                "word": " land",
+                "time": 2.26
+            },
+            {
+                "word": " and",
+                "time": 2.5
+            },
+            {
+                "word": " in",
+                "time": 2.72
+            },
+            {
+                "word": " water.",
+                "time": 2.8
+            }
+        ],
+        "off_topic_answer": [
+            {
+                "word": " Thanks",
+                "time": 0.0
+            },
+            {
+                "word": " for",
+                "time": 0.24
+            },
+            {
+                "word": " sharing.",
+                "time": 0.38
+            },
+            {
+                "word": " Amphibians",
+                "time": 1.18
+            },
+            {
+                "word": " live",
+                "time": 1.72
+            },
+            {
+                "word": " both",
+                "time": 1.94
+            },
+            {
+                "word": " on",
+                "time": 2.28
+            },
+            {
+                "word": " land",
+                "time": 2.56
+            },
+            {
+                "word": " and",
+                "time": 2.88
+            },
+            {
+                "word": " in",
+                "time": 3.32
+            },
+            {
+                "word": " water.",
+                "time": 3.44
             }
         ]
     },
     "4": {
         "question": [
             {
-                "word": "Does",
+                "word": " Does",
                 "time": 0.0
             },
             {
                 "word": " a",
-                "time": 0.14
+                "time": 0.16
             },
             {
                 "word": " frog",
-                "time": 0.26
+                "time": 0.3
             },
             {
                 "word": " breathe",
-                "time": 0.52
+                "time": 0.58
             },
             {
                 "word": " through",
-                "time": 0.78
+                "time": 0.96
             },
             {
                 "word": " its",
-                "time": 1.02
+                "time": 1.3
             },
             {
-                "word": " lungs,",
-                "time": 1.22
-            },
-            {
-                "word": " its",
-                "time": 1.78
-            },
-            {
-                "word": " skin,",
-                "time": 1.88
+                "word": " lungs",
+                "time": 1.5
             },
             {
                 "word": " or",
-                "time": 2.56
+                "time": 1.76
             },
             {
-                "word": " both?",
-                "time": 2.68
+                "word": " its",
+                "time": 2.14
+            },
+            {
+                "word": " skin?",
+                "time": 2.34
             }
         ],
         "correct_answer": [
             {
-                "word": "Excellent!",
+                "word": " Excellent!",
                 "time": 0.0
             },
             {
                 "word": " A",
-                "time": 0.86
+                "time": 0.9
             },
             {
                 "word": " frog",
-                "time": 0.96
+                "time": 1.0
             },
             {
                 "word": " breathes",
-                "time": 1.34
+                "time": 1.4
             },
             {
                 "word": " through",
-                "time": 1.88
+                "time": 2.04
             },
             {
                 "word": " both",
-                "time": 2.02
-            },
-            {
-                "word": " its",
-                "time": 2.26
-            },
-            {
-                "word": " skin",
-                "time": 2.42
-            },
-            {
-                "word": " and",
-                "time": 2.74
-            },
-            {
-                "word": " lungs.",
-                "time": 3.1
-            }
-        ],
-        "incorrect_answer": [
-            {
-                "word": "Good",
-                "time": 0.0
-            },
-            {
-                "word": " effort!",
-                "time": 0.18
-            },
-            {
-                "word": " A",
-                "time": 1.08
-            },
-            {
-                "word": " frog",
-                "time": 1.18
-            },
-            {
-                "word": " breathes",
-                "time": 1.5
-            },
-            {
-                "word": " through",
-                "time": 2.1
-            },
-            {
-                "word": " both",
-                "time": 2.24
+                "time": 2.2
             },
             {
                 "word": " its",
@@ -635,49 +517,95 @@
             },
             {
                 "word": " skin",
-                "time": 2.66
+                "time": 2.68
             },
             {
                 "word": " and",
-                "time": 2.98
+                "time": 3.0
             },
             {
                 "word": " lungs.",
-                "time": 3.32
+                "time": 3.18
+            }
+        ],
+        "incorrect_answer": [
+            {
+                "word": " Good",
+                "time": 0.0
+            },
+            {
+                "word": " effort!",
+                "time": 0.2
+            },
+            {
+                "word": " A",
+                "time": 1.12
+            },
+            {
+                "word": " frog",
+                "time": 1.24
+            },
+            {
+                "word": " breathes",
+                "time": 1.56
+            },
+            {
+                "word": " through",
+                "time": 2.06
+            },
+            {
+                "word": " both",
+                "time": 2.22
+            },
+            {
+                "word": " its",
+                "time": 2.5
+            },
+            {
+                "word": " skin",
+                "time": 2.72
+            },
+            {
+                "word": " and",
+                "time": 3.04
+            },
+            {
+                "word": " lungs.",
+                "time": 3.28
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "Oh",
+                "word": " Oh,",
                 "time": 0.0
             },
             {
                 "word": " you",
-                "time": 0.18
+                "time": 0.28
             },
             {
                 "word": " don't",
-                "time": 0.32
+                "time": 0.3
             },
             {
                 "word": " know?",
-                "time": 0.5
+                "time": 0.44
             },
             {
                 "word": " That's",
-                "time": 1.16
+                "time": 1.04
             },
             {
                 "word": " okay.",
-                "time": 1.4
+                "time": 1.26
             },
             {
                 "word": " A",
-                "time": 2.18
+                "time": 2.16
             },
             {
                 "word": " frog",
-                "time": 2.26
+                "time": 2.3
             },
             {
                 "word": " breathes",
@@ -685,11 +613,61 @@
             },
             {
                 "word": " through",
-                "time": 3.08
+                "time": 3.06
             },
             {
                 "word": " both",
-                "time": 3.24
+                "time": 3.18
+            },
+            {
+                "word": " its",
+                "time": 3.4
+            },
+            {
+                "word": " skin",
+                "time": 3.6
+            },
+            {
+                "word": " and",
+                "time": 3.94
+            },
+            {
+                "word": " lungs.",
+                "time": 4.16
+            }
+        ],
+        "off_topic_answer": [
+            {
+                "word": " Thanks",
+                "time": 0.0
+            },
+            {
+                "word": " for",
+                "time": 0.26
+            },
+            {
+                "word": " participating.",
+                "time": 0.38
+            },
+            {
+                "word": " A",
+                "time": 1.96
+            },
+            {
+                "word": " frog",
+                "time": 2.08
+            },
+            {
+                "word": " breathes",
+                "time": 2.42
+            },
+            {
+                "word": " through",
+                "time": 3.02
+            },
+            {
+                "word": " both",
+                "time": 3.22
             },
             {
                 "word": " its",
@@ -705,342 +683,260 @@
             },
             {
                 "word": " lungs.",
-                "time": 4.44
-            }
-        ],
-        "off_topic_answer": [
-            {
-                "word": "Thanks",
-                "time": 0.0
-            },
-            {
-                "word": " for",
-                "time": 0.28
-            },
-            {
-                "word": " participating.",
-                "time": 0.38
-            },
-            {
-                "word": " A",
-                "time": 1.72
-            },
-            {
-                "word": " frog",
-                "time": 1.84
-            },
-            {
-                "word": " breathes",
-                "time": 2.18
-            },
-            {
-                "word": " through",
-                "time": 2.72
-            },
-            {
-                "word": " both",
-                "time": 2.88
-            },
-            {
-                "word": " its",
-                "time": 3.12
-            },
-            {
-                "word": " skin",
-                "time": 3.3
-            },
-            {
-                "word": " and",
-                "time": 3.64
-            },
-            {
-                "word": " lungs.",
-                "time": 3.9
+                "time": 4.38
             }
         ]
     },
     "5": {
         "question": [
             {
-                "word": "During",
+                "word": " During",
                 "time": 0.0
             },
             {
-                "word": " the",
-                "time": 0.22
+                "word": " hibernation",
+                "time": 0.26
             },
             {
-                "word": " winter,",
-                "time": 0.38
+                "word": " does",
+                "time": 0.98
             },
             {
-                "word": " do",
-                "time": 1.22
-            },
-            {
-                "word": " frogs",
+                "word": " a",
                 "time": 1.3
             },
             {
-                "word": " run",
-                "time": 1.66
+                "word": " frog",
+                "time": 1.44
             },
             {
-                "word": " around",
-                "time": 1.9
+                "word": " dig",
+                "time": 1.74
             },
             {
-                "word": " to",
-                "time": 2.18
-            },
-            {
-                "word": " stay",
-                "time": 2.38
-            },
-            {
-                "word": " warm",
-                "time": 2.6
-            },
-            {
-                "word": " or",
-                "time": 3.0
-            },
-            {
-                "word": " stay",
-                "time": 3.4
-            },
-            {
-                "word": " in",
-                "time": 3.7
+                "word": " into",
+                "time": 2.06
             },
             {
                 "word": " the",
-                "time": 3.86
+                "time": 2.34
             },
             {
                 "word": " mud",
-                "time": 3.94
+                "time": 2.5
             },
             {
-                "word": " and",
-                "time": 4.22
+                "word": " or",
+                "time": 2.72
             },
             {
-                "word": " hibernate.",
-                "time": 4.52
+                "word": " hardly",
+                "time": 3.14
+            },
+            {
+                "word": " breathe?",
+                "time": 3.54
             }
         ],
         "correct_answer": [
             {
-                "word": "Great",
+                "word": " Great",
                 "time": 0.0
             },
             {
-                "word": " job!",
-                "time": 0.24
+                "word": " job,",
+                "time": 0.22
             },
             {
-                "word": " Frogs",
+                "word": " a",
                 "time": 1.14
             },
             {
-                "word": " stay",
-                "time": 1.56
+                "word": " frog",
+                "time": 1.2
             },
             {
-                "word": " in",
-                "time": 1.7
+                "word": " hardly",
+                "time": 1.48
             },
             {
-                "word": " the",
-                "time": 1.86
-            },
-            {
-                "word": " mud",
+                "word": " breathes",
                 "time": 1.92
             },
             {
-                "word": " and",
-                "time": 2.14
+                "word": " during",
+                "time": 2.42
             },
             {
-                "word": " hibernate.",
-                "time": 2.32
+                "word": " hibernation.",
+                "time": 2.6
             }
         ],
         "incorrect_answer": [
             {
-                "word": "Almost",
+                "word": " Almost",
                 "time": 0.0
             },
             {
-                "word": " there.",
+                "word": " there,",
                 "time": 0.32
             },
             {
-                "word": " Frog",
-                "time": 1.38
+                "word": " a",
+                "time": 1.24
             },
             {
-                "word": " stay",
+                "word": " frog",
+                "time": 1.32
+            },
+            {
+                "word": " hardly",
                 "time": 1.58
             },
             {
-                "word": " in",
-                "time": 1.9
+                "word": " breathes",
+                "time": 2.04
             },
             {
-                "word": " the",
-                "time": 2.06
+                "word": " during",
+                "time": 2.6
             },
             {
-                "word": " mud",
-                "time": 2.16
-            },
-            {
-                "word": " and",
-                "time": 2.36
-            },
-            {
-                "word": " hibernate.",
-                "time": 2.54
+                "word": " hibernation.",
+                "time": 2.76
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "It's",
+                "word": " It's",
                 "time": 0.0
             },
             {
                 "word": " okay,",
-                "time": 0.2
+                "time": 0.22
             },
             {
-                "word": " frogs",
-                "time": 0.86
+                "word": " a",
+                "time": 0.8
             },
             {
-                "word": " stay",
+                "word": " frog",
+                "time": 0.88
+            },
+            {
+                "word": " hardly",
                 "time": 1.08
             },
             {
-                "word": " in",
-                "time": 1.32
+                "word": " breathes",
+                "time": 1.44
             },
             {
-                "word": " the",
-                "time": 1.46
+                "word": " during",
+                "time": 1.9
             },
             {
-                "word": " mud",
-                "time": 1.54
-            },
-            {
-                "word": " and",
-                "time": 1.76
-            },
-            {
-                "word": " hibernate.",
-                "time": 2.06
+                "word": " hibernation.",
+                "time": 2.1
             }
         ],
         "off_topic_answer": [
             {
-                "word": "Hmm,",
+                "word": " Hmm,",
                 "time": 0.0
             },
             {
                 "word": " I",
-                "time": 0.66
+                "time": 0.76
             },
             {
                 "word": " am",
-                "time": 0.74
+                "time": 0.86
             },
             {
                 "word": " wondering",
-                "time": 0.88
+                "time": 0.98
             },
             {
                 "word": " about",
-                "time": 1.2
+                "time": 1.24
             },
             {
                 "word": " your",
                 "time": 1.52
             },
             {
-                "word": " sharing.",
-                "time": 1.72
+                "word": " sharing,",
+                "time": 1.7
             },
             {
-                "word": " Frog",
+                "word": " a",
+                "time": 2.68
+            },
+            {
+                "word": " frog",
                 "time": 2.76
             },
             {
-                "word": " stay",
-                "time": 3.0
+                "word": " hardly",
+                "time": 3.16
             },
             {
-                "word": " in",
-                "time": 3.36
+                "word": " breathes",
+                "time": 3.74
             },
             {
-                "word": " the",
-                "time": 3.54
+                "word": " during",
+                "time": 4.28
             },
             {
-                "word": " mud",
-                "time": 3.62
-            },
-            {
-                "word": " and",
-                "time": 3.88
-            },
-            {
-                "word": " hibernate.",
-                "time": 4.06
+                "word": " hibernation.",
+                "time": 4.48
             }
         ]
     },
     "6": {
         "question": [
             {
-                "word": "Can",
+                "word": " Are",
                 "time": 0.0
             },
             {
                 "word": " tadpoles",
-                "time": 0.46
+                "time": 0.14
             },
             {
-                "word": " breathe",
-                "time": 0.76
+                "word": " frog",
+                "time": 0.66
             },
             {
-                "word": " through",
-                "time": 1.1
+                "word": " babies",
+                "time": 0.98
             },
             {
-                "word": " their",
-                "time": 1.46
+                "word": " or",
+                "time": 1.4
             },
             {
-                "word": " gills",
-                "time": 1.66
+                "word": " another",
+                "time": 1.86
             },
             {
-                "word": " on",
-                "time": 2.04
+                "word": " name",
+                "time": 2.18
             },
             {
-                "word": " land.",
-                "time": 2.24
+                "word": " for",
+                "time": 2.44
+            },
+            {
+                "word": " frogs?",
+                "time": 2.66
             }
         ],
         "correct_answer": [
             {
-                "word": "You",
+                "word": " You",
                 "time": 0.0
             },
             {
@@ -1048,45 +944,197 @@
                 "time": 0.16
             },
             {
-                "word": " it!",
+                "word": " it.",
                 "time": 0.38
             },
             {
                 "word": " Tadpoles",
-                "time": 1.1
+                "time": 0.8
             },
             {
-                "word": " can't",
-                "time": 1.64
+                "word": " her",
+                "time": 1.24
             },
             {
-                "word": " breathe",
-                "time": 1.98
+                "word": " frog",
+                "time": 1.38
             },
             {
-                "word": " through",
-                "time": 2.18
-            },
-            {
-                "word": " their",
-                "time": 2.48
-            },
-            {
-                "word": " gills",
-                "time": 2.64
-            },
-            {
-                "word": " on",
-                "time": 3.0
-            },
-            {
-                "word": " land.",
-                "time": 3.2
+                "word": " babies.",
+                "time": 1.66
             }
         ],
         "incorrect_answer": [
             {
-                "word": "That's",
+                "word": " That's",
+                "time": 0.0
+            },
+            {
+                "word": " a",
+                "time": 0.22
+            },
+            {
+                "word": " good",
+                "time": 0.28
+            },
+            {
+                "word": " try.",
+                "time": 0.4
+            },
+            {
+                "word": " Tadpoles",
+                "time": 1.12
+            },
+            {
+                "word": " are",
+                "time": 1.5
+            },
+            {
+                "word": " frog",
+                "time": 1.68
+            },
+            {
+                "word": " babies.",
+                "time": 2.0
+            }
+        ],
+        "uncertainty_answer": [
+            {
+                "word": " No",
+                "time": 0.0
+            },
+            {
+                "word": " worries,",
+                "time": 0.2
+            },
+            {
+                "word": " tadpoles",
+                "time": 0.88
+            },
+            {
+                "word": " are",
+                "time": 1.32
+            },
+            {
+                "word": " frog",
+                "time": 1.46
+            },
+            {
+                "word": " babies.",
+                "time": 1.72
+            }
+        ],
+        "off_topic_answer": [
+            {
+                "word": " I",
+                "time": 0.0
+            },
+            {
+                "word": " heard",
+                "time": 0.14
+            },
+            {
+                "word": " you're",
+                "time": 0.3
+            },
+            {
+                "word": " talking.",
+                "time": 0.56
+            },
+            {
+                "word": " Ted",
+                "time": 1.64
+            },
+            {
+                "word": " pulls",
+                "time": 1.82
+            },
+            {
+                "word": " our",
+                "time": 2.08
+            },
+            {
+                "word": " frog",
+                "time": 2.24
+            },
+            {
+                "word": " babies.",
+                "time": 2.56
+            }
+        ]
+    },
+    "7": {
+        "question": [
+            {
+                "word": " Do",
+                "time": 0.0
+            },
+            {
+                "word": " all",
+                "time": 0.14
+            },
+            {
+                "word": " frogs",
+                "time": 0.3
+            },
+            {
+                "word": " have",
+                "time": 0.68
+            },
+            {
+                "word": " wet",
+                "time": 0.86
+            },
+            {
+                "word": " skin",
+                "time": 1.08
+            },
+            {
+                "word": " or",
+                "time": 1.36
+            },
+            {
+                "word": " dry",
+                "time": 1.54
+            },
+            {
+                "word": " skin?",
+                "time": 1.8
+            }
+        ],
+        "correct_answer": [
+            {
+                "word": " Well",
+                "time": 0.0
+            },
+            {
+                "word": " done.",
+                "time": 0.2
+            },
+            {
+                "word": " Our",
+                "time": 1.04
+            },
+            {
+                "word": " frogs",
+                "time": 1.16
+            },
+            {
+                "word": " have",
+                "time": 1.48
+            },
+            {
+                "word": " wet",
+                "time": 1.64
+            },
+            {
+                "word": " skin.",
+                "time": 1.8
+            }
+        ],
+        "incorrect_answer": [
+            {
+                "word": " That's",
                 "time": 0.0
             },
             {
@@ -1102,232 +1150,146 @@
                 "time": 0.46
             },
             {
-                "word": " Tadpoles",
-                "time": 1.38
+                "word": " All",
+                "time": 1.14
             },
             {
-                "word": " can't",
-                "time": 1.78
+                "word": " frogs",
+                "time": 1.26
             },
             {
-                "word": " breathe",
+                "word": " have",
+                "time": 1.64
+            },
+            {
+                "word": " wet",
+                "time": 1.82
+            },
+            {
+                "word": " skin.",
                 "time": 2.04
-            },
-            {
-                "word": " through",
-                "time": 2.26
-            },
-            {
-                "word": " their",
-                "time": 2.54
-            },
-            {
-                "word": " gills",
-                "time": 2.7
-            },
-            {
-                "word": " on",
-                "time": 3.08
-            },
-            {
-                "word": " land.",
-                "time": 3.26
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "No",
+                "word": " That's",
                 "time": 0.0
             },
             {
-                "word": " worries,",
-                "time": 0.2
+                "word": " alright,",
+                "time": 0.26
             },
             {
-                "word": " tadpoles",
-                "time": 1.02
+                "word": " all",
+                "time": 0.9
             },
             {
-                "word": " can't",
-                "time": 1.52
+                "word": " frogs",
+                "time": 1.16
             },
             {
-                "word": " breathe",
-                "time": 1.84
+                "word": " have",
+                "time": 1.58
             },
             {
-                "word": " through",
-                "time": 2.14
+                "word": " wet",
+                "time": 1.8
             },
             {
-                "word": " their",
-                "time": 2.5
-            },
-            {
-                "word": " gills",
-                "time": 2.68
-            },
-            {
-                "word": " on",
-                "time": 3.04
-            },
-            {
-                "word": " land.",
-                "time": 3.22
+                "word": " skin.",
+                "time": 2.0
             }
         ],
         "off_topic_answer": [
             {
-                "word": "I",
+                "word": " Thanks",
                 "time": 0.0
             },
             {
-                "word": " heard",
-                "time": 0.16
+                "word": " for",
+                "time": 0.24
             },
             {
-                "word": " you",
+                "word": " participating.",
                 "time": 0.36
             },
             {
-                "word": " were",
-                "time": 0.54
+                "word": " All",
+                "time": 1.5
             },
             {
-                "word": " talking.",
-                "time": 0.64
+                "word": " frogs",
+                "time": 1.72
             },
             {
-                "word": " Tadpoles",
-                "time": 1.64
+                "word": " have",
+                "time": 2.18
             },
             {
-                "word": " can't",
-                "time": 2.16
+                "word": " wet",
+                "time": 2.38
             },
             {
-                "word": " breathe",
-                "time": 2.44
-            },
-            {
-                "word": " through",
-                "time": 2.66
-            },
-            {
-                "word": " their",
-                "time": 2.96
-            },
-            {
-                "word": " gills",
-                "time": 3.14
-            },
-            {
-                "word": " on",
-                "time": 3.68
-            },
-            {
-                "word": " land.",
-                "time": 4.02
+                "word": " skin.",
+                "time": 2.6
             }
         ]
     },
     "9": {
         "question": [
             {
-                "word": "Do",
+                "word": " Do",
                 "time": 0.0
             },
             {
                 "word": " frogs",
-                "time": 0.14
+                "time": 0.12
             },
             {
                 "word": " use",
-                "time": 0.52
+                "time": 0.44
             },
             {
                 "word": " their",
-                "time": 0.88
+                "time": 0.76
             },
             {
                 "word": " voices",
-                "time": 1.1
+                "time": 0.96
             },
             {
                 "word": " to",
-                "time": 1.52
+                "time": 1.36
             },
             {
                 "word": " hunt",
-                "time": 1.8
+                "time": 1.64
             },
             {
                 "word": " for",
-                "time": 1.98
+                "time": 1.82
             },
             {
                 "word": " mates",
-                "time": 2.2
+                "time": 2.0
             },
             {
                 "word": " or",
-                "time": 2.46
+                "time": 2.22
             },
             {
                 "word": " attract",
-                "time": 2.84
+                "time": 2.62
             },
             {
                 "word": " insects?",
-                "time": 3.24
+                "time": 2.94
             }
         ],
         "correct_answer": [
             {
-                "word": "Excellent!",
+                "word": " Excellent.",
                 "time": 0.0
-            },
-            {
-                "word": " Frogs",
-                "time": 0.8
-            },
-            {
-                "word": " use",
-                "time": 1.22
-            },
-            {
-                "word": " their",
-                "time": 1.36
-            },
-            {
-                "word": " voices",
-                "time": 1.54
-            },
-            {
-                "word": " to",
-                "time": 1.92
-            },
-            {
-                "word": " hunt",
-                "time": 2.2
-            },
-            {
-                "word": " for",
-                "time": 2.4
-            },
-            {
-                "word": " mates.",
-                "time": 2.64
-            }
-        ],
-        "incorrect_answer": [
-            {
-                "word": "Good",
-                "time": 0.0
-            },
-            {
-                "word": " effort.",
-                "time": 0.18
             },
             {
                 "word": " Frogs",
@@ -1335,19 +1297,19 @@
             },
             {
                 "word": " use",
-                "time": 1.34
+                "time": 1.36
             },
             {
                 "word": " their",
-                "time": 1.44
+                "time": 1.48
             },
             {
                 "word": " voices",
-                "time": 1.64
+                "time": 1.68
             },
             {
                 "word": " to",
-                "time": 2.02
+                "time": 2.04
             },
             {
                 "word": " hunt",
@@ -1355,33 +1317,75 @@
             },
             {
                 "word": " for",
-                "time": 2.52
+                "time": 2.48
             },
             {
                 "word": " mates.",
-                "time": 2.72
+                "time": 2.7
+            }
+        ],
+        "incorrect_answer": [
+            {
+                "word": " Good",
+                "time": 0.0
+            },
+            {
+                "word": " effort.",
+                "time": 0.2
+            },
+            {
+                "word": " Frogs",
+                "time": 1.04
+            },
+            {
+                "word": " use",
+                "time": 1.44
+            },
+            {
+                "word": " their",
+                "time": 1.54
+            },
+            {
+                "word": " voices",
+                "time": 1.72
+            },
+            {
+                "word": " to",
+                "time": 2.02
+            },
+            {
+                "word": " hunt",
+                "time": 2.26
+            },
+            {
+                "word": " for",
+                "time": 2.38
+            },
+            {
+                "word": " mates.",
+                "time": 2.6
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "This",
+                "word": " This",
                 "time": 0.0
             },
             {
                 "word": " question",
-                "time": 0.18
+                "time": 0.2
             },
             {
                 "word": " may",
-                "time": 0.56
+                "time": 0.6
             },
             {
                 "word": " be",
-                "time": 0.76
+                "time": 0.78
             },
             {
                 "word": " a",
-                "time": 0.9
+                "time": 0.92
             },
             {
                 "word": " bit",
@@ -1389,15 +1393,15 @@
             },
             {
                 "word": " tricky.",
-                "time": 1.18
+                "time": 1.16
             },
             {
                 "word": " Frogs",
-                "time": 2.22
+                "time": 2.2
             },
             {
                 "word": " use",
-                "time": 2.62
+                "time": 2.64
             },
             {
                 "word": " their",
@@ -1413,20 +1417,20 @@
             },
             {
                 "word": " hunt",
-                "time": 3.72
+                "time": 3.68
             },
             {
                 "word": " for",
-                "time": 3.9
+                "time": 3.86
             },
             {
                 "word": " mates.",
-                "time": 4.12
+                "time": 4.08
             }
         ],
         "off_topic_answer": [
             {
-                "word": "I",
+                "word": " I",
                 "time": 0.0
             },
             {
@@ -1435,19 +1439,19 @@
             },
             {
                 "word": " you",
-                "time": 0.6
+                "time": 0.7
             },
             {
                 "word": " letting",
-                "time": 0.8
+                "time": 0.9
             },
             {
                 "word": " me",
-                "time": 1.04
+                "time": 1.14
             },
             {
                 "word": " know.",
-                "time": 1.3
+                "time": 1.36
             },
             {
                 "word": " Frogs",
@@ -1455,7 +1459,7 @@
             },
             {
                 "word": " use",
-                "time": 2.56
+                "time": 2.54
             },
             {
                 "word": " their",
@@ -1467,26 +1471,26 @@
             },
             {
                 "word": " to",
-                "time": 3.32
+                "time": 3.36
             },
             {
                 "word": " hunt",
-                "time": 3.62
+                "time": 3.72
             },
             {
                 "word": " for",
-                "time": 3.8
+                "time": 3.9
             },
             {
                 "word": " mates.",
-                "time": 4.0
+                "time": 4.12
             }
         ]
     },
     "11": {
         "question": [
             {
-                "word": "Can",
+                "word": " Can",
                 "time": 0.0
             },
             {
@@ -1499,49 +1503,99 @@
             },
             {
                 "word": " see",
-                "time": 0.52
+                "time": 0.62
             },
             {
                 "word": " in",
-                "time": 0.86
+                "time": 0.96
             },
             {
                 "word": " all",
-                "time": 1.02
+                "time": 1.12
             },
             {
                 "word": " directions",
-                "time": 1.16
+                "time": 1.3
             },
             {
                 "word": " or",
-                "time": 1.62
+                "time": 1.82
             },
             {
                 "word": " stare",
-                "time": 2.04
+                "time": 2.3
             },
             {
                 "word": " while",
-                "time": 2.46
+                "time": 2.68
             },
             {
                 "word": " blinking?",
-                "time": 2.76
+                "time": 2.98
             }
         ],
         "correct_answer": [
             {
-                "word": "Well",
+                "word": " Well",
                 "time": 0.0
             },
             {
-                "word": " done.",
-                "time": 0.18
+                "word": " done,",
+                "time": 0.22
             },
             {
-                "word": " Frogs",
-                "time": 1.36
+                "word": " a",
+                "time": 0.84
+            },
+            {
+                "word": " frog",
+                "time": 0.92
+            },
+            {
+                "word": " can",
+                "time": 1.26
+            },
+            {
+                "word": " see",
+                "time": 1.42
+            },
+            {
+                "word": " in",
+                "time": 1.64
+            },
+            {
+                "word": " all",
+                "time": 1.78
+            },
+            {
+                "word": " directions.",
+                "time": 1.96
+            }
+        ],
+        "incorrect_answer": [
+            {
+                "word": " You",
+                "time": 0.0
+            },
+            {
+                "word": " are",
+                "time": 0.14
+            },
+            {
+                "word": " really",
+                "time": 0.24
+            },
+            {
+                "word": " close.",
+                "time": 0.48
+            },
+            {
+                "word": " A",
+                "time": 1.48
+            },
+            {
+                "word": " frog",
+                "time": 1.56
             },
             {
                 "word": " can",
@@ -1549,328 +1603,118 @@
             },
             {
                 "word": " see",
-                "time": 2.04
-            },
-            {
-                "word": " what",
-                "time": 2.34
-            },
-            {
-                "word": " is",
-                "time": 2.56
-            },
-            {
-                "word": " around",
-                "time": 2.72
-            },
-            {
-                "word": " them",
-                "time": 3.02
-            },
-            {
-                "word": " without",
-                "time": 3.28
-            },
-            {
-                "word": " moving",
-                "time": 3.6
-            },
-            {
-                "word": " because",
-                "time": 4.08
-            },
-            {
-                "word": " their",
-                "time": 4.56
-            },
-            {
-                "word": " eyes",
-                "time": 4.78
-            },
-            {
-                "word": " can",
-                "time": 5.12
-            },
-            {
-                "word": " see",
-                "time": 5.36
+                "time": 2.08
             },
             {
                 "word": " in",
-                "time": 5.66
+                "time": 2.3
             },
             {
                 "word": " all",
-                "time": 5.88
+                "time": 2.42
             },
             {
                 "word": " directions.",
-                "time": 6.14
-            }
-        ],
-        "incorrect_answer": [
-            {
-                "word": "You",
-                "time": 0.0
-            },
-            {
-                "word": " are",
-                "time": 0.18
-            },
-            {
-                "word": " really",
-                "time": 0.28
-            },
-            {
-                "word": " close.",
-                "time": 0.56
-            },
-            {
-                "word": " Frogs",
-                "time": 1.74
-            },
-            {
-                "word": " can",
-                "time": 2.12
-            },
-            {
-                "word": " see",
-                "time": 2.22
-            },
-            {
-                "word": " what",
-                "time": 2.46
-            },
-            {
-                "word": " is",
-                "time": 2.66
-            },
-            {
-                "word": " around",
-                "time": 2.82
-            },
-            {
-                "word": " them",
-                "time": 3.1
-            },
-            {
-                "word": " without",
-                "time": 3.32
-            },
-            {
-                "word": " moving",
-                "time": 3.7
-            },
-            {
-                "word": " because",
-                "time": 4.24
-            },
-            {
-                "word": " their",
-                "time": 4.84
-            },
-            {
-                "word": " eyes",
-                "time": 5.06
-            },
-            {
-                "word": " can",
-                "time": 5.46
-            },
-            {
-                "word": " see",
-                "time": 5.72
-            },
-            {
-                "word": " in",
-                "time": 6.0
-            },
-            {
-                "word": " all",
-                "time": 6.16
-            },
-            {
-                "word": " directions.",
-                "time": 6.38
+                "time": 2.6
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "I",
+                "word": " I",
                 "time": 0.0
             },
             {
                 "word": " see",
-                "time": 0.2
+                "time": 0.16
             },
             {
                 "word": " you",
-                "time": 0.5
+                "time": 0.4
             },
             {
                 "word": " are",
-                "time": 0.76
+                "time": 0.58
             },
             {
-                "word": " unsure.",
-                "time": 0.9
+                "word": " unsure,",
+                "time": 0.7
             },
             {
-                "word": " Frogs",
-                "time": 2.16
+                "word": " a",
+                "time": 1.4
             },
             {
-                "word": " can",
-                "time": 2.58
-            },
-            {
-                "word": " see",
-                "time": 2.7
-            },
-            {
-                "word": " what",
-                "time": 3.02
-            },
-            {
-                "word": " is",
-                "time": 3.2
-            },
-            {
-                "word": " around",
-                "time": 3.34
-            },
-            {
-                "word": " them",
-                "time": 3.64
-            },
-            {
-                "word": " without",
-                "time": 3.86
-            },
-            {
-                "word": " moving,",
-                "time": 4.16
-            },
-            {
-                "word": " because",
-                "time": 4.98
-            },
-            {
-                "word": " their",
-                "time": 5.22
-            },
-            {
-                "word": " eyes",
-                "time": 5.4
+                "word": " frog",
+                "time": 1.44
             },
             {
                 "word": " can",
-                "time": 5.72
+                "time": 1.8
             },
             {
                 "word": " see",
-                "time": 5.94
+                "time": 2.0
             },
             {
                 "word": " in",
-                "time": 6.28
+                "time": 2.24
             },
             {
                 "word": " all",
-                "time": 6.44
+                "time": 2.42
             },
             {
                 "word": " directions.",
-                "time": 6.66
+                "time": 2.68
             }
         ],
         "off_topic_answer": [
             {
-                "word": "Thanks",
+                "word": " Thanks",
                 "time": 0.0
             },
             {
                 "word": " for",
-                "time": 0.32
+                "time": 0.28
             },
             {
                 "word": " sharing.",
-                "time": 0.5
+                "time": 0.4
             },
             {
-                "word": " Frogs",
-                "time": 1.7
+                "word": " A",
+                "time": 1.4
             },
             {
-                "word": " can",
-                "time": 2.2
-            },
-            {
-                "word": " see",
-                "time": 2.36
-            },
-            {
-                "word": " what",
-                "time": 2.64
-            },
-            {
-                "word": " is",
-                "time": 2.84
-            },
-            {
-                "word": " around",
-                "time": 3.0
-            },
-            {
-                "word": " them",
-                "time": 3.3
-            },
-            {
-                "word": " without",
-                "time": 3.5
-            },
-            {
-                "word": " moving",
-                "time": 3.82
-            },
-            {
-                "word": " because",
-                "time": 4.3
-            },
-            {
-                "word": " their",
-                "time": 4.82
-            },
-            {
-                "word": " eyes",
-                "time": 5.04
+                "word": " frog",
+                "time": 1.48
             },
             {
                 "word": " can",
-                "time": 5.38
+                "time": 1.76
             },
             {
                 "word": " see",
-                "time": 5.62
+                "time": 1.98
             },
             {
                 "word": " in",
-                "time": 5.92
+                "time": 2.2
             },
             {
                 "word": " all",
-                "time": 6.08
+                "time": 2.32
             },
             {
                 "word": " directions.",
-                "time": 6.26
+                "time": 2.42
             }
         ]
     },
     "13": {
         "question": [
             {
-                "word": "Is",
+                "word": " Is",
                 "time": 0.0
             },
             {
@@ -1883,251 +1727,291 @@
             },
             {
                 "word": " tongue",
-                "time": 0.68
+                "time": 0.72
             },
             {
-                "word": " sticky",
-                "time": 0.82
+                "word": " attached",
+                "time": 0.9
+            },
+            {
+                "word": " to",
+                "time": 1.28
+            },
+            {
+                "word": " the",
+                "time": 1.64
+            },
+            {
+                "word": " front",
+                "time": 1.72
             },
             {
                 "word": " or",
-                "time": 1.14
+                "time": 2.0
             },
             {
-                "word": " not",
-                "time": 1.46
+                "word": " the",
+                "time": 2.46
             },
             {
-                "word": " stick.",
-                "time": 1.64
+                "word": " back",
+                "time": 2.6
+            },
+            {
+                "word": " of",
+                "time": 2.84
+            },
+            {
+                "word": " its",
+                "time": 3.0
+            },
+            {
+                "word": " mouth?",
+                "time": 3.16
             }
         ],
         "correct_answer": [
             {
-                "word": "You're",
+                "word": " You're",
                 "time": 0.0
             },
             {
                 "word": " paying",
-                "time": 0.2
+                "time": 0.22
             },
             {
                 "word": " great",
-                "time": 0.46
+                "time": 0.54
             },
             {
                 "word": " attention.",
-                "time": 0.86
+                "time": 0.88
             },
             {
                 "word": " A",
-                "time": 1.8
+                "time": 2.16
             },
             {
                 "word": " frog's",
-                "time": 1.88
+                "time": 2.26
             },
             {
                 "word": " tongue",
-                "time": 2.34
+                "time": 2.8
             },
             {
                 "word": " is",
-                "time": 2.5
+                "time": 2.96
             },
             {
-                "word": " sticky,",
-                "time": 2.82
+                "word": " attached",
+                "time": 3.2
             },
             {
-                "word": " which",
+                "word": " to",
                 "time": 3.52
             },
             {
-                "word": " helps",
-                "time": 3.72
+                "word": " the",
+                "time": 3.9
             },
             {
-                "word": " them",
-                "time": 3.96
+                "word": " front",
+                "time": 3.98
             },
             {
-                "word": " catch",
+                "word": " of",
                 "time": 4.18
             },
             {
-                "word": " insects.",
-                "time": 4.58
+                "word": " its",
+                "time": 4.32
+            },
+            {
+                "word": " mouth.",
+                "time": 4.48
             }
         ],
         "incorrect_answer": [
             {
-                "word": "Almost",
+                "word": " Almost",
                 "time": 0.0
             },
             {
-                "word": " there,",
+                "word": " there.",
                 "time": 0.32
             },
             {
-                "word": " a",
-                "time": 1.16
+                "word": " A",
+                "time": 1.36
             },
             {
                 "word": " frog's",
-                "time": 1.26
+                "time": 1.46
             },
             {
                 "word": " tongue",
-                "time": 1.74
+                "time": 1.96
             },
             {
                 "word": " is",
-                "time": 1.9
+                "time": 2.18
             },
             {
-                "word": " sticky",
-                "time": 2.12
+                "word": " attached",
+                "time": 2.46
             },
             {
-                "word": " which",
-                "time": 2.54
+                "word": " to",
+                "time": 2.78
             },
             {
-                "word": " helps",
-                "time": 2.92
+                "word": " the",
+                "time": 3.14
             },
             {
-                "word": " them",
-                "time": 3.16
+                "word": " front",
+                "time": 3.24
             },
             {
-                "word": " catch",
-                "time": 3.38
+                "word": " of",
+                "time": 3.48
             },
             {
-                "word": " insects.",
-                "time": 3.7
+                "word": " its",
+                "time": 3.68
+            },
+            {
+                "word": " mouth.",
+                "time": 3.82
             }
         ],
         "uncertainty_answer": [
             {
-                "word": "Oh,",
+                "word": " Oh,",
                 "time": 0.0
             },
             {
                 "word": " you",
-                "time": 0.62
+                "time": 0.26
             },
             {
                 "word": " don't",
+                "time": 0.28
+            },
+            {
+                "word": " know,",
+                "time": 0.44
+            },
+            {
+                "word": " that's",
                 "time": 0.74
             },
             {
-                "word": " know?",
-                "time": 0.94
-            },
-            {
-                "word": " That's",
-                "time": 1.64
-            },
-            {
                 "word": " okay.",
-                "time": 1.96
+                "time": 0.96
             },
             {
                 "word": " A",
-                "time": 2.52
+                "time": 2.04
             },
             {
                 "word": " frog's",
-                "time": 2.58
+                "time": 2.18
             },
             {
                 "word": " tongue",
-                "time": 3.04
+                "time": 2.86
             },
             {
                 "word": " is",
-                "time": 3.16
+                "time": 3.12
             },
             {
-                "word": " sticky,",
-                "time": 3.36
+                "word": " attached",
+                "time": 3.48
             },
             {
-                "word": " which",
-                "time": 4.1
+                "word": " to",
+                "time": 3.84
             },
             {
-                "word": " helps",
-                "time": 4.22
+                "word": " the",
+                "time": 4.24
             },
             {
-                "word": " them",
-                "time": 4.42
+                "word": " front",
+                "time": 4.32
             },
             {
-                "word": " catch",
-                "time": 4.64
+                "word": " of",
+                "time": 4.54
             },
             {
-                "word": " insects.",
-                "time": 4.82
+                "word": " its",
+                "time": 4.7
+            },
+            {
+                "word": " mouth.",
+                "time": 4.84
             }
         ],
         "off_topic_answer": [
             {
-                "word": "Thanks",
+                "word": " Thanks",
                 "time": 0.0
             },
             {
                 "word": " for",
-                "time": 0.26
+                "time": 0.28
             },
             {
                 "word": " sharing.",
-                "time": 0.4
+                "time": 0.42
             },
             {
                 "word": " A",
-                "time": 1.32
+                "time": 1.56
             },
             {
                 "word": " frog's",
-                "time": 1.4
+                "time": 1.64
             },
             {
                 "word": " tongue",
-                "time": 1.96
+                "time": 2.14
             },
             {
                 "word": " is",
-                "time": 2.1
+                "time": 2.36
             },
             {
-                "word": " sticky,",
-                "time": 2.34
+                "word": " attached",
+                "time": 2.68
             },
             {
-                "word": " which",
-                "time": 3.04
+                "word": " to",
+                "time": 3.1
             },
             {
-                "word": " helps",
-                "time": 3.22
+                "word": " the",
+                "time": 3.5
             },
             {
-                "word": " them",
-                "time": 3.48
+                "word": " front",
+                "time": 3.58
             },
             {
-                "word": " catch",
-                "time": 3.72
+                "word": " of",
+                "time": 3.84
             },
             {
-                "word": " insects.",
+                "word": " its",
                 "time": 4.06
+            },
+            {
+                "word": " mouth.",
+                "time": 4.24
             }
         ]
     },

@@ -114,4 +114,5 @@ def revise_timestamps():
     save_json(timestamps, 'timestamps.json')
 
 if __name__ == "__main__":
-    revise_timestamps()
+    # revise_timestamps()
+    generate_audio_for_book()

@@ -9,7 +9,7 @@ import { useSwipeable } from 'react-swipeable';
 import { FaRegClosedCaptioning } from "react-icons/fa6";
 import { FaPlay, FaPause, FaCirclePlay, FaCirclePause } from "react-icons/fa6";
 import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-icons/fa";
-import { IoMdCloseCircle } from "react-icons/io";
+import { FaCaretRight, FaCaretLeft } from "react-icons/fa6";
 import { RiSpeedUpFill } from "react-icons/ri";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 import { Howl } from 'howler';
@@ -69,6 +69,7 @@ const ReadChatPage = () => {
     const currentWordIndexRef = useRef(0);
     const currentTranscriptRef = useRef('');
     const hasAskedRef = useRef(false);
+    const isAskedRef = useRef(false);
 
     const mediaRecorderRef = useRef(null);
     const recordedChunksRef = useRef([]);
@@ -393,6 +394,9 @@ const ReadChatPage = () => {
     }, [pages]);
 
     const handlePrevPage = async () => {
+        if (isKnowledge) {
+            return;
+        }
         console.log('moving to previous page', currentPageRef.current);
         if (currentPageRef.current > 0) {
             audioRef.current.pause();
@@ -402,6 +406,7 @@ const ReadChatPage = () => {
             // setIsAsking(false);
             isAskingRef.current = false;
             hasAskedRef.current = false;
+            isAskedRef.current = false;
             setIsAsked(false);
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
@@ -424,6 +429,10 @@ const ReadChatPage = () => {
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
+        if (isKnowledge && !isAskedRef.current) {
+            console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
+            return;
+        }
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         // setIsPlaying(false);
@@ -432,6 +441,7 @@ const ReadChatPage = () => {
         isAskingRef.current = false;
         hasAskedRef.current = false;
         setIsAsked(false);
+        isAskedRef.current = false;
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
         setAnswerRecord([]);
@@ -450,9 +460,10 @@ const ReadChatPage = () => {
         playPageSentences();  
     };
 
-    const showWords = (convAudio, timestamps) => {
-        if (currentWordIndexRef.current >= timestamps.length) {
+    const showWords = (convAudio, timestamps, onComplete) => {
+        if (currentWordIndexRef.current >= timestamps?.length) {
             console.log('All words displayed');
+            console.log('Final transcript:', currentTranscriptRef.current);
             // console.log('currentPageChatHistory', currentPageChatHistory);
             // console.log('chat history', chatHistoryRef.current);
             setCurrentPageChatHistory(prevHistory => {
@@ -474,11 +485,18 @@ const ReadChatPage = () => {
                 }
                 return updatedHistory;
             });
+            
+            // Call completion callback if provided
+            if (onComplete) {
+                onComplete();
+            }
             return;
         } else {
             const now = convAudio.seek();
-            if (now >= timestamps[currentWordIndexRef.current].time) {
-                currentTranscriptRef.current += timestamps[currentWordIndexRef.current].word;
+            if (now >= timestamps?.[currentWordIndexRef.current]?.time) {
+                const wordToAdd = timestamps?.[currentWordIndexRef.current]?.word;
+                currentTranscriptRef.current += wordToAdd;
+                console.log('Added word:', wordToAdd, 'Current transcript:', currentTranscriptRef.current);
                 setCurrentPageChatHistory(prevHistory => {
                     const updatedHistory = [...prevHistory];
                     if (updatedHistory.length > 0) {
@@ -496,7 +514,7 @@ const ReadChatPage = () => {
                 });
                 currentWordIndexRef.current += 1;
             }
-            requestAnimationFrame(() => showWords(convAudio, timestamps));
+            requestAnimationFrame(() => showWords(convAudio, timestamps, onComplete));
         }
     }
 
@@ -508,17 +526,18 @@ const ReadChatPage = () => {
         const convAudio = new Howl({
             src: [openingAudioSrc],
             onplay: () => {
-                showWords(convAudio, timestampsRef.current['opening'][openingIndex]);
-            },
-            onend: () => {
-                setTimeout(() => {
-                    playQuestion();
-                }, 100); // Small delay to ensure state is updated
+                showWords(convAudio, timestampsRef.current['opening'][openingIndex], () => {
+                    console.log('Opening showWords completed, transcript:', currentTranscriptRef.current);
+                    setTimeout(() => {
+                        playQuestion();
+                    }, 700); // Small delay to ensure state is updated
+                });
             }
         });
         // Ensure chat history is updated before playing question
         currentWordIndexRef.current = 0;
         currentTranscriptRef.current = '';
+        console.log('Opening starting, reset transcript to:', currentTranscriptRef.current);
 
         const updatedChatHistory = [];
         updatedChatHistory.push({
@@ -539,10 +558,12 @@ const ReadChatPage = () => {
         const convAudio = new Howl({
             src: [noAnswerAudioSrc],
             onplay: () => {
-                showWords(convAudio, timestampsRef.current['no-answer']);
-            },
-            onend: () => {
-                playQuestion();
+                setTimeout(() => {
+                    showWords(convAudio, timestampsRef.current['no-answer'], () => {
+                        console.log('No answer showWords completed');
+                        playQuestion();
+                    });
+                }, 700);
             }
         });
         currentWordIndexRef.current = 0;
@@ -559,38 +580,49 @@ const ReadChatPage = () => {
 
     const playQuestion = () => {
         console.log('playQuestion called');
+        console.log('Transcript at start of playQuestion:', currentTranscriptRef.current);
         const questionAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_question.mp3`;
         const convAudio = new Howl({
             src: [questionAudioSrc],
             onplay: () => {
-                console.log('Audio started playing');
-                showWords(convAudio, timestampsRef.current[currentPageRef.current]['question']);
-            },
-            onend: () => {
-                if (currentPageChatHistory.length < 2) {
-                    startResponseTimer();
-                }
+                console.log('Question audio started playing, current transcript:', currentTranscriptRef.current);
+                showWords(convAudio, timestampsRef.current[currentPageRef.current]['question'], () => {
+                    console.log('Question showWords completed');
+                    if (currentPageChatHistory.length < 2) {
+                        startResponseTimer();
+                    }
+                });
             }
         });
+        
+        // Reset word index for the question timestamps (each audio file has its own timestamp sequence)
         currentWordIndexRef.current = 0;
         const previousContent = currentTranscriptRef.current;
-        currentTranscriptRef.current = previousContent + ' ';
+        // Add a space between opening and question if there's previous content
+        currentTranscriptRef.current = previousContent + (previousContent ? ' ' : '');
+        console.log('Updated transcript before question starts:', currentTranscriptRef.current);
         
+        // Update the most recent assistant message (last assistant message in the chat)
         setCurrentPageChatHistory(prevHistory => {
             console.log('Previous chat history in question:', prevHistory);
-            if (prevHistory.length > 0) {
-                const lastMessage = prevHistory[0];
-                console.log('Last message:', lastMessage);
-                const updatedChatHistory = {
-                    ...lastMessage,
-                    content: currentTranscriptRef.current,
-                    audio: lastMessage.audio ? [...lastMessage.audio, questionAudioSrc] : [questionAudioSrc],
-                    status: 'in_progress'
-                };
-                console.log('Updated chat history:', updatedChatHistory);
-                return [updatedChatHistory];
+            const updatedHistory = [...prevHistory];
+            
+            // Find the most recent assistant message
+            for (let i = updatedHistory.length - 1; i >= 0; i--) {
+                if (updatedHistory[i].role === 'assistant') {
+                    console.log('Updating assistant message at index:', i);
+                    updatedHistory[i] = {
+                        ...updatedHistory[i],
+                        // Don't update content here - let showWords handle it
+                        audio: updatedHistory[i].audio ? [...updatedHistory[i].audio, questionAudioSrc] : [questionAudioSrc],
+                        status: 'in_progress'
+                    };
+                    break;
+                }
             }
-            return prevHistory;
+            
+            console.log('Updated chat history:', updatedHistory);
+            return updatedHistory;
         });
         
         convAudio.play();
@@ -635,11 +667,10 @@ const ReadChatPage = () => {
                         timestampsKey = 'uncertainty_answer';
                         break;
                 }
-                showWords(convAudio, timestampsRef.current[currentPageRef.current][timestampsKey]);
-            },
-            onend: () => {
-                console.log('response audio ended');
-                setIsConversationEnded(true);
+                showWords(convAudio, timestampsRef.current[currentPageRef.current][timestampsKey], () => {
+                    console.log('response audio showWords completed');
+                    setIsConversationEnded(true);
+                });
             }
         });
         currentWordIndexRef.current = 0;
@@ -871,6 +902,7 @@ const ReadChatPage = () => {
         }
         if (isKnowledge) {
             setIsKnowledge(false);
+            isAskedRef.current = true;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             setTimeout(() => {
                 // audioRef.current.play();
@@ -946,9 +978,9 @@ const ReadChatPage = () => {
                         variant='plain'
                         onClick={handlePrevPage}
                         disabled={currentPageRef.current === 0}
-                        sx={{ opacity: 0 }}
+                        sx={{ opacity: 0.7 }}
                         >
-                            <MdArrowCircleLeft size={60} color='#7AA2E3'/>
+                            <FaCaretLeft size={60} color='#2A2278'/>
                         </IconButton>
                         <div id='caption-btn-box'>
                             <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
@@ -1000,9 +1032,9 @@ const ReadChatPage = () => {
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
-                        sx={{ opacity: 0 }}
+                        sx={{ opacity: 0.7 }}
                         >
-                        <MdArrowCircleRight size={60} color='#7AA2E3'/>
+                        <FaCaretRight size={60} color='#2A2278'/>
                     </IconButton>
                 </Box>            
             </div>
@@ -1067,22 +1099,6 @@ const ReadChatPage = () => {
                             >
                             {/* always set the backgroud to transparent */}
                             <FaMinusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }}/>
-                        </IconButton>
-                        <IconButton 
-                            id='close-btn'
-                            onClick={handleCloseChat}
-                            onMouseOver={() => {
-                                document.getElementById('close-btn').style.backgroundColor = 'rgba(0,0,0,0)';
-                            }}
-                            sx={{
-                                position: 'absolute',
-                                top: '8px',
-                                left: '80px',
-                                zIndex: 1
-                            }}
-                        >
-                            {/* add a close icon */}
-                            <IoMdCloseCircle size={36} color='#7AA2E3' />
                         </IconButton>
                        
                     <Box className='chat-window'>

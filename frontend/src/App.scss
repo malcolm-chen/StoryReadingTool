@@ -567,6 +567,11 @@ button {
   right: 0;
 }
 
+#prev-btn:hover, #next-btn:hover {
+  background-color: transparent;
+  opacity: 1;
+}
+
 #play-btn-box {
   display: flex;
   justify-content: center;

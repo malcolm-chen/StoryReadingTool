@@ -426,15 +426,6 @@ const ReadChatPage = () => {
                             console.log('resetting client for guiding');
                             updateClientInstruction(await getInstruction4Guiding());
                         }
-                    } else if (currentPageRef.current === 6 && title === 'Why Frogs are Wet') { 
-                        setIsKnowledge(false);
-
-                        // wait for 2 seconds, if the user does not click the next page button, move to the next page
-                        setTimeout(() => {
-                            if (!clientRef.current.realtime.isConnected()) {
-                                handleNextPage();
-                            }
-                        }, 3000);
                     }
                     else {
                         setIsKnowledge(false);
@@ -786,7 +777,8 @@ const ReadChatPage = () => {
         - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
        
     **Instructions for Whole Response**:
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         return instruction4Correct;
@@ -820,7 +812,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER.
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
@@ -829,7 +821,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - Your response should *NOT* reveal the answer. Gently guide the child to think towards the missing part of the answer.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -862,7 +855,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
 
     **Instructions for Whole Response**:
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         `;
         let sumCount = 0;
@@ -910,7 +904,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER
+        - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
@@ -919,7 +913,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - Your response should *NOT* reveal the answer. Gently guide the child to think towards the correct part of the answer.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -952,7 +947,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
 
     **Instructions for Whole Response**:
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         let sumCount = 0;
@@ -999,14 +995,15 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER
+        - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -1039,7 +1036,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
 
     **Instructions for Whole Response**:
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         let sumCount = 0;
@@ -1094,7 +1092,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -1126,7 +1125,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
 
     **Instructions for Whole Response**:
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         
@@ -1177,7 +1177,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - *DO NOT* ask a question that is beyond the main question.
 
     **Instructions for Whole Response**:
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Do not include any inappropriate content, such as violence, sex, drugs, etc.
+        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence at the end.
         `;
 

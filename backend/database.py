@@ -212,4 +212,4 @@ def delete_user_files(username):
         return 0
 
 if __name__ == "__main__":
-    delete_user_files("jiaju")
+    delete_user_files("Jiaju")

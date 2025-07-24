@@ -235,12 +235,17 @@ const ReadChatPage = () => {
                 console.log('SpeechRecognition result event triggered');
                 const transcript = event.results[0][0].transcript;
                 console.log('Transcription:', transcript);
-                currentPageChatHistory.push({
-                    role: 'user',
-                    content: transcript,
-                    audio: new Blob(recordedChunksRef.current, { type: 'audio/webm' })
-                });
-                setCurrentPageChatHistory([...currentPageChatHistory]);
+                
+                // Use the state setter function to properly update the chat history
+                setCurrentPageChatHistory(prevHistory => [
+                    ...prevHistory,
+                    {
+                        role: 'user',
+                        content: transcript,
+                        audio: new Blob(recordedChunksRef.current, { type: 'audio/webm' })
+                    }
+                ]);
+                
                 console.log('apiUrl', apiUrl);
                 // Send transcription to backend
                 fetch(`${apiUrl}/api/evaluate_response`, {
@@ -470,16 +475,18 @@ const ReadChatPage = () => {
                 const updatedHistory = [...prevHistory];
                 console.log('updatedHistory when showing words', updatedHistory);
                 if (updatedHistory.length > 0) {
-                    updatedHistory[updatedHistory.length - 1].status = 'completed';
-                    if (!updatedHistory[updatedHistory.length - 1].audio.includes(convAudio._src)) {
-                        console.log('adding convAudio._src to the audio array');
-                        updatedHistory[updatedHistory.length - 1].audio.push(convAudio._src);
-                    }
+                    updatedHistory[updatedHistory.length - 1] = {
+                        ...updatedHistory[updatedHistory.length - 1],
+                        status: 'completed',
+                        audio: !updatedHistory[updatedHistory.length - 1].audio.includes(convAudio._src) 
+                            ? [...updatedHistory[updatedHistory.length - 1].audio, convAudio._src]
+                            : updatedHistory[updatedHistory.length - 1].audio
+                    };
                 } else {
                     updatedHistory.push({
                         role: 'assistant',
                         content: currentTranscriptRef.current,
-                        audio: convAudio._src,
+                        audio: [convAudio._src],
                         status: 'completed'
                     });
                 }
@@ -500,13 +507,16 @@ const ReadChatPage = () => {
                 setCurrentPageChatHistory(prevHistory => {
                     const updatedHistory = [...prevHistory];
                     if (updatedHistory.length > 0) {
-                        updatedHistory[updatedHistory.length - 1].content = currentTranscriptRef.current;
-                        updatedHistory[updatedHistory.length - 1].status = 'in_progress';
+                        updatedHistory[updatedHistory.length - 1] = {
+                            ...updatedHistory[updatedHistory.length - 1],
+                            content: currentTranscriptRef.current,
+                            status: 'in_progress'
+                        };
                     } else {
                         updatedHistory.push({
                             role: 'assistant',
                             content: currentTranscriptRef.current,
-                            audio: convAudio._src,
+                            audio: [convAudio._src],
                             status: 'in_progress'
                         });
                     }
@@ -539,15 +549,12 @@ const ReadChatPage = () => {
         currentTranscriptRef.current = '';
         console.log('Opening starting, reset transcript to:', currentTranscriptRef.current);
 
-        const updatedChatHistory = [];
-        updatedChatHistory.push({
+        setCurrentPageChatHistory([{
             role: 'assistant',
             content: currentTranscriptRef.current,
             audio: [openingAudioSrc],
             status: 'in_progress'
-        });
-        setCurrentPageChatHistory(updatedChatHistory);
-        console.log('updatedChatHistory', updatedChatHistory);
+        }]);
         console.log('currentPageChatHistory after updating', currentPageChatHistory);
         convAudio.play();
     }
@@ -568,13 +575,15 @@ const ReadChatPage = () => {
         });
         currentWordIndexRef.current = 0;
         currentTranscriptRef.current = '';
-        currentPageChatHistory.push({
-            role: 'assistant',
-            content: currentTranscriptRef.current,
-            audio: [noAnswerAudioSrc],
-            status: 'in_progress'
-        });
-        setCurrentPageChatHistory([...currentPageChatHistory]);
+        setCurrentPageChatHistory(prevHistory => [
+            ...prevHistory,
+            {
+                role: 'assistant',
+                content: currentTranscriptRef.current,
+                audio: [noAnswerAudioSrc],
+                status: 'in_progress'
+            }
+        ]);
         convAudio.play();
     }
 
@@ -676,13 +685,15 @@ const ReadChatPage = () => {
         currentWordIndexRef.current = 0;
         currentTranscriptRef.current = '';
         // add the a new message to chatHistoryRef
-        currentPageChatHistory.push({
-            role: 'assistant',
-            content: currentTranscriptRef.current,
-            audio: [responseAudioSrc],
-            status: 'in_progress'
-        });
-        setCurrentPageChatHistory([...currentPageChatHistory]);
+        setCurrentPageChatHistory(prevHistory => [
+            ...prevHistory,
+            {
+                role: 'assistant',
+                content: currentTranscriptRef.current,
+                audio: [responseAudioSrc],
+                status: 'in_progress'
+            }
+        ]);
         convAudio.play();
     }
 

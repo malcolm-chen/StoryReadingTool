@@ -541,7 +541,7 @@ const ReadChatPage = () => {
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
-        if (isKnowledge && !isAskedRef.current) {
+        if (isKnowledge && !isAskedRef.current && currentPageRef.current !== 7) {
             console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
             return;
         }
@@ -741,7 +741,7 @@ const ReadChatPage = () => {
             ** Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. **
             **DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
             ** Your first question must be identical to the provided main question, meaning that you should not substitute any keyword.
-            ** Must ask only ONE question (${knowledgeRef.current[currentPageRef.current]?.question})). DO NOT ASK MORE THAN ONE QUESTION. **
+            ** Must ask only ONE question (${knowledgeRef.current[currentPageRef.current]?.question})). ASK EXACTLY ONE QUESTION. **
         `;
         
         console.log(instruction4Guiding);
@@ -778,7 +778,7 @@ const ReadChatPage = () => {
        
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         return instruction4Correct;
@@ -822,7 +822,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response should *NOT* reveal the answer. Gently guide the child to think towards the missing part of the answer.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -856,7 +856,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         `;
         let sumCount = 0;
@@ -895,7 +895,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer or details of the correct answer in the hint.
+        - *DO NOT* include the correct answer or details of the correct answer, acceptance criteria in the hint.
         - *DO NOT* include any question in the hint.
         - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
@@ -914,7 +914,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response should *NOT* reveal the answer. Gently guide the child to think towards the correct part of the answer.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -948,7 +948,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         let sumCount = 0;
@@ -986,7 +986,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer or details of the correct answer in the hint.
+        - *DO NOT* include the correct answer or details of the correct answer, acceptance criteria in the hint.
         - *DO NOT* include any question in the hint.
         - Provide an IMPLICIT hint that guides children toward the relevant context. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
@@ -1003,7 +1003,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -1037,7 +1037,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         let sumCount = 0;
@@ -1074,7 +1074,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer in the hint.
+        - *DO NOT* include the correct answer or details of acceptance criteria in the hint.
         - *DO NOT* include any question in the hint.
         - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
         - Your hints should avoid any phrasing that might directly suggest the answer.
@@ -1093,7 +1093,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response should *NOT* reveal the answer. The goal of your hint is to gently guide the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question per turn.
@@ -1126,7 +1126,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         
@@ -1178,7 +1178,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - Keep the conversation focus on the story and frogs. DO NOT DIVERGE THE CONVERSATION TO OTHER TOPICS.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence at the end.
         `;
 
@@ -1956,19 +1956,22 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             console.error('Error sending chat history to backend', error);
         }
         if (isKnowledge) {
+            console.log('isKnowledge', isKnowledge);
             setIsKnowledge(false);
             isAskedRef.current = true;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             setTimeout(() => {
                 // audioRef.current.play();
+                console.log('isKnowledge', isKnowledge);
                 if (currentPageRef.current < pages.length - 1) {
                     setIsPlaying(true);
                     handleNextPage();
                 }
-            }, 100);
+            }, 300);
         }
         else {
             // setIsAsking(false);
+            setIsKnowledge(false);
             isAskingRef.current = false;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
         }
@@ -2192,7 +2195,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             <div id='main-container'>
                 <div id='book-container'>
                     <Box id='book-content' style={bookContentStyle}>
-                        <IconButton
+                        {/* <IconButton
                         id="prev-btn"
                         variant='plain'
                         onClick={handlePrevPage}
@@ -2200,9 +2203,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         sx={{ opacity: 0.7 }}
                         >
                             <FaCaretLeft size={60} color='#2A2278'/>
-                        </IconButton>
+                        </IconButton> */}
 
-                        <Box id='book-img' {...swipeHandlers} onClick={handleImageClick} style={bookImgStyle}>
+                        <Box id='book-img' style={bookImgStyle}>
                             <img 
                                 src={pages[currentPageRef.current]?.image} 
                                 alt={`Page ${currentPageRef.current + 1}`}
@@ -2210,14 +2213,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                             />
                         </Box>
 
-                    <IconButton
+                    {/* <IconButton
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
                         sx={{ opacity: 0.7 }}
                         >
                         <FaCaretRight size={60} color='#2A2278'/>
-                    </IconButton>
+                    </IconButton> */}
                     <div id='play-btn-box'>
                             <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 {isPlaying ? <FaPause /> : <FaPlay />}

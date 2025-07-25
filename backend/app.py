@@ -173,6 +173,7 @@ def chat_history():
 @app.route('/api/evaluate_response', methods=['POST'])
 def evaluate_response():
     data = request.get_json()
+    print('page', data['page'])
     page = str(int(data['page']) + 2)
     response = data['transcript']
     
@@ -198,7 +199,7 @@ def evaluate_response():
     uncertainty
     incorrect
     """
-    print('prompt', prompt)
+    # print('prompt', prompt)
     response = openai_client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],

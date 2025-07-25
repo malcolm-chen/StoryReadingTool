@@ -436,7 +436,7 @@ const ReadChatPage = () => {
         console.log('moving to next page', currentPageRef.current);
         if (isKnowledge && !isAskedRef.current) {
             console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
-            if (currentPageRef.current != 7 && currentPageRef.current != 10 && currentPageRef.current != 12) {
+            if (currentPageRef.current != 7 && currentPageRef.current != 10 && currentPageRef.current != 12 && currentPageRef.current != 14) {
                 return;
             }
         }

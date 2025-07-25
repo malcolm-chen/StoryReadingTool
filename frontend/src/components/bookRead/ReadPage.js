@@ -501,6 +501,7 @@ const ReadChatPage = () => {
         } else {
             const now = convAudio.seek();
             if (now >= timestamps?.[currentWordIndexRef.current]?.time) {
+                console.log('now', now, 'timestamps', timestamps);
                 const wordToAdd = timestamps?.[currentWordIndexRef.current]?.word;
                 currentTranscriptRef.current += wordToAdd;
                 console.log('Added word:', wordToAdd, 'Current transcript:', currentTranscriptRef.current);
@@ -915,13 +916,14 @@ const ReadChatPage = () => {
             setIsKnowledge(false);
             isAskedRef.current = true;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
-            setTimeout(() => {
-                // audioRef.current.play();
-                if (currentPageRef.current < pages.length - 1) {
+            // audioRef.current.play();
+            if (currentPageRef.current < pages.length - 1) {
+                setTimeout(() => {
                     setIsPlaying(true);
+                    console.log('playing next page');
                     handleNextPage();
-                }
-            }, 500);
+                }, 1500);
+            }
         }
         else {
             // setIsAsking(false);
@@ -984,7 +986,7 @@ const ReadChatPage = () => {
             <div id='main-container'>
                 <div id='book-container'>
                     <Box id='book-content'>
-                        <IconButton
+                        {/* <IconButton
                         id="prev-btn"
                         variant='plain'
                         onClick={handlePrevPage}
@@ -992,7 +994,7 @@ const ReadChatPage = () => {
                         sx={{ opacity: 0.7 }}
                         >
                             <FaCaretLeft size={60} color='#2A2278'/>
-                        </IconButton>
+                        </IconButton> */}
                         <div id='caption-btn-box'>
                             <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 <FaRegClosedCaptioning />
@@ -1035,18 +1037,18 @@ const ReadChatPage = () => {
                             </div>
                         )}
 
-                    <Box id='book-img' {...swipeHandlers} onClick={handleImageClick}>
+                    <Box id='book-img'>
                         <img src={pages[currentPageRef.current]?.image} alt={`Page ${currentPageRef.current + 1}`}/>
                     </Box>
 
-                    <IconButton
+                    {/* <IconButton
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
                         sx={{ opacity: 0.7 }}
                         >
                         <FaCaretRight size={60} color='#2A2278'/>
-                    </IconButton>
+                    </IconButton> */}
                 </Box>            
             </div>
             <div id='bottom-box'>

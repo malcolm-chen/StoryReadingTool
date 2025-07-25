@@ -173,7 +173,7 @@ def chat_history():
 @app.route('/api/evaluate_response', methods=['POST'])
 def evaluate_response():
     data = request.get_json()
-    page = str(int(data['page']) + 1)
+    page = str(int(data['page']) + 2)
     response = data['transcript']
     
     prompt = f"""

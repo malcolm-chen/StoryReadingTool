@@ -2195,7 +2195,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
             <div id='main-container'>
                 <div id='book-container'>
                     <Box id='book-content' style={bookContentStyle}>
-                        {/* <IconButton
+                        <IconButton
                         id="prev-btn"
                         variant='plain'
                         onClick={handlePrevPage}
@@ -2203,7 +2203,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                         sx={{ opacity: 0.7 }}
                         >
                             <FaCaretLeft size={60} color='#2A2278'/>
-                        </IconButton> */}
+                        </IconButton>
 
                         <Box id='book-img' style={bookImgStyle}>
                             <img 
@@ -2213,14 +2213,14 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                             />
                         </Box>
 
-                    {/* <IconButton
+                    <IconButton
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
                         sx={{ opacity: 0.7 }}
                         >
                         <FaCaretRight size={60} color='#2A2278'/>
-                    </IconButton> */}
+                    </IconButton>
                     <div id='play-btn-box'>
                             <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 {isPlaying ? <FaPause /> : <FaPlay />}

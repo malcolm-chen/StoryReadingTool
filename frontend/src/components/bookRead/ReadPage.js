@@ -681,7 +681,9 @@ const ReadChatPage = () => {
                 }
                 showWords(convAudio, timestampsRef.current[currentPageRef.current][timestampsKey], () => {
                     console.log('response audio showWords completed');
-                    setIsConversationEnded(true);
+                    setTimeout(() => {
+                        setIsConversationEnded(true);
+                    }, 500);
                 });
             }
         });

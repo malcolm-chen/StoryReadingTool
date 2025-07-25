@@ -382,6 +382,12 @@ const ReadChatPage = () => {
         setIsPlaying(!isPlaying);
     };
 
+    useEffect(() => {
+        if (audioRef.current) {
+          audioRef.current.playbackRate = audioSpeed;
+        }
+        localStorage.setItem(`${title}-audioSpeed`, audioSpeed);
+      }, [audioSpeed, title]);
 
     const playPageSentences = () => {
         if (pages[currentPageRef.current]?.text) {
@@ -1415,7 +1421,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         if (noResponseReminderCountRef.current == 1) {
             const lastQuestion = items[items.length - 1]?.content[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
-            if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+            if (lastQuestion?.toLowerCase().includes('do you have any questions')) {
                 const instruction4NoResponse1_1 = `
     **Instructions**:
         1. Ignore the chat history. Say "Hey, I didn't hear your answer. Do you have any questions about this page?"

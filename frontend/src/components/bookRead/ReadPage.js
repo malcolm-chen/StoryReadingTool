@@ -709,6 +709,7 @@ const ReadChatPage = () => {
         When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response, to determine whether all of the child's responses, when taken together, accurately address the main question. The evaluation should consider ALL of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
         - Correct answer: Consider the child's all responses in the conversation history of the current page. Only if the child's current response or combined responses across all turns closely ALIGN WITH key elements of the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly, but incompletely.
+        ${currentPageRef.current === 11 ? " - If the child only answers 'frogs can see through their lower eyelids' or only answers 'frogs can see in all directions without moving', you should mark it as 'correct but incomplete'." : ''}
         - Factually incorrect answer: The response contains incorrect information compared to the answer
         - Irrelevant response: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
         - Uncertainty answer: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
@@ -817,7 +818,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your hints should avoid any phrasing that might directly suggest the answer.
         - *DO NOT* include the correct answer in your follow-up question. 
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention frogs use their voice to hunt for mates and scare others when frightened." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
 
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
@@ -911,7 +912,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
         - *DO NOT* include the correct answer in your follow-up question. 
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention frogs use their voice to hunt for mates and scare others when frightened." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
 
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -1004,7 +1005,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
         - *DO NOT* include the correct answer in your follow-up question. 
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention frogs use their voice to hunt for mates and scare others when frightened." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'"  : ''}
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -1094,7 +1095,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
         - *DO NOT* include the correct answer in your follow-up question. 
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention frogs use their voice to hunt for mates and scare others when frightened." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
      
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;

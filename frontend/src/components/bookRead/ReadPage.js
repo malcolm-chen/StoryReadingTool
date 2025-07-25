@@ -541,9 +541,11 @@ const ReadChatPage = () => {
 
     const handleNextPage = async () => {
         console.log('moving to next page', currentPageRef.current);
-        if (isKnowledge && !isAskedRef.current && currentPageRef.current !== 7) {
+        if (isKnowledge && !isAskedRef.current) {
             console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
-            return;
+            if (currentPageRef.current != 7 && currentPageRef.current != 10 && currentPageRef.current != 12) {
+                return;
+            }
         }
         audioRef.current.pause();
         audioRef.current.currentTime = 0;

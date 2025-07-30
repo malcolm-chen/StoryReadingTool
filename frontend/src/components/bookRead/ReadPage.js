@@ -2247,6 +2247,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                                 <RiSpeedUpFill />
                             </IconButton>
                         </div>
+                        <div id='caption-btn-box'>
+                            <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
+                                <FaRegClosedCaptioning />
+                            </IconButton>
+                        </div>
                         {showSpeedSlider && (
                             <div id='speed-slider-box'>
                                 <Slider
@@ -2276,7 +2281,17 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 </Box>            
             </div>
             <div id='bottom-box' style={bottomBoxStyle}>
-                
+                {showCaption && 
+                        <div id='caption-box'>
+                            {/* keep the caption at the center of the caption-box */}
+                        <h4 id="caption">
+                            {/* <Button onClick={togglePlayPause} variant="contained" color="primary">
+                                {isPlaying ? <FaPause /> : <FaPlay />}
+                            </Button> */}
+                            {pages[currentPageRef.current]?.text[sentenceIndexRef.current]}
+                        </h4>
+                    </div>
+                }
                 {/* shake the penguin image at the first page, after 13 seconds */}
                 <div id='penguin-box' onClick={handlePenguinClick}>
                     <img

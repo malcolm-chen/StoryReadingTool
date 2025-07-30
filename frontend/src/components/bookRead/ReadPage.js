@@ -326,6 +326,9 @@ const ReadChatPage = () => {
         setIsPlaying(!isPlaying);
     };
 
+    useEffect(() => {
+        console.log('isKnowledge', isKnowledge);
+    }, [isKnowledge]);
 
     const playPageSentences = () => {
         if (pages[currentPageRef.current]?.text) {
@@ -368,6 +371,7 @@ const ReadChatPage = () => {
                             }, 500);
                         }
                     } else {
+                        console.log('currentPage not in knowledge', currentPageRef.current);
                         setIsKnowledge(false);
                         if (currentPageRef.current < pages.length - 1) {
                             handleNextPage();
@@ -436,7 +440,8 @@ const ReadChatPage = () => {
         console.log('moving to next page', currentPageRef.current);
         if (isKnowledge && !isAskedRef.current) {
             console.log('isKnowledge and isAsked', isKnowledge, isAskedRef.current);
-            if (currentPageRef.current != 7 && currentPageRef.current != 10 && currentPageRef.current != 12 && currentPageRef.current != 14) {
+            if ([2, 3, 4, 5, 6, 9, 11, 13].includes(currentPageRef.current)) {
+                console.log('currentPage in [2, 3, 4, 5, 6, 9, 11, 13]', currentPageRef.current);
                 return;
             }
         }
@@ -931,6 +936,7 @@ const ReadChatPage = () => {
         }
         else {
             // setIsAsking(false);
+            setIsKnowledge(false);
             isAskingRef.current = false;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
             if (sentenceIndexRef.current === pages[currentPageRef.current]?.text.length) {
@@ -999,11 +1005,11 @@ const ReadChatPage = () => {
                         >
                             <FaCaretLeft size={60} color='#2A2278'/>
                         </IconButton>
-                        {/* <div id='caption-btn-box'>
+                        <div id='caption-btn-box'>
                             <IconButton variant='plain' onClick={handleCaptionToggle} style={{ zIndex: 2, color: 'white', fontSize: '30px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 <FaRegClosedCaptioning />
                             </IconButton>
-                        </div> */}
+                        </div>
                         <div id='play-btn-box'>
                             <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
                                 {isPlaying ? <FaPause /> : <FaPlay />}
@@ -1056,7 +1062,17 @@ const ReadChatPage = () => {
                 </Box>            
             </div>
             <div id='bottom-box'>
-                {/* shake the penguin image at the first page, after 13 seconds */}
+                {showCaption && 
+                        <div id='caption-box'>
+                            {/* keep the caption at the center of the caption-box */}
+                        <h4 id="caption">
+                            {/* <Button onClick={togglePlayPause} variant="contained" color="primary">
+                                {isPlaying ? <FaPause /> : <FaPlay />}
+                            </Button> */}
+                            {pages[currentPageRef.current]?.text[sentenceIndexRef.current]}
+                        </h4>
+                    </div>
+                }
                 <div id='penguin-box' onClick={handlePenguinClick}>
                     <img
                     src='./files/imgs/penguin.svg'

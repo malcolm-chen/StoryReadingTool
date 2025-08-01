@@ -855,7 +855,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) here with easy-to-understand words, excluding the acceptance criteria.
+        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) here with easy-to-understand words, EXCLUDING THE ACCEPTANCE CRITERIA.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
@@ -868,6 +868,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
+        - Never explicitly include the acceptance criteria in the whole response.
         `;
         let sumCount = 0;
         for (const answer of answerRecord) {
@@ -949,7 +950,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
+        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), EXCLUDING THE ACCEPTANCE CRITERIA.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
@@ -962,6 +963,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
@@ -994,7 +996,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
-        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Great Thinking!', 'Let’s think about what the question is asking,' 'Thanks for sharing that! Let’s focus on what we are reading here,' 'I heard you! Let’s think about what the question is asking' and other similar acknowledgments)."}
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Great Thinking!', 'Let's think about what the question is asking,' 'Thanks for sharing that! Let's focus on what we are reading here,' 'I heard you! Let's think about what the question is asking' and other similar acknowledgments)."}
 
     **Instructions for hint**:
         - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
@@ -1036,11 +1038,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
-        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Let’s think about what the question is asking,' 'Thanks for sharing that! Let’s focus on what we are reading here,' 'I heard you! Let’s think about what the question is asking' and other similar acknowledgments)."}
+        ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Let's think about what the question is asking,' 'Thanks for sharing that! Let's focus on what we are reading here,' 'I heard you! Let's think about what the question is asking' and other similar acknowledgments)."}
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
+        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), EXCLUDING THE ACCEPTANCE CRITERIA.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
@@ -1053,6 +1055,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
@@ -1131,7 +1134,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
 
     **Instructions for Explanation**:
         - Your explanation should be suitable for children aged 6 to 8.
-        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), excluding the acceptance criteria.
+        - Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}), EXCLUDING THE ACCEPTANCE CRITERIA.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Keep your explanation simple, engaging and under 20 words. 
 
@@ -1144,6 +1147,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - Never explicitly include the acceptance criteria in the whole response.
         `
         
         let sumCount = 0;
@@ -1276,7 +1280,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Example: "Let me share with you! (If the child didn't say anything) / No worries! We are learning together! (If the child didn't say anything) + While I didn't hear your answer, ...", and move on to the explanation.
     
     **Instructions for Explanation**:
-        - Since the evaluation of the child's response is 'invalid', you should Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in your explanation, excluding the acceptance criteria.
+        - Since the evaluation of the child's response is 'invalid', you should Cover ALL key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in your explanation, EXCLUDING THE ACCEPTANCE CRITERIA.
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
 
@@ -1287,6 +1291,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
     
     **Instructions for Whole Response**:
         - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
+        - Never explicitly include the acceptance criteria in the whole response.
         `;
 
         let invalidCount = 0;
@@ -1479,8 +1484,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
                 } else {
                     const instruction4NoResponse2_3 = `
        **Instructions**:
-            1. Ignore the chat history. Say "Hey, the answer is ${knowledgeRef.current[currentPageRef.current]?.answer}. Let's continue reading the story."
+            1. Ignore the chat history. Reveal the answer ( ${knowledgeRef.current[currentPageRef.current]?.answer?.split('(The acceptance criteria')[0]}), and say "Let's continue reading the story."
         **Important Reminder**:
+            - If there is an acceptance criteria in the answer, remove it in your response.
             - You must not say or ask anything else.`;
                     console.log(instruction4NoResponse2_3);
                     return instruction4NoResponse2_3;

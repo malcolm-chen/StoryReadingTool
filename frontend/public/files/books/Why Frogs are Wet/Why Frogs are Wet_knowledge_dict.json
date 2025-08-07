@@ -5,7 +5,7 @@
     },
     "3": {
         "question": "What are “amphibians”?",
-        "answer": "Amphibians are special animals that can live both in water and on land, just like frogs! They can breathe through their wet skin or use their lungs, depending on where they are. (The acceptance criteria are to answer the two points about amphibians: 1. two places where amphibians live (water and land) and 2. two ways how amphibians breathe (through wet skin in water and through both lungs and wet skin on land))"
+        "answer": "Amphibians are special animals that can live both in water and on land, just like frogs! They can breathe through their wet skin or use their lungs, depending on where they are. (The acceptance criteria are to answer the two points about amphibians: 1. two places where amphibians live (water and land) and 2. two ways how amphibians breathe (through wet skin or through  both lungs and wet skin, depending on where they live))"
     },
     "4": {
         "question": "How does a frog breathe?",
@@ -13,7 +13,7 @@
     },
     "5": {
         "question": "What do frogs do during the winter?",
-        "answer": "During the winter, frogs hibernate. They stay in the mud for months, hardly breathe, and their hearts slow down. This process is called hibernation. This helps frogs save energy in their bodies and make it through the winter. (The acceptance criteria are that the answer must include that frogs (1) hibernate and (2) save energy by hardly breathing and slowing down their heart rate )"
+        "answer": "During the winter, frogs hibernate. They stay in the mud for months, hardly breathe, and their hearts slow down. This process is called hibernation. This helps frogs save energy in their bodies and make it through the winter. (The acceptance criteria are that the answer must include that frogs (1) hibernate, (2) save energy, and 3) hardly breathe and slow down their heart rate.)"
     },
     "6": {
         "question": "Why can’t tadpoles live on land?",

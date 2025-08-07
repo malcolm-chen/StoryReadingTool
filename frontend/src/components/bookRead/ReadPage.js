@@ -465,6 +465,8 @@ const ReadChatPage = () => {
         }
         console.log('moving to previous page', currentPageRef.current);
         if (currentPageRef.current > 0) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
             setIsKnowledge(false);
             // setIsAsking(false);
             isAskingRef.current = false;
@@ -489,6 +491,7 @@ const ReadChatPage = () => {
             sentenceIndexRef.current = 0;
             localStorage.setItem(`${title}-currentPage`, newPage); // Save currentPage
             localStorage.setItem(`${title}-currentSentence`, 0);    // Reset currentSentence to 0
+            playPageSentences();  
         }
     };
 
@@ -680,7 +683,7 @@ const ReadChatPage = () => {
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
-        You need to evaluate the child's response to the main question.
+        You need to evaluate the child's latest response to the main question.
         
         **Instructions for Evaluation**:
         You need to evaluate the child's response based on the following inputs:
@@ -705,8 +708,8 @@ const ReadChatPage = () => {
         *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
         *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history, along with their latest response, to determine whether all of the child's responses, when taken together, accurately address the main question. The evaluation should consider ALL of the child's responses to decide whether or not they collectively form the most accurate answer to the main question.
-        - Correct answer: Consider the child's all responses in the conversation history of the current page. Only if the child's current response or combined responses across all turns closely ALIGN WITH key elements of the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history to determine whether all of the child's responses, when taken together, collectively form the most accurate answer to the main question.
+        - Correct answer: Consider the CHILD's all responses in the conversation history. Only if the child's current response or combined responses across all turns closely ALIGN WITH key elements of the provided answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the given answer (${knowledgeRef.current[currentPageRef.current]?.answer}), consider the child has answered the question correctly, but incompletely.
         ${currentPageRef.current === 11 ? " - If the child only answers 'frogs can see through their lower eyelids' or only answers 'frogs can see in all directions without moving', you should mark it as 'correct but incomplete'." : ''}
         - Factually incorrect answer: The response contains incorrect information compared to the answer
@@ -811,19 +814,18 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., 'Great start!', 'Nice work! There's more to it', 'You got part of it!', etc.)."}
     
     **Instructions for hint**:
-        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include any question in the hint.
-        - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
-        - Your hints should avoid any phrasing that might directly suggest the answer.
-        - *DO NOT* include the correct answer in your follow-up question. 
-         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
+        - Provide an INDIRECT hint that guides children towards the missing parts of the correct answer.
+        - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
+         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
+        ${currentPageRef.current === 9 ? "- Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
+        ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
     **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about how many directions frogs can see and/or the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -904,21 +906,18 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'Let's think about it together!', 'That's a good try!', 'Let's try it again', and other similar acknowledgments)."}
 
     **Instructions for hint**:
-        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer or details of the correct answer, acceptance criteria in the hint.
-        - *DO NOT* include any question in the hint.
-        - Provide an IMPLICIT hint that guides children toward the missing parts of the answer. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
-        - Your hints should avoid any phrasing that might directly suggest the answer.
-        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
-        - *DO NOT* include the correct answer in your follow-up question. 
+        - Provide an INDIRECT hint that guides children towards the correct answer.
+        - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
+        ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
  **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -998,15 +997,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Great Thinking!', 'Let's think about what the question is asking,' 'Thanks for sharing that! Let's focus on what we are reading here,' 'I heard you! Let's think about what the question is asking' and other similar acknowledgments)."}
 
     **Instructions for hint**:
-        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer or details of the correct answer, acceptance criteria in the hint.
-        - *DO NOT* include any question in the hint.
-        - Provide an IMPLICIT hint that guides children toward the relevant context. You should help them think in the right direction WITHOUT revealing the core elements of the provided correct answer.
-        - Your hints should avoid any phrasing that might directly suggest the answer.
-        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
-        - *DO NOT* include the correct answer in your follow-up question. 
+        - Provide an INDIRECT hint that guides children towards the correct answer.
+        - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'"  : ''}
+        ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -1089,21 +1084,18 @@ You are a friendly chatbot engaging with a 6-8-year-old child named ${user}, who
         - Since the child's response is uncertain, acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'That's okay, I see you're unsure,' 'No worries,' 'Thank you for letting me know,' 'That's alright. I'm here to help', 'Let's think together', and other similar acknowledgments).
 
     **Instructions for hint**:
-        - Your hint should be indirect, simple, engaging, under 20 words, and suitable for children aged 6 to 8.
-        - *DO NOT* include the correct answer or details of acceptance criteria in the hint.
-        - *DO NOT* include any question in the hint.
-        - *DO NOT* draw on specific details from the correct answer. Provide an implicit hint that guides children toward the core concept, helping them think in the right direction without revealing the core elements of the provided correct answer.
-        - Your hints should avoid any phrasing that might directly suggest the answer.
-        - You should only hint toward a general understanding of the core elements of the concept or idea, instead of revealing any key details from the correct answer.
-        - *DO NOT* include the correct answer in your follow-up question. 
+        - Provide an INDIRECT hint that guides children towards the correct answer.
+        - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention 'hunt for mates' and 'scare others when frightened'" : ''}
+        ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
      
        **Instructions for Asking a Reprompt Question**:   
         - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not divert the question to the page details. Do not include answer details in the reprompt question.
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.

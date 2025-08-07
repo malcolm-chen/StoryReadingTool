@@ -13,11 +13,11 @@
     },
     "5": {
         "question": "What do frogs do during the winter?",
-        "answer": "During the winter, frogs hibernate. They stay in the mud for months, hardly breathe, and their hearts slow down. This process is called hibernation. This helps frogs save energy in their bodies and make it through the winter. "
+        "answer": "During the winter, frogs hibernate. They stay in the mud for months, hardly breathe, and their hearts slow down. This process is called hibernation. This helps frogs save energy in their bodies and make it through the winter. (The acceptance criteria are that the answer must include that frogs (1) hibernate and (2) save energy by hardly breathing and slowing down their heart rate )"
     },
     "6": {
         "question": "Why can’t tadpoles live on land?",
-        "answer": "Tadpoles can't live on land because they need water to breathe through their gills and don't have legs to walk on land. (The acceptance criteria are to answer that tadpoles need 1. water to breathe and 2. legs to walk on land)"
+        "answer": "Tadpoles can't live on land because they need water to breathe through their gills and don't have legs to walk on land. (The acceptance criteria are to answer that tadpoles 1. breathe in water and 2. have no legs to walk on land)"
     },
     "9": {
         "question": "What do frogs use their voices for?",
@@ -25,7 +25,7 @@
     }, 
     "11": {
         "question": "How can frogs see what’s around them without moving?",
-        "answer": "Frogs have big eyes that let them see in all directions without moving. They can even see through their lower eyelids, when they're partly closed. (The acceptance criteria are to answer that frogs' eyes allow them to 1. SEE IN ALL DIRECTIONS without moving, and 2. see through their lower eyelids)"
+        "answer": "Frogs have big eyes that let them see in all directions without moving. They can even see through their lower eyelids, when they're partly closed. (The acceptance criteria are to explain the ways frogs' eyes help them see without moving, including: 1. their eyes allow them to see in all directions, and 2. they can see when their eyes are halfway closed)"
     },
     "13": {
         "question": "How does a frog’s tongue help it catch insects?",

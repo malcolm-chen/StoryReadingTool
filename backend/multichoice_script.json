@@ -7,7 +7,8 @@
         "correct": "That’s right! The forefathers of frogs are fish with lungs and legs.",
         "incorrect": "Good try! The forefathers of frogs are fish with lungs and legs.",
         "uncertainty": "I see you are wondering. The forefathers of frogs are fish with lungs and legs.",
-        "off-topic": "Hmm, that’s a cool sharing. The forefathers of frogs are fish with lungs and legs."
+        "off-topic": "Hmm, that’s a cool sharing. The forefathers of frogs are fish with lungs and legs.",
+        "no-response": "The answer is: Fish grow lungs and legs."
       }
     },
     "5": {
@@ -17,7 +18,8 @@
         "correct": "Good job! Amphibians do live both on land and in water.",
         "incorrect": "Not quite! Amphibians live both on land and in water.",
         "uncertainty": "That’s ok! Amphibians live both on land and in water.",
-        "off-topic": "Thanks for sharing! Amphibians live both on land and in water."
+        "off-topic": "Thanks for sharing! Amphibians live both on land and in water.",
+        "no-response": "The answer is: Amphibians live both on land and in water."
       }
     },
     "6": {
@@ -27,7 +29,8 @@
         "correct": "Excellent! A frog breathes through both its skin and lungs.",
         "incorrect": "Good effort! A frog breathes through both its skin and lungs.",
         "uncertainty": "Oh you don’t know? That’s ok. A frog breathes through both its skin and lungs.",
-        "off-topic": "Thanks for participating. A frog breathes through both its skin and lungs."
+        "off-topic": "Thanks for participating. A frog breathes through both its skin and lungs.",
+        "no-response": "The answer is: A frog breathes through both its skin and lungs."
       }
     },
     "7": {
@@ -37,7 +40,8 @@
         "correct": "Great job! Frogs stay in the mud and hibernate.",
         "incorrect": "Almost there! Frogs stay in the mud and hibernate.",
         "uncertainty": "It’s ok! Frogs stay in the mud and hibernate.",
-        "off-topic": "Hmm, I am wondering about your sharing. Frogs stay in the mud and hibernate."
+        "off-topic": "Hmm, I am wondering about your sharing. Frogs stay in the mud and hibernate.",
+        "no-response": "The answer is: During the winter, frogs stay in the mud and hibernate."
       }
     },
     "8": {
@@ -47,7 +51,8 @@
         "correct": "You got it! Tadpoles can't breathe through their gills on land.",
         "incorrect": "That’s a good try! Tadpoles can't breathe through their gills on land.",
         "uncertainty": "No worries! Tadpoles can't breathe through their gills on land.",
-        "off-topic": "I heard you are talking. Tadpoles can't breathe through their gills on land."
+        "off-topic": "I heard you are talking. Tadpoles can't breathe through their gills on land.",
+        "no-response": "The answer is: Tadpoles can't breathe through their gills on land."
       }
     },
     "11": {
@@ -57,7 +62,8 @@
         "correct": "Excellent! Frogs use their voices to hunt for mates.",
         "incorrect": "Good effort. Frogs use their voices to hunt for mates.",
         "uncertainty": "This question may be a bit tricky. Frogs use their voices to hunt for mates.",
-        "off-topic": "I appreciate you letting me know! Frogs use their voices to hunt for mates."
+        "off-topic": "I appreciate you letting me know! Frogs use their voices to hunt for mates.",
+      "no-response": "The answer is: Frogs use their voices to hunt for mates."
       }
     },
     "13": {
@@ -67,17 +73,19 @@
         "correct": "Well done! Frogs can see what is around them without moving because their eyes can see in all directions.",
         "incorrect": "You are really close! Frogs can see what is around them without moving because their eyes can see in all directions.",
         "uncertainty": "I see you are unsure! Frogs can see what is around them without moving because their eyes can see in all directions.",
-        "off-topic": "Thanks for sharing! Frogs can see what is around them without moving because their eyes can see in all directions."
+        "off-topic": "Thanks for sharing! Frogs can see what is around them without moving because their eyes can see in all directions.",
+      "no-response": "The answer is: Frogs can see what is around them without moving because their eyes can see in all directions."
       }
     },
     "15": {
-      "question": "Is a frog’s tongue sticky or not stick?",
+      "question": "Is a frog’s tongue sticky or not sticky?",
       "answer": "A frog’s tongue is sticky which helps them catch insects.",
       "feedback": {
         "correct": "You’re paying great attention! A frog’s tongue is sticky which helps them catch insects.",
         "incorrect": "Almost there! A frog’s tongue is sticky which helps them catch insects.",
         "uncertainty": "Oh you don’t know? That’s okay. A frog’s tongue is sticky which helps them catch insects.",
-        "off-topic": "Thanks for sharing! A frog’s tongue is sticky which helps them catch insects."
+        "off-topic": "Thanks for sharing! A frog’s tongue is sticky which helps them catch insects.",
+        "no-response": "The answer is: A frog’s tongue is sticky which helps them catch insects."
       }
     }
   },

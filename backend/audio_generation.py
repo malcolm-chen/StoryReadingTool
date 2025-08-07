@@ -53,41 +53,48 @@ def generate_audio_for_book():
         incorrect_answer = data['pages'][page]['feedback']['incorrect']
         uncertainty_answer = data['pages'][page]['feedback']['uncertainty']
         off_topic_answer = data['pages'][page]['feedback']['off-topic']
+        no_response = data['pages'][page]['feedback']['no-response']
         page = int(page)
-        if not os.path.exists(f"audio/page_{page}_question.mp3"):
+        audio = generate_audio(no_response, f"audio/page_{page-2}_no_response.mp3")
+        words_with_timestamps = get_timestamps(f"audio/page_{page-2}_no_response.mp3")
+        if page not in timestamps:
+            timestamps[page - 2] = {}
+        timestamps[page - 2]['no_response'] = words_with_timestamps
+        continue
+        if not os.path.exists(f"audio/page_{page-2}_question.mp3"):
             audio = generate_audio(question, f"audio/page_{page-2}_question.mp3")
             words_with_timestamps = get_timestamps(f"audio/page_{page-2}_question.mp3")
             if page not in timestamps:
                 timestamps[page - 2] = {}
             timestamps[page - 2]['question'] = words_with_timestamps
-        if not os.path.exists(f"audio/page_{page}_correct_answer.mp3"):
+        if not os.path.exists(f"audio/page_{page-2}_correct_answer.mp3"):
             audio = generate_audio(correct_answer, f"audio/page_{page-2}_correct_answer.mp3")
             words_with_timestamps = get_timestamps(f"audio/page_{page-2}_correct_answer.mp3")
             timestamps[page - 2]['correct_answer'] = words_with_timestamps
-        if not os.path.exists(f"audio/page_{page}_incorrect_answer.mp3"):
+        if not os.path.exists(f"audio/page_{page-2}_incorrect_answer.mp3"):
             audio = generate_audio(incorrect_answer, f"audio/page_{page-2}_incorrect_answer.mp3")
             words_with_timestamps = get_timestamps(f"audio/page_{page-2}_incorrect_answer.mp3")
             timestamps[page - 2]['incorrect_answer'] = words_with_timestamps
-        if not os.path.exists(f"audio/page_{page}_uncertainty_answer.mp3"):
+        if not os.path.exists(f"audio/page_{page-2}_uncertainty_answer.mp3"):
             audio = generate_audio(uncertainty_answer, f"audio/page_{page-2}_uncertainty_answer.mp3")
             words_with_timestamps = get_timestamps(f"audio/page_{page-2}_uncertainty_answer.mp3")
             timestamps[page - 2]['uncertainty_answer'] = words_with_timestamps
-        if not os.path.exists(f"audio/page_{page}_off_topic_answer.mp3"):
+        if not os.path.exists(f"audio/page_{page-2}_off_topic_answer.mp3"):
             audio = generate_audio(off_topic_answer, f"audio/page_{page-2}_off_topic_answer.mp3")
             words_with_timestamps = get_timestamps(f"audio/page_{page-2}_off_topic_answer.mp3")
             timestamps[page - 2]['off_topic_answer'] = words_with_timestamps
-    for i, opening in enumerate(data['opening']):
-        audio = generate_audio(opening, f"audio/opening_{i}.mp3")
-        words_with_timestamps = get_timestamps(f"audio/opening_{i}.mp3")
-        timestamps['opening'] = words_with_timestamps
-    for i, closing in enumerate(data['closing']):
-        audio = generate_audio(closing, f"audio/closing_{i}.mp3")
-        words_with_timestamps = get_timestamps(f"audio/closing_{i}.mp3")
-        timestamps['closing'] = words_with_timestamps
-    for i, no_answer in enumerate(data['no-answer']):
-        audio = generate_audio(no_answer, f"audio/no_answer_{i}.mp3")
-        words_with_timestamps = get_timestamps(f"audio/no_answer_{i}.mp3")
-        timestamps['no-answer'] = words_with_timestamps
+    # for i, opening in enumerate(data['opening']):
+    #     audio = generate_audio(opening, f"audio/opening_{i}.mp3")
+    #     words_with_timestamps = get_timestamps(f"audio/opening_{i}.mp3")
+    #     timestamps['opening'] = words_with_timestamps
+    # for i, closing in enumerate(data['closing']):
+    #     audio = generate_audio(closing, f"audio/closing_{i}.mp3")
+    #     words_with_timestamps = get_timestamps(f"audio/closing_{i}.mp3")
+    #     timestamps['closing'] = words_with_timestamps
+    # for i, no_answer in enumerate(data['no-answer']):
+    #     audio = generate_audio(no_answer, f"audio/no_answer_{i}.mp3")
+    #     words_with_timestamps = get_timestamps(f"audio/no_answer_{i}.mp3")
+    #     timestamps['no-answer'] = words_with_timestamps
     save_json(timestamps, 'timestamps.json')
 
 

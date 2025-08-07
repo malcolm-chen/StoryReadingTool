@@ -70,6 +70,8 @@ const ReadChatPage = () => {
     const currentTranscriptRef = useRef('');
     const hasAskedRef = useRef(false);
     const isAskedRef = useRef(false);
+    const hasPlayedNoAnswerRef = useRef(false);
+    const noResponseAttemptsRef = useRef(0);
 
     const mediaRecorderRef = useRef(null);
     const recordedChunksRef = useRef([]);
@@ -203,6 +205,7 @@ const ReadChatPage = () => {
         console.log('start recording');
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
+        noResponseAttemptsRef.current = 0;
         if (timerRef.current) clearInterval(timerRef.current);
         replayAudioRef.current.pause();
         setReplayingIndex(null);
@@ -364,6 +367,8 @@ const ReadChatPage = () => {
                         setAnswerRecord([]);
                         noReponseCntRef.current = 0;
                         setCurrentPageChatHistory([]);
+                        hasPlayedNoAnswerRef.current = false;
+                        noResponseAttemptsRef.current = 0;
                         if (!hasAskedRef.current) {
                             console.log('start guiding'); 
                             setTimeout(() => {
@@ -424,6 +429,8 @@ const ReadChatPage = () => {
             // setChatHistory([]);
             setCurrentPageChatHistory([]);
             isWaitingForResponseRef.current = false;
+            hasPlayedNoAnswerRef.current = false;
+            noResponseAttemptsRef.current = 0;
             const newPage = currentPageRef.current - 1;
             //setCurrentPage(newPage);
             currentPageRef.current = newPage;
@@ -461,6 +468,8 @@ const ReadChatPage = () => {
         // setChatHistory([]);
         setCurrentPageChatHistory([]);
         isWaitingForResponseRef.current = false;
+        hasPlayedNoAnswerRef.current = false;
+        noResponseAttemptsRef.current = 0;
         const newPage = ( currentPageRef.current + 1 ) % pages.length;
         // setCurrentPage(newPage);
         currentPageRef.current = newPage;
@@ -576,7 +585,9 @@ const ReadChatPage = () => {
                 setTimeout(() => {
                     showWords(convAudio, timestampsRef.current['no-answer'], () => {
                         console.log('No answer showWords completed');
-                        playQuestion();
+                        setTimeout(() => {
+                            playQuestion();
+                        }, 700);
                     });
                 }, 700);
             }
@@ -595,6 +606,36 @@ const ReadChatPage = () => {
         convAudio.play();
     }
 
+    const playNoResponseAndMoveOn = () => {
+        console.log('playNoResponseAndMoveOn called');
+        const noResponseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_no_response.mp3`;
+        const convAudio = new Howl({
+            src: [noResponseAudioSrc],
+            onplay: () => {
+                setTimeout(() => {
+                    showWords(convAudio, timestampsRef.current[currentPageRef.current]['no_response'], () => {
+                        console.log('No response showWords completed');
+                        setTimeout(() => {
+                            handleCloseChat();
+                        }, 500);
+                    });
+                }, 700);
+            }
+        });
+        currentWordIndexRef.current = 0;
+        currentTranscriptRef.current = '';
+        setCurrentPageChatHistory(prevHistory => [
+            ...prevHistory,
+            {
+                role: 'assistant',
+                content: currentTranscriptRef.current,
+                audio: [noResponseAudioSrc],
+                status: 'in_progress'
+            }
+        ]);
+        convAudio.play();
+    }
+
     const playQuestion = () => {
         console.log('playQuestion called');
         console.log('Transcript at start of playQuestion:', currentTranscriptRef.current);
@@ -605,9 +646,7 @@ const ReadChatPage = () => {
                 console.log('Question audio started playing, current transcript:', currentTranscriptRef.current);
                 showWords(convAudio, timestampsRef.current[currentPageRef.current]['question'], () => {
                     console.log('Question showWords completed');
-                    if (currentPageChatHistory.length < 2) {
-                        startResponseTimer();
-                    }
+                    startResponseTimer();
                 });
             }
         });
@@ -729,11 +768,21 @@ const ReadChatPage = () => {
 
     useEffect(() => {
         if (timer >= 15 && !userRespondedRef.current && isKnowledge) {
-          console.log('User did not respond in 15 seconds. Sending another message...');
-          console.log('isWaitingForResponse', isWaitingForResponseRef.current);
-          // play the question again
-          playNoAnswer();
-          if (timerRef.current) clearInterval(timerRef.current); // 停止计时器
+            noResponseAttemptsRef.current += 1;
+            console.log('No response attempt:', noResponseAttemptsRef.current);
+            
+            if (noResponseAttemptsRef.current === 1 && !hasPlayedNoAnswerRef.current) {
+                // First time no response - play no answer audio
+                console.log('First time no response - playing no answer audio');
+                hasPlayedNoAnswerRef.current = true;
+                playNoAnswer();
+                if (timerRef.current) clearInterval(timerRef.current);
+            } else if (noResponseAttemptsRef.current >= 2 && !userRespondedRef.current) {
+                // Second time no response - play no-response audio and move on
+                console.log('Second time no response - playing no-response audio and moving on');
+                playNoResponseAndMoveOn();
+                if (timerRef.current) clearInterval(timerRef.current);
+            }
         }
     }, [timer, userRespondedRef.current]);
     // clear the timer when page changes
@@ -773,20 +822,6 @@ const ReadChatPage = () => {
         trackMouse: true,
     });
 
-    const handleImageClick = (event) => {
-        console.log('image clicked', currentPageRef.current);
-        const { left, width, top, height } = event.currentTarget.getBoundingClientRect();
-        const clickX = event.clientX - left;
-        const clickY = event.clientY - top;
-    
-        if (clickX < width / 2) {
-            handlePrevPage();
-        } else if (clickX > width / 2) {
-            if (!event.target.closest('#speed-btn-box') && !event.target.closest('#caption-btn-box') && !event.target.closest('#play-btn-box')) {
-                handleNextPage();
-            }
-        }
-    };
 
     const handleReplay = async (index, audioSources) => {
         console.log('handleReplay', index, audioSources);

@@ -7,7 +7,7 @@
     "3": {
         "question": "What are “amphibians”?",
         "answer": "Amphibians are special animals that can live both in water and on land, just like frogs! They can breathe through their wet skin or use their lungs, depending on where they are.",
-        "acceptance_criteria": "The acceptance criteria are to answer the two points about amphibians: 1. two places where amphibians live (water and land), and 2. amphibians' wet skin allows them to breathe both on land and in water."
+        "acceptance_criteria": "The acceptance criteria are to answer the two points about amphibians: 1. two places where amphibians live (water and land), and 2. amphibians' WET SKIN allows them to breathe both on land and in water."
     },
     "4": {
         "question": "How does a frog breathe?",

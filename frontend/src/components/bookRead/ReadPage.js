@@ -712,6 +712,7 @@ const ReadChatPage = () => {
         When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history to determine whether all of the child's responses, when taken together, collectively covers ALL elements in the acceptance criteria.
         - Correct answer: Consider the CHILD's all responses in the conversation history. Only if the child's current response or combined responses across all turns cover ALL key elements of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child has answered the question correctly. 
         - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child has answered the question correctly, but incompletely.
+        ${currentPageRef.current === 3 ? " - If the child only answers 'amphibians live on both land and water' or only answers 'wet skin', you should mark it as 'correct but incomplete'." : ''}
         ${currentPageRef.current === 11 ? " - If the child only answers 'frogs can see through their lower eyelids' or only answers 'frogs can see in all directions without moving', you should mark it as 'correct but incomplete'." : ''}
         - Factually incorrect answer: The response contains incorrect information compared to the answer.
         - Irrelevant response: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
@@ -792,7 +793,7 @@ const ReadChatPage = () => {
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / Do not want to talk about frogs)
-        - Make sure your response covers all the key elements of the answer.
+        - Make sure your response covers all the key elements (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) of the answer.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         `
         return instruction4Correct;
@@ -820,17 +821,17 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     
     **Instructions for hint**:
         - Provide an INDIRECT hint that guides children towards the missing parts of the correct answer.
-        - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
-        - Do not hint at multiple parts of the answer at once.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
+        - NO QUESTION in hint! Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
+        - Only hint at ONE part of the answer at once.
+        ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You must implicitly guide the child to figure out the purpose of frogs using their voice." : ''}
         ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
     **Instructions for Asking a Reprompt Question**:   
-        - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
+        - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
+        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead. If the child did not come up with wet skin, you can ask 'what allows amphibians breathe in different places'" : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about how many directions frogs can see and/or the fact that frogs can see through their lower eyelids." : ''}
@@ -844,7 +845,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
-        - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
+        - I noticed that you sometimes ask more than one question in a single turn. You must ONLY INCLUDE ONE QUESTION in the whole response.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer instead of diverging the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `
@@ -877,7 +878,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
-        - Make sure your response covers all the key elements of the answer.
+        - Make sure your response covers all the key elements (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) of the answer.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
         `;
@@ -927,7 +928,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
  **Instructions for Asking a Reprompt Question**:   
-        - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
+        - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
@@ -976,7 +977,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
-        - Make sure your response covers all the key elements of the answer.
+        - Make sure your response covers all the key elements (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) of the answer.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
         `
@@ -1025,7 +1026,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
        **Instructions for Asking a Reprompt Question**:   
-        - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
+        - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
@@ -1074,7 +1075,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
-        - Make sure your response covers all the key elements of the answer.
+        - Make sure your response covers all the key elements (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) of the answer.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
         `
@@ -1121,7 +1122,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
      
        **Instructions for Asking a Reprompt Question**:   
-        - After the hint, ask ONE reprompt question that 1) directly follows from the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
+        - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not divert the question to the page details. Do not include answer details in the reprompt question.
         ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
@@ -1169,7 +1170,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
-        - Make sure your response covers all the key elements of the answer.
+        - Make sure your response covers all the key elements (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}).
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
         `
@@ -1253,7 +1254,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
     
     **Instructions for Whole Response**:
-        - Make sure your response covers all the key elements of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) without explicitly mentioning the acceptance criteria.
+        - Make sure your response covers all the key elements (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) of the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) without explicitly mentioning the acceptance criteria.
         - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
         `;
         let sumCount = 0;

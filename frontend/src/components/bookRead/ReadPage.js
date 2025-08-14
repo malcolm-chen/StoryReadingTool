@@ -1479,7 +1479,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         } else if (noResponseReminderCountRef.current == 2) {
             const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
-            if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+            if (lastQuestion?.toLowerCase().includes('do you have any questions')) {
                 const instruction4NoResponse1_2 = `
     **Instructions**:
         1. Ignore the chat history. Say "Hey, are you still there? Do you have any questions about this page?"
@@ -1502,7 +1502,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         } else {
             const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
-            if (lastQuestion.toLowerCase().includes('do you have any questions')) {
+            if (lastQuestion?.toLowerCase().includes('do you have any questions')) {
                 const instruction4NoResponse1_3 = `
         **Instructions**:
             1. Ignore the chat history. Say "Hey, let's continue reading the story."

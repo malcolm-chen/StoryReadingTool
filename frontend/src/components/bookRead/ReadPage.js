@@ -614,7 +614,7 @@ const ReadChatPage = () => {
         - Acceptance Criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         
         When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's ALL responses in the chat history to determine whether all of the child's responses, when taken together, collectively covers ALL mentioned points in the acceptance criteria.
-        - **Correct answer**: Compare the child's ALL responses in the conversation history with the acceptance criteria. If the child's current response or combined responses ${currentPageRef.current === 13 ? "COVER ALL THREE POINTS" : "COVER ALL POINTS"} in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child's response as 'correct'. 
+        - **Fully correct answer**: Compare the child's ALL responses in the conversation history with the acceptance criteria. If the child's current response or combined responses ${currentPageRef.current === 13 ? "COVER ALL THREE POINTS" : "COVER ALL POINTS"} in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child's response as 'correct'. 
         - **Correct but incomplete answer**: Compare the child's ALL responses in the conversation history of the current page with the acceptance criteria. As long as the child's answers include some correct components but still MISS one or more mentioned points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child has answered the question correctly, but incompletely.
         ${currentPageRef.current === 3 ? "For instance, if the child only answers 'amphibians live on both land and water' or only answers 'wet skin', you should mark it as 'correct but incomplete'." : ''}
         ${currentPageRef.current === 4 ? "For instance, if the child only answers 'frogs breathe through their skin' or only answers 'frogs breathe through their lungs', you should mark it as 'correct but incomplete'." : ''}
@@ -629,7 +629,7 @@ const ReadChatPage = () => {
         1. {"evaluation": "invalid"}
         2. {"evaluation": "conv end"}
         3. {"evaluation": "child asks question"}
-        4. {"evaluation": "correct"}
+        4. {"evaluation": "fully correct"}
         5. {"evaluation": "correct but incomplete"}
         6. {"evaluation": "factually incorrect"}
         7. {"evaluation": "irrelevant"}
@@ -798,7 +798,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `;
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
+            if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -902,7 +902,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
+            if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -1005,7 +1005,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
+            if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -1106,7 +1106,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
+            if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -1193,7 +1193,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
-            if (answer === 'correct') {
+            if (answer === 'fully correct') {
                 correctCount++;
             }
         }
@@ -1369,7 +1369,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
         let sumCount = 0;
         for (const answer of answerRecord) {
-            if (answer === 'correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
+            if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
         }
@@ -2009,7 +2009,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     const getInstruction4Response = (items, evaluation) => {
         switch (evaluation) {
-            case 'correct':
+            case 'fully correct':
                 return getInstruction4Correct(items, evaluation);
             case 'correct but incomplete':
                 return getInstruction4Incomplete(items, evaluation);
@@ -2042,7 +2042,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         }
 
         switch (evaluation) {
-            case 'correct':
+            case 'fully correct':
                 await client.realtime.send('response.create', {
                     response: {
                         "modalities": ["text", "audio"],

@@ -586,100 +586,6 @@ const ReadChatPage = () => {
         playPageSentences();  
     };
 
-    const getFirstQuestion = async () => {
-        const firstQuestionSet = knowledgeRef.current[currentPageRef.current]?.first_question_set;
-        console.log('firstQuestionSet', firstQuestionSet);
-        console.log('asked question', askedQuestionsRef.current[currentPageRef.current]);
-        if (firstQuestionSet?.length <= askedQuestionsRef.current[currentPageRef.current]?.length) {
-            console.log('all questions have been asked, now asking: ', firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)]);
-            return firstQuestionSet[Math.floor(Math.random() * firstQuestionSet.length)];
-        }
-        if (Array.isArray(firstQuestionSet)) {
-            for (const question of firstQuestionSet) {
-                if (!askedQuestionsRef.current[currentPageRef.current]?.includes(question)) {
-                    // send to backend to save the question
-                    console.log('saving question', question);
-                    const response = await fetch(`${apiUrl}/api/save_asked_question`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            user: user,
-                            title: title,
-                            page: currentPageRef.current,
-                            question: question
-                        })
-                    });
-                    console.log('response', response);
-                    return question;
-                }
-            }
-        }
-        return "No questions available"; // Default message if firstQuestionSet is not an array
-    }
-
-    function getInstruction4Frogs() {
-        const instruction4Frogs = `
-        You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. 
-        This page illustrates different types of frogs. Your task is to answer the child's questions about the frogs.
-        
-        Here are the frogs information on this page:
-        - Arum Frog: 
-            information to identify the frog: the light yellow frog on the left side of the page
-            location: Southern Africa, 
-            fact about this frog: This frog is ivory when the ivory swamp lilies are in bloom. The rest of the year it is brown with silvery stripes along its sides.
-        - Blue Poison Dart Frog: 
-            information to identify the frog: the blue frog on the top of the page
-            location: Surinam, 
-            fact about this frog: The male carries the eggs and tadpoles on his back until they are well developed.
-        - Common Gray Tree Frog: 
-            information to identify the frog: the big gray frog on the left page
-            location: North America, 
-            fact about this frog: This frog changes color according to its mood. It may be gray, green, or brown.
-        - Glass Frog: 
-            information to identify the frog: the yellow frog on the top of the page
-            location: Costa Rica, 
-            fact about this frog: These frogs are transparent underneath.
-        - White's Tree Frog: 
-            information to identify the frog: the big green frog on the left page
-            location: Australia, 
-            fact about this frog: This frog is often found in people's bathrooms.
-        - Darwin's Frog: 
-            information to identify the frog: the big green frog on the right page
-            location: Chile, 
-            fact about this frog: This frog is floats upside down in the water to imitate a fallen leaf.
-        - Poison Dart Frog: 
-            information to identify the frog: the small yellow frog on the right page
-            location: Colombia, 
-            fact about this frog: This is the most poisonous frog in the world.
-        - Painted Reed Frog: 
-            information to identify the frog: the red frog covered in stripes on the right page
-            location: Tanzania to South Africa, 
-            fact about this frog: During warm months hundreds of these frogs call with a series of shrill whistles.
-        - Tomato Frog: 
-            information to identify the frog: the big red frog on the right page
-            location: Madagascar, 
-            fact about this frog: The tomato frog spends most of the year in hiding, but comes out during spring rains.
-        - Asian Horned Frog: 
-            information to identify the frog: the big brown frog on the right page
-            location: Southern Asia, 
-            fact about this frog: This frog looks like a brown leaf on the forest floor.
-        
-        **Instructions for the Conversation**:
-        When the child asks about a frog, you need to provide the frog's name, its location, and a fact about it. Introduce the frog in a interesting and engaging way.
-        - Start by asking 'Hey ${user}, what do you want to know about this page?' Do not say anything else.
-        - If you cannot identify which frog on this page the child is asking about, you can ask 'Which frog are you asking about?', and add some features for them to choose, like 'The light yellow frog on the left or the yellow one on the top?'
-        - Only introduce one frog at a time. Keep your response concise and under 25 words.
-        - Do not use questions like 'Do you know that?', 'Can you spot it?'. 
-        - Unless you are ending the conversation, ends each round of conversation with a friendly line like 'Is there anything else you want to know about this page?' (the last sentence need to be a question)
-        - You should not ask questions unless you are asking 'Is there anything else you want to know about this page?'
-        - If the child does not have any questions, you can say 'It was fun chatting with you! Let's keep reading.'
-        - Keep the conversation safe, civil, and appropriate for children. Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        `;
-        return instruction4Frogs;
-    }
-
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
@@ -690,9 +596,6 @@ const ReadChatPage = () => {
         - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
         - Child's Latest Response: The most recent input from the child.
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story Context: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
-        - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        - Acceptance Criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
 
         **Steps for Evaluation**:
         Step 1: Check Response Validity
@@ -706,13 +609,15 @@ const ReadChatPage = () => {
         
         Step 4: Evaluate Valid Responses
         For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
-        *Main Question*: ${knowledgeRef.current[currentPageRef.current]?.question}
-        *Answer*: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - Acceptance Criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's all responses in the chat history to determine whether all of the child's responses, when taken together, collectively covers ALL elements in the acceptance criteria.
-        - Correct answer: Consider the CHILD's all responses in the conversation history. Only if the child's current response or combined responses across all turns cover ALL key elements of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child has answered the question correctly. 
-        - Correct but incomplete answer: Consider the child's all responses in the conversation history of the current page. As long as the child's answers include some correct components but still MISS key elements from the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child has answered the question correctly, but incompletely.
+        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's ALL responses in the chat history to determine whether all of the child's responses, when taken together, collectively covers ALL elements in the acceptance criteria.
+        - Correct answer: Compare the child's ALL responses in the conversation history with the acceptance criteria. Only if the child's current response or combined responses across all turns cover ALL key elements of the acceptance criteria, consider the child's response as 'correct'. 
+        - Correct but incomplete answer: Compare the child's ALL responses in the conversation history of the current page with the acceptance criteria. As long as the child's answers include some correct components but still MISS one or more key elements from the acceptance criteria, consider the child has answered the question correctly, but incompletely.
         ${currentPageRef.current === 3 ? " - If the child only answers 'amphibians live on both land and water' or only answers 'wet skin', you should mark it as 'correct but incomplete'." : ''}
+        ${currentPageRef.current === 4 ? " - If the child only answers 'frogs breathe through their skin' or only answers 'frogs breathe through their lungs', you should mark it as 'correct but incomplete'." : ''}
         ${currentPageRef.current === 11 ? " - If the child only answers 'frogs can see through their lower eyelids' or only answers 'frogs can see in all directions without moving', you should mark it as 'correct but incomplete'." : ''}
         - Factually incorrect answer: The response contains incorrect information compared to the answer.
         - Irrelevant response: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
@@ -820,7 +725,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
     
     **Instructions for hint**:
-        - Provide an INDIRECT hint that guides children towards the missing parts of the correct answer.
+        - Since the evaluation of child's response is 'incomplete', compare the child's response with acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), and provide an INDIRECT hint that guides children towards the missing parts of the correct answer.
         - NO QUESTION in hint! Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Only hint at ONE part of the answer at once.
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
@@ -829,12 +734,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 11 ? "- Do not explicitly mention 'frogs can see in all directions without moving' and 'frogs can see through their lower eyelids'" : ''}
 
     **Instructions for Asking a Reprompt Question**:   
-        - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to think in the right direction toward the missing part from the provided correct answer;
+        - After the hint, ask ***ONE*** reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to find the missing part in the acceptance criteria;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead. If the child did not come up with wet skin, you can ask 'what allows amphibians breathe in different places'" : ''}
+        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention these places. You can ask about 'what are the two places where amphibians live' instead. If the child did not come up with wet skin, you can ask 'what allows amphibians breathe in different places'" : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about how many directions frogs can see and/or the fact that frogs can see through their lower eyelids." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'. Instead, guide the child to think about how many directions frogs can see and/or the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -845,7 +750,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
-        - I noticed that you sometimes ask more than one question in a single turn. You must ONLY INCLUDE ONE QUESTION in the whole response.
+        - ONLY INCLUDE ***ONE QUESTION*** IN THE WHOLE RESPONSE.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer instead of diverging the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `
@@ -933,7 +838,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1031,7 +936,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1127,7 +1032,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
+        ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'. Instead, guide the child to think about what direction frogs can see and the fact that frogs can see through their lower eyelids." : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -2214,7 +2119,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     };
 
     const bookImgStyle = {
-        width: currentPageRef.current === 2 ? '70%' : (isKnowledge ? '80%' : '100%')
+        width: isKnowledge ? (currentPageRef.current === 2 ? '70%' : '80%') : '100%'
     };
 
     const toggleSpeedClick = () => {

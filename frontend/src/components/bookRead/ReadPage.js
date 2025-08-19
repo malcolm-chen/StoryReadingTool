@@ -589,39 +589,44 @@ const ReadChatPage = () => {
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
-        You need to evaluate the child's latest response to the main question.
+        You need to evaluate whether the child's response covers all the key points in the answer.
         
         **Instructions for Evaluation**:
-        You need to evaluate the child's response based on the following inputs:
-        - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
-        - Child's Latest Response: The most recent input from the child.
+        You need to evaluate the child's latest response based on the following inputs:
+        - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
+        - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+        - Acceptance Criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story Context: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
 
         **Steps for Evaluation**:
         Step 1: Check Response Validity
-        If the response is empty, cannot be recognized due to noise, is too short, or sent by mistake, you must mark it as "invalid". Jumping straight to **Response Format**.
+        If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        As long as in the chat history, the assistant has asked a question like 'Do you have any questions about this page?', ignore the child's answer, mark the evaluation result as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet.
+        If the assistant previously asked, “Do you have any questions about this page?”, ignore the child’s reply and mark the evaluation as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet.
         
         Step 3: Check if the child asks a question
-        If the assistant has NOT asked a question like 'Do you have any questions about this page?', and the child asks a question, no matter if it is off-topic or not, mark it as "child asks question". Jumping straight to **Response Format**.
+        If the assistant has not asked “Do you have any questions about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
         
         Step 4: Evaluate Valid Responses
-        For responses that contain meaningful content, and the conversation is not ended, use the following criteria:
+        For meaningful responses (and if conversation is not ended):
         - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        - Acceptance Criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         
-        When evaluating a child's response, do not focus solely on the current round of QA. Instead, consider the child's ALL responses in the chat history to determine whether all of the child's responses, when taken together, collectively covers ALL mentioned points in the acceptance criteria.
-        - **Fully correct answer**: Compare the child's ALL responses in the conversation history with the acceptance criteria. If the child's current response or combined responses ${currentPageRef.current === 13 ? "COVER ALL THREE POINTS" : "COVER ALL POINTS"} in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child's response as 'correct'. 
-        - **Correct but incomplete answer**: Compare the child's ALL responses in the conversation history of the current page with the acceptance criteria. As long as the child's answers include some correct components but still MISS one or more mentioned points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), consider the child has answered the question correctly, but incompletely.
-        ${currentPageRef.current === 3 ? "For instance, if the child only answers 'amphibians live on both land and water' or only answers 'wet skin', you should mark it as 'correct but incomplete'." : ''}
-        ${currentPageRef.current === 4 ? "For instance, if the child only answers 'frogs breathe through their skin' or only answers 'frogs breathe through their lungs', you should mark it as 'correct but incomplete'." : ''}
-        ${currentPageRef.current === 11 ? "For instance, if the child only answers 'frogs can see through their lower eyelids' or only answers 'frogs can see in all directions without moving', you should mark it as 'correct but incomplete'." : ''}
-        - **Factually incorrect answer**: The response contains incorrect information compared to the answer.
-        - **Irrelevant response**: The response is unrelated to the question or the story context. *If the response is invalid, DO NOT mark it as irrelevant.*
-        - **Uncertainty answer**: The response indicates that the child is unsure such as "I don't know" or "I am not sure". 
+        Compare all of the child’s responses on this page against the acceptance criteria:
+        - **Fully correct**: Responses collectively ${currentPageRef.current === 13 ? "COVER ALL THREE POINTS" : "COVER ALL POINTS"} in the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
+        ${currentPageRef.current === 3 ? "!!! If the child only answers 'amphibians live on both land and water' without mentioning 'wet skin', you should NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 4 ? "!!! If the child only answers 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs', you should NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 9 ? "!!! If the child only answers 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', you should NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 11 ? "!!! If the child only answers 'frogs can see through their lower eyelids' without mentioning 'frogs can see in all directions without moving', you should NOT mark it as 'fully correct'. Vice versa." : ''}
+        - **Correct but incomplete**: Responses include some correct elements but miss one or more points.
+${currentPageRef.current === 3 ? "E.g., only 'amphibians live on both land and water' OR only 'wet skin' → 'correct but incomplete'." : ''}
+${currentPageRef.current === 4 ? "E.g., only 'frogs breathe through their skin' OR only 'frogs breathe through their lungs' → 'correct but incomplete'." : ''}
+${currentPageRef.current === 9 ? "E.g., only 'frogs use their voices to scare others when frightened' OR only 'frogs use their voices to hunt for mates' → 'correct but incomplete'." : ''}
+${currentPageRef.current === 11 ? "E.g., only 'frogs can see through their lower eyelids' OR only 'frogs can see in all directions without moving' → 'correct but incomplete'." : ''}
+        - **Factually incorrect**: The response contains incorrect information compared to the answer.
+        - **Irrelevant response**: Unrelated to the question or story context. (Do not use this if response is invalid.)
+        - **Uncertainty answer**: Shows doubt, e.g., “I don’t know,” “I’m not sure.”
                     
         **Response Format**:
         Return the evaluation result in a json format.
@@ -636,9 +641,8 @@ const ReadChatPage = () => {
         8. {"evaluation": "uncertainty"}
 
         **Important Reminder**:
-        - Your evaluation should consider all of the child's responses in the conversation history. If, when taken together, these responses match the provided correct answer, the response should be marked as correct.
-        - Only reply within the JSON format. DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE FORMAT.
-        - YOU MUST REPLY WITH VALID CONTENT IN THE JSON FORMAT. DO NOT REPLY WITH EMPTY CONTENT.
+        - Always consider the entire conversation history on this page, not just the latest response. If all responses combined meet the acceptance criteria, mark as fully correct.
+        - Only return valid JSON from the list above. No extra text, no empty outputs.
         `;
         console.log(instruction4Evaluation);
         return instruction4Evaluation;
@@ -670,8 +674,7 @@ const ReadChatPage = () => {
         const instruction4Correct = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
@@ -710,8 +713,7 @@ const ReadChatPage = () => {
         const instruction4Incomplete1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 && currentPageRef.current !==  7 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the main question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
@@ -738,32 +740,32 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ***ONE*** reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to find the missing part in the acceptance criteria;
-        - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
-        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live. You can ask about 'what are the two places where amphibians live' instead. " : ''}
-        ${currentPageRef.current === 3 ? " If the child did not come up with wet skin, you can ask 'what allows amphibians breathe in different places'" : ''}
+        - DO NOT include multiple elements in the reprompt question.
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live. You can ask about 'what are the two places where amphibians live' instead." : ""}
+        ${currentPageRef.current === 3 ? "If the child did not come up with wet skin, you can ask 'what allows amphibians breathe in different places'" : ""}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' or 'save energy' when you are asking about frogs' heart rate and breathing, you can ask 'what happens to frogs' heart/breathing'": ''}
         ${currentPageRef.current === 11 ? " - Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. Instead, ONLY guide the child to think about 1. what direction frogs can see (e.g., What directions can a frog see with its eyes?) OR 2. the fact that frogs can see through their lower eyelids (e.g., What is special about a frog’s eyes?/Frogs' lower eyelids are special. What do you think it can do?)." : ''}
-        - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** AVOID YES/NO QUESTION The reprompt question should be open-ended instead of in the form of a yes/no question.    
+        - !!! The question should not be phrased as “Can you … ?” or “Do you … ?”
+        - !!! Ask exactly *ONE* question.
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
-        - Ask exactly *ONE* question.
 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Always check if the hint reveals the answer of your reprompt question.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention 'water and land' in the hint. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
-        - The whole response must only include and end with *ONE question* (i.e., the reprompt question.*DO NOT* use the form of "Can you xxx?", or "Do you xxx?"
-        - ONLY INCLUDE ***ONE QUESTION*** IN THE WHOLE RESPONSE.
+        ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
+        - The whole response must only include and end with *ONE question* (i.e., the reprompt question).
+        - !!! ONLY INCLUDE ***ONE QUESTION*** IN THE WHOLE RESPONSE.
+        - !!! The reprompt question should not be phrased as “Can you … ?” or “Do you … ?”
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer instead of diverging the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        - conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the evaluation of the child's latest response: ${evaluation};
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
 
@@ -817,8 +819,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4FactuallyIncorrect1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
@@ -867,8 +868,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the evaluation of the child's latest response: ${evaluation};
         
     Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
@@ -920,8 +920,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4IrrelevantResponse1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
@@ -970,8 +969,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the evaluation of the child's latest response: ${evaluation};
 
     Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
@@ -1022,8 +1020,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4Uncertainty1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
@@ -1125,8 +1122,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4ChildQuestion1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - child's latest response: the most recent input from the child.
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         
@@ -1160,8 +1156,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4ChildQuestion2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - child's latest response: the most recent input from the child (user).
 
     Building on previous conversation history, your response should contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion
@@ -1210,8 +1205,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4Invalid1 = `
         You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the evaluation of the child's latest response: ${evaluation};
 
         **Instructions for Response**:
@@ -1224,8 +1218,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - main question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - child's latest response: the most recent input from the child (user).
 
     Since the evaluation of the child's response is 'invalid', your response should include three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
@@ -1286,8 +1279,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         const instruction4FollowUp1 = `
         You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - Conversation history: 
-        ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
@@ -1759,8 +1751,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         else if (transcript.includes('factually incorrect')) {
             return 'factually incorrect';
         }
-        else if (transcript.includes('correct')) {
-            return 'correct';
+        else if (transcript.includes('fully correct')) {
+            return 'fully correct';
         }
         else if (transcript.includes('irrelevant')) {
             return 'irrelevant';

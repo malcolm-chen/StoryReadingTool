@@ -2158,11 +2158,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     };
 
     const chatContainerStyle = {
-        height: isKnowledge 
-            ? (currentPageRef.current === 2 || currentPageRef.current === 5) ? '40%' : (currentPageRef.current === 7)
-                ? '35%'
-                : '55%'
-            : chatBoxSize.height
+        // height: isKnowledge 
+        //     ? (currentPageRef.current === 2 || currentPageRef.current === 5) ? '40%' : (currentPageRef.current === 7)
+        //         ? '35%'
+        //         : '55%'
+        //     : chatBoxSize.height
+        height: '35%'
     };
 
     const handleSpeedChange = (event, newValue) => {

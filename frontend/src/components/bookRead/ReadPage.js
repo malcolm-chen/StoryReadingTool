@@ -2150,7 +2150,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     };
 
     const bookImgStyle = {
-        width: isKnowledge ? (currentPageRef.current === 2 ? '70%' : '80%') : '100%'
+        width: isKnowledge ? (currentPageRef.current === 2 ? '70%' : '75%') : '100%'
     };
 
     const toggleSpeedClick = () => {
@@ -2163,7 +2163,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         //         ? '35%'
         //         : '55%'
         //     : chatBoxSize.height
-        height: '35%'
+        height: '36%'
     };
 
     const handleSpeedChange = (event, newValue) => {

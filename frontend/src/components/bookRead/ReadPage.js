@@ -603,7 +603,7 @@ const ReadChatPage = () => {
         If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        If the assistant previously asked, “Do you have any questions about this page?”, ignore the child’s reply and mark the evaluation as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet.
+        Ignore the child’s all reply. If and ONLY if the assistant previously asked, “Do you have any questions about this page?”, mark the evaluation as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet. If the child does not talk, you must NOT mark the evaluation as "conv end". It should be "irrelevant".
         
         Step 3: Check if the child asks a question
         If the assistant has not asked “Do you have any questions about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
@@ -615,17 +615,17 @@ const ReadChatPage = () => {
         
         Compare all of the child’s responses on this page against the acceptance criteria:
         - **Fully correct**: Responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
-        ${currentPageRef.current === 3 ? "!!! If the child only answers 'amphibians live on both land and water' without mentioning 'wet skin', you should NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 4 ? "!!! If the child only answers 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs', you should NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 9 ? "!!! If the child only answers 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', you should NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 11 ? "!!! If the child only answers 'frogs can see through their lower eyelids' without mentioning 'frogs can see in all directions', you should NOT mark it as 'fully correct'. Vice versa." : ''}
-        - **Correct but incomplete**: As long as the response misses one or more points in acceptance criteria, mark it as 'correct but incomplete'.
+        ${currentPageRef.current === 3 ? "!!! If the child only mentions 'amphibians live on both land and water' without mentioning 'wet skin', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 9 ? "!!! If the child only mentions 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 11 ? "!!! If the child only mentions 'frogs can see through their lower eyelids' without mentioning 'frogs can see in all directions', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        - **Correct but incomplete**: As long as the response is missing one or more points in the acceptance criteria, mark it as 'correct but incomplete'.
 ${currentPageRef.current === 3 ? "E.g., only 'amphibians live on both land and water' OR only 'wet skin' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 4 ? "E.g., only 'frogs breathe through their skin' OR only 'frogs breathe through their lungs' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 9 ? "E.g., only 'frogs use their voices to scare others when frightened' OR only 'frogs use their voices to hunt for mates' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 11 ? "E.g., only 'frogs can see through their lower eyelids' OR only 'frogs can see in all directions' → 'correct but incomplete'." : ''}
         - **Factually incorrect**: The response contains incorrect information compared to the answer.
-        - **Irrelevant response**: Unrelated to the question or story context. (Do not use this if response is invalid.)
+        - **Irrelevant response**: Unrelated to the question or story context (e.g., the child talks about other things, does not want to talk about frogs, does not want to keep talking). Do not use this if response is invalid.
         - **Uncertainty answer**: Shows doubt, e.g., “I don’t know,” “I’m not sure.”
                     
         **Response Format**:
@@ -702,7 +702,7 @@ ${currentPageRef.current === 11 ? "E.g., only 'frogs can see through their lower
        
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / Do not want to talk about frogs).
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking).
         - Do not extend your response to story text details.
         - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
         - The whole response should only include and end with ONE question: "Do you have any questions about this page?" No other question allowed.
@@ -759,7 +759,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction.
         ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question).
@@ -797,7 +797,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Do not extend your response to story text details.
@@ -867,7 +867,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
@@ -903,7 +903,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
         - Do not extend your response to story text details.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
@@ -936,6 +936,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - the evaluation of the child's latest response: ${evaluation};
 
     Building on previous conversation history, your response should contain three parts: 1. acknowledgment, 2. hint, and 3. restate the main question.
+    Note: If the child does not talk, you must still focus the conversation on the question and answer. DO NOT diverge to other things.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -971,7 +972,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
@@ -1007,7 +1008,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
         - Do not extend your response to story text details.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
@@ -1073,7 +1074,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
@@ -1109,7 +1110,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
         - Do not extend your response to story text details.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
@@ -1164,7 +1165,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence at the end.
         `;
 

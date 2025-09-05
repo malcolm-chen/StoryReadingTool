@@ -179,7 +179,7 @@ def save_json_to_file(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
-# save_json_to_file(read_chat_history("Dominic "), "Dominic_chat_history.json")
+save_json_to_file(read_chat_history("Ellie"), "Ellie_chat_history.json")
 
 def delete_user_files(username):
     """
@@ -210,6 +210,12 @@ def delete_user_files(username):
     except Exception as e:
         print(f"Error deleting files for user {username}: {e}")
         return 0
+    
+def get_all_users():
+    return users.find()
 
-if __name__ == "__main__":
-    delete_user_files("Jiaju")
+# if __name__ == "__main__":
+    # delete_user_files("Leo1")
+    # for user in get_all_users():
+    #     print(user["username"])
+    

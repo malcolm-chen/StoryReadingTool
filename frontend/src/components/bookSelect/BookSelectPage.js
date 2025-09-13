@@ -41,10 +41,14 @@ const BookSelectPage = () => {
     const isFavorite = (bookTitle) => favorites.includes(bookTitle);
 
     const handleOpenBook = (bookTitle) => {
-        navigate('/greet', { state: {
+        // navigate('/greet', { state: {
+        //     title: bookTitle,
+        //     user: user
+        // } });
+        navigate('/read', { state: {
             title: bookTitle,
             user: user
-        } });
+        } });   
     };
 
     console.log(favorites);

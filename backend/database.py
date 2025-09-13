@@ -179,7 +179,12 @@ def save_json_to_file(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
-save_json_to_file(read_chat_history("Ellie"), "Ellie_chat_history.json")
+# save_json_to_file(read_chat_history("Saud"), "Saud_chat_history.json")
+# save_json_to_file(read_chat_history("Iris"), "Iris_chat_history.json")
+save_json_to_file(read_chat_history("Fredrik"), "Fredrik_chat_history.json")
+save_json_to_file(read_chat_history("Reed"), "Reed_chat_history.json")
+# save_json_to_file(read_chat_history("Sylvie"), "Sylvie_chat_history.json")
+# save_json_to_file(read_chat_history("Sal"), "Sal_chat_history.json")
 
 def delete_user_files(username):
     """
@@ -214,6 +219,7 @@ def delete_user_files(username):
 def get_all_users():
     return users.find()
 
+# delete_user_files("Julian")
 # if __name__ == "__main__":
     # delete_user_files("Leo1")
     # for user in get_all_users():

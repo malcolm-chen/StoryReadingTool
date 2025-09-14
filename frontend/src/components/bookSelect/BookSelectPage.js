@@ -41,7 +41,10 @@ const BookSelectPage = () => {
     const isFavorite = (bookTitle) => favorites.includes(bookTitle);
 
     const handleOpenBook = (bookTitle) => {
-        a
+        navigate('/greet', { state: {
+            title: bookTitle,
+            user: user
+        } });
         // navigate('/read', { state: {
         //     title: bookTitle,
         //     user: user

@@ -603,18 +603,18 @@ const ReadChatPage = () => {
         If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        Ignore the child’s all reply. If and ONLY if the assistant previously asked, “Do you have any questions about this page?”, mark the evaluation as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet. If the child does not talk, you must NOT mark the evaluation as "conv end". It should be "irrelevant".
+        Ignore the child’s all reply. If and ONLY if the assistant already asked, “Do you have any questions about this page?”, mark the evaluation as "conv end". If the child does not reply, do NOT mark the evaluation as "conv end". It should be "irrelevant".
         
         Step 3: Check if the child asks a question
         If the assistant has not asked “Do you have any questions about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
         
-        Step 4: Evaluate Valid Responses
+        Step 4: Evaluate Valid Responses if the conversation is not ended
         For meaningful responses (and if conversation is not ended):
         - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
         Compare all of the child’s responses on this page against the acceptance criteria:
-        - **Fully correct**: Responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
+        - **Fully correct**: Children's responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria without any incorrect information. The acceptance criteria is: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         ${currentPageRef.current === 3 ? "!!! If the child only mentions 'amphibians live on both land and water' without mentioning 'wet skin', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 9 ? "!!! If the child only mentions 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', DO NOT mark it as 'fully correct'. Vice versa." : ''}
@@ -1510,7 +1510,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 response: {
                     "modalities": ["text", "audio"],
                     "instructions": getInstruction4NoResponse(),
-                    "temperature": 0.9
+                    "temperature": 0.7
                 }
             });
             
@@ -2055,7 +2055,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Correct(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2065,7 +2065,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Incomplete(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2075,7 +2075,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4FactuallyIncorrect(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2085,7 +2085,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4IrrelevantResponse(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2095,7 +2095,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Uncertainty(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2105,7 +2105,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4ChildQuestion(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2115,7 +2115,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Invalid(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;
@@ -2125,7 +2125,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4ConvEnd(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 break;
@@ -2134,7 +2134,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4FollowUp(items, evaluation),
-                        "temperature": 0.9
+                        "temperature": 0.7
                     }
                 });
                 userRespondedRef.current = false;

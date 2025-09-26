@@ -73,7 +73,7 @@ const ReadChatPage = () => {
         new WavStreamPlayer({ sampleRate: 24000 })
     );
     const clientRef = useRef(
-        new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766' } )
+        new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766', model: 'gpt4o-realtime' } )
     );
 
     const storyTextRef = useRef([]);
@@ -412,6 +412,27 @@ const ReadChatPage = () => {
                         console.error('Error playing audio:', error);
                     }
                 } else {
+                    // setIsPlaying(false);
+                    if (currentPageRef.current in knowledgeRef.current) {
+                        console.log('currentPage in knowledge', currentPageRef.current);
+                        setIsKnowledge(true);
+                        audio.pause();
+                        setIsPlaying(false);
+                        setIsConversationEnded(false);
+                        setAnswerRecord([]);
+                        noReponseCntRef.current = 0;
+                        setCurrentPageChatHistory([]);
+                        // check if the client is not setup for guiding
+                        if (!clientRef.current.realtime.isConnected()) {
+                            console.log('setting up client for guiding');
+                            setupClient(await getInstruction4Guiding());
+                            setIsClientSetup(true);
+                        } else {
+                            console.log('resetting client for guiding');
+                            updateClientInstruction(await getInstruction4Guiding());
+                        }
+                    }
+                    else {
                         setIsKnowledge(false);
                         if (currentPageRef.current < pages.length - 1) {
                             handleNextPage();
@@ -420,6 +441,7 @@ const ReadChatPage = () => {
                             setIsPlaying(false);
                         }
                     }
+                }
             };
             playNextSentence();
         }
@@ -1488,7 +1510,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 response: {
                     "modalities": ["text", "audio"],
                     "instructions": getInstruction4NoResponse(),
-                    "temperature": 0.7
+                    "temperature": 0.9
                 }
             });
             
@@ -2033,7 +2055,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Correct(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2043,7 +2065,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Incomplete(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2053,7 +2075,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4FactuallyIncorrect(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2063,7 +2085,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4IrrelevantResponse(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2073,7 +2095,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Uncertainty(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2083,7 +2105,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4ChildQuestion(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2093,7 +2115,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4Invalid(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2103,7 +2125,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4ConvEnd(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 break;
@@ -2112,7 +2134,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     response: {
                         "modalities": ["text", "audio"],
                         "instructions": getInstruction4FollowUp(items, evaluation),
-                        "temperature": 0.7
+                        "temperature": 0.9
                     }
                 });
                 userRespondedRef.current = false;
@@ -2254,7 +2276,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 />
                 </div>
             </div>
-            {(isAskingRef.current) && (
+            {(isAskingRef.current || isKnowledge) && (
                     <Box id='chat-container' style={chatContainerStyle} sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (

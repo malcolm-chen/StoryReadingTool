@@ -616,14 +616,16 @@ const ReadChatPage = () => {
         Compare all of the child’s responses on this page against the acceptance criteria:
         - **Fully correct**: Children's responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria without any incorrect information. The acceptance criteria is: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         ${currentPageRef.current === 3 ? "!!! If the child only mentions 'amphibians live on both land and water' without mentioning 'wet skin', DO NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs' or 'skin needs to be wet', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 9 ? "!!! If the child only mentions 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 11 ? "!!! If the child only mentions 'frogs can see through their lower eyelids' without mentioning 'frogs can see in all directions', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 13 ? "!!! If the child only mentions part of the actions of frogs' eating process, DO NOT mark it as 'fully correct'. Vice versa." : ''}
         - **Correct but incomplete**: As long as the response is missing one or more points in the acceptance criteria, mark it as 'correct but incomplete'.
 ${currentPageRef.current === 3 ? "E.g., only 'amphibians live on both land and water' OR only 'wet skin' → 'correct but incomplete'." : ''}
-${currentPageRef.current === 4 ? "E.g., only 'frogs breathe through their skin' OR only 'frogs breathe through their lungs' → 'correct but incomplete'." : ''}
+${currentPageRef.current === 4 ? "E.g., only 'frogs breathe through their skin' OR only 'frogs breathe through their lungs' OR only 'skin needs to be wet' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 9 ? "E.g., only 'frogs use their voices to scare others when frightened' OR only 'frogs use their voices to hunt for mates' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 11 ? "E.g., only 'frogs can see through their lower eyelids' OR only 'frogs can see in all directions' → 'correct but incomplete'." : ''}
+${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 'frogs' tongue moves quickly' OR only 'frogs' tongue wraps around an insect' → 'correct but incomplete'." : ''}
         - **Factually incorrect**: The response contains incorrect information compared to the answer.
         - **Irrelevant response**: Unrelated to the question or story context (e.g., the child talks about other things, does not want to talk about frogs, does not want to keep talking). Do not use this if response is invalid.
         - **Uncertainty answer**: Shows doubt, e.g., “I don’t know,” “I’m not sure.”
@@ -1054,7 +1056,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' when you are hinting the child to think about frogs' heart rate and breathing": ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You must implicitly guide the child to figure out the purpose of frogs using their voice." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
          ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   

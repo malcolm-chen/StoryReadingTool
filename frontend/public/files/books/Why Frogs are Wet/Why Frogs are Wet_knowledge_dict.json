@@ -37,6 +37,6 @@
     "13": {
         "question": "How does a frog’s tongue help it catch insects?",
         "answer": "A frog’s tongue is sticky and can wrap around an insect. It flips forward very quickly to grab the insect and pull it back into the frog’s mouth.",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: frog's tongue 1) is sticky, 2) flips forward quickly, and 3) can wrap around an insect"
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: frog's tongue 1) is sticky, 2) flips forward quickly, and 3) can wrap around an insect (must answer complete actions)"
     }
 }

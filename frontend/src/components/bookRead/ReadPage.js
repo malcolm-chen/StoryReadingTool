@@ -73,7 +73,7 @@ const ReadChatPage = () => {
         new WavStreamPlayer({ sampleRate: 24000 })
     );
     const clientRef = useRef(
-        new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766', model: 'gpt4o-realtime' } )
+        new RealtimeClient( { url: 'wss://storybook-reader.hailab.io:8766' } )
     );
 
     const storyTextRef = useRef([]);
@@ -412,27 +412,6 @@ const ReadChatPage = () => {
                         console.error('Error playing audio:', error);
                     }
                 } else {
-                    // setIsPlaying(false);
-                    if (currentPageRef.current in knowledgeRef.current) {
-                        console.log('currentPage in knowledge', currentPageRef.current);
-                        setIsKnowledge(true);
-                        audio.pause();
-                        setIsPlaying(false);
-                        setIsConversationEnded(false);
-                        setAnswerRecord([]);
-                        noReponseCntRef.current = 0;
-                        setCurrentPageChatHistory([]);
-                        // check if the client is not setup for guiding
-                        if (!clientRef.current.realtime.isConnected()) {
-                            console.log('setting up client for guiding');
-                            setupClient(await getInstruction4Guiding());
-                            setIsClientSetup(true);
-                        } else {
-                            console.log('resetting client for guiding');
-                            updateClientInstruction(await getInstruction4Guiding());
-                        }
-                    }
-                    else {
                         setIsKnowledge(false);
                         if (currentPageRef.current < pages.length - 1) {
                             handleNextPage();
@@ -441,7 +420,6 @@ const ReadChatPage = () => {
                             setIsPlaying(false);
                         }
                     }
-                }
             };
             playNextSentence();
         }
@@ -603,29 +581,27 @@ const ReadChatPage = () => {
         If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        Ignore the child’s all reply. If and ONLY if the assistant already asked, “Do you have any questions about this page?”, mark the evaluation as "conv end". If the child does not reply, do NOT mark the evaluation as "conv end". It should be "irrelevant".
+        Ignore the child’s all reply. If and ONLY if the assistant previously asked, “Do you have any questions about this page?”, mark the evaluation as "conv end". Jumping straight to **Response Format**. Ignore this step if the assistant has not asked, 'Do you have any questions about this page?' yet. If the child does not talk, you must NOT mark the evaluation as "conv end". It should be "irrelevant".
         
         Step 3: Check if the child asks a question
         If the assistant has not asked “Do you have any questions about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
         
-        Step 4: Evaluate Valid Responses if the conversation is not ended
+        Step 4: Evaluate Valid Responses
         For meaningful responses (and if conversation is not ended):
         - Main Question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
         Compare all of the child’s responses on this page against the acceptance criteria:
-        - **Fully correct**: Children's responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria without any incorrect information. The acceptance criteria is: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
+        - **Fully correct**: Responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         ${currentPageRef.current === 3 ? "!!! If the child only mentions 'amphibians live on both land and water' without mentioning 'wet skin', DO NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs' or 'skin needs to be wet', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 9 ? "!!! If the child only mentions 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 11 ? "!!! If the child only mentions 'frogs can see through their lower eyelids' without mentioning 'frogs can see in all directions', DO NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 13 ? "!!! If the child only mentions part of the actions of frogs' eating process, DO NOT mark it as 'fully correct'. Vice versa." : ''}
         - **Correct but incomplete**: As long as the response is missing one or more points in the acceptance criteria, mark it as 'correct but incomplete'.
 ${currentPageRef.current === 3 ? "E.g., only 'amphibians live on both land and water' OR only 'wet skin' → 'correct but incomplete'." : ''}
-${currentPageRef.current === 4 ? "E.g., only 'frogs breathe through their skin' OR only 'frogs breathe through their lungs' OR only 'skin needs to be wet' → 'correct but incomplete'." : ''}
+${currentPageRef.current === 4 ? "E.g., only 'frogs breathe through their skin' OR only 'frogs breathe through their lungs' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 9 ? "E.g., only 'frogs use their voices to scare others when frightened' OR only 'frogs use their voices to hunt for mates' → 'correct but incomplete'." : ''}
 ${currentPageRef.current === 11 ? "E.g., only 'frogs can see through their lower eyelids' OR only 'frogs can see in all directions' → 'correct but incomplete'." : ''}
-${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 'frogs' tongue moves quickly' OR only 'frogs' tongue wraps around an insect' → 'correct but incomplete'." : ''}
         - **Factually incorrect**: The response contains incorrect information compared to the answer.
         - **Irrelevant response**: Unrelated to the question or story context (e.g., the child talks about other things, does not want to talk about frogs, does not want to keep talking). Do not use this if response is invalid.
         - **Uncertainty answer**: Shows doubt, e.g., “I don’t know,” “I’m not sure.”
@@ -1056,7 +1032,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' when you are hinting the child to think about frogs' heart rate and breathing": ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You must implicitly guide the child to figure out the purpose of frogs using their voice." : ''}
          ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -2278,7 +2254,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 />
                 </div>
             </div>
-            {(isAskingRef.current || isKnowledge) && (
+            {(isAskingRef.current) && (
                     <Box id='chat-container' style={chatContainerStyle} sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (

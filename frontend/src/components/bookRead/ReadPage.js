@@ -72,6 +72,8 @@ const ReadChatPage = () => {
     const isAskedRef = useRef(false);
     const hasPlayedNoAnswerRef = useRef(false);
     const noResponseAttemptsRef = useRef(0);
+    const firstTurnCategoryRef = useRef(null); // incorrect | uncertainty | off-topic
+    const isSecondTurnRef = useRef(false);
 
     const mediaRecorderRef = useRef(null);
     const recordedChunksRef = useRef([]);
@@ -166,7 +168,7 @@ const ReadChatPage = () => {
         };
         const loadQuestion = async () => {
             try {
-                const response = await fetch(`/files/books/${title}/multichoice_script.json`);
+                const response = await fetch(`/files/books/${title}/multichoice_script_2turn.json`);
                 const question = await response.json();
                 questionListRef.current = question;
             } catch (error) {
@@ -470,6 +472,8 @@ const ReadChatPage = () => {
         isWaitingForResponseRef.current = false;
         hasPlayedNoAnswerRef.current = false;
         noResponseAttemptsRef.current = 0;
+        firstTurnCategoryRef.current = null;
+        isSecondTurnRef.current = false;
         const newPage = ( currentPageRef.current + 1 ) % pages.length;
         // setCurrentPage(newPage);
         currentPageRef.current = newPage;
@@ -683,51 +687,79 @@ const ReadChatPage = () => {
         
         convAudio.play();
         hasAskedRef.current = true;
+        // reset two-turn state for this question round
+        firstTurnCategoryRef.current = null;
+        isSecondTurnRef.current = false;
     }
 
     // useEffect(() => {
     //     console.log('currentPageChatHistory updated:', currentPageChatHistory);
     // }, [currentPageChatHistory]);
 
-    const playResponseAudio = (response) => {
-        let responseAudioSrc;
-        switch (response) {
-            case 'correct':
-                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_correct_answer.mp3`;
-                break;
-            case 'incorrect':
-                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_incorrect_answer.mp3`;
-                break;
-            case 'off-topic':
-                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_off_topic_answer.mp3`;
-                break;
-            case 'uncertainty':
-                responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_uncertainty_answer.mp3`;
-                break;
+    const toAudioKey = (category, isSecondTurn = false, firstTurnCategory = null) => {
+        if (isSecondTurn && firstTurnCategory) {
+            // Second turn uses followup audio format
+            const firstSafe = firstTurnCategory.replace('-', '_');
+            const secondSafe = category.replace('-', '_');
+            return {
+                file: `followup_${firstSafe}_${secondSafe}`,
+                ts: ['followup', firstSafe, secondSafe]
+            };
+        } else {
+            // First turn uses regular audio format
+            switch (category) {
+                case 'correct': return { file: 'correct_answer', ts: 'correct_answer' };
+                case 'incorrect': return { file: 'incorrect_answer', ts: 'incorrect_answer' };
+                case 'off-topic': return { file: 'off_topic_answer', ts: 'off_topic_answer' };
+                case 'uncertainty': return { file: 'uncertainty_answer', ts: 'uncertainty_answer' };
+                case 'no-response': return { file: 'no_response', ts: 'no_response' };
+                default: return { file: category, ts: category };
+            }
         }
+    };
+
+
+    const playResponseAudio = (response) => {
+        const isFirstTurn = !isSecondTurnRef.current;
+        const { file, ts } = toAudioKey(response, isSecondTurnRef.current, firstTurnCategoryRef.current);
+        
+        let responseAudioSrc;
+        if (isSecondTurnRef.current && firstTurnCategoryRef.current) {
+            // Second turn uses followup audio
+            responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_${file}.mp3`;
+        } else {
+            // First turn uses regular audio
+            responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_${file}.mp3`;
+        }
+        
         const convAudio = new Howl({
             src: [responseAudioSrc],
             onplay: () => {
-                let timestampsKey;
-                switch (response) {
-                    case 'correct':
-                        timestampsKey = 'correct_answer';
-                        break;
-                    case 'incorrect':
-                        timestampsKey = 'incorrect_answer';
-                        break;
-                    case 'off-topic':
-                        timestampsKey = 'off_topic_answer';
-                        break;
-                    case 'uncertainty':
-                        timestampsKey = 'uncertainty_answer';
-                        break;
+                let timestamps;
+                if (isSecondTurnRef.current && firstTurnCategoryRef.current) {
+                    // Second turn timestamps
+                    timestamps = timestampsRef.current[currentPageRef.current][ts[0]][ts[1]][ts[2]];
+                } else {
+                    // First turn timestamps
+                    timestamps = timestampsRef.current[currentPageRef.current][ts];
                 }
-                showWords(convAudio, timestampsRef.current[currentPageRef.current][timestampsKey], () => {
-                    console.log('response audio showWords completed');
-                    setTimeout(() => {
-                        setIsConversationEnded(true);
-                    }, 500);
+                
+                showWords(convAudio, timestamps, () => {
+                    // If first turn and not correct, start second turn; else end conversation
+                    if (isFirstTurn && ['incorrect', 'uncertainty', 'off-topic'].includes(response)) {
+                        firstTurnCategoryRef.current = response;
+                        // reset no-response trackers for second turn
+                        hasPlayedNoAnswerRef.current = false;
+                        noResponseAttemptsRef.current = 0;
+                        setTimeout(() => {
+                            startResponseTimer();
+                        }, 500);
+                        isSecondTurnRef.current = true;
+                    } else {
+                        setTimeout(() => {
+                            setIsConversationEnded(true);
+                        }, 500);
+                    }
                 });
             }
         });
@@ -768,6 +800,14 @@ const ReadChatPage = () => {
 
     useEffect(() => {
         if (timer >= 15 && !userRespondedRef.current && isKnowledge) {
+            // If we are in the second turn, play follow-up no-response for the first-turn category
+            if (isSecondTurnRef.current && firstTurnCategoryRef.current) {
+                console.log('Second turn no response - playing follow-up no-response');
+                if (timerRef.current) clearInterval(timerRef.current);
+                playResponseAudio('no-response');
+                return;
+            }
+
             noResponseAttemptsRef.current += 1;
             console.log('No response attempt:', noResponseAttemptsRef.current);
             

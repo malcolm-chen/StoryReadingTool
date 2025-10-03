@@ -52,7 +52,7 @@ def save_json(data, filename):
 multichoice_questions = {}
 def load_question():
     global multichoice_questions
-    json_file = f'./files/multichoice_script.json'
+    json_file = f'./files/multichoice_script_2turn.json'
     with open(json_file, 'r') as file:
         multichoice_questions = json.load(file)
     return multichoice_questions
@@ -174,15 +174,15 @@ def chat_history():
 def evaluate_response():
     data = request.get_json()
     print('page', data['page'])
-    page = str(int(data['page']) + 2)
+    page = str(int(data['page'])+2)
     response = data['transcript']
     
     prompt = f"""
     Your task is to evaluate the response of a child to a question.
 
     ** Input **
-    The question is: {multichoice_questions[page]['question']}
-    The answer is: {multichoice_questions[page]['answer']}
+    The question is: {multichoice_questions['pages'][page]['question']}
+    The answer is: {multichoice_questions['pages'][page]['answer']}
     The child's response is: {response}
 
     ** Evaluation Criteria **

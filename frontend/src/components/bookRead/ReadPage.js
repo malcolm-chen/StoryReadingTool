@@ -706,7 +706,7 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking).
         - Do not extend your response to story text details.
-        - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
+        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - The whole response should only include and end with ONE question: "Do you have any questions about this page?" No other question allowed.
         `
         return instruction4Correct;
@@ -800,7 +800,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
+        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Do not extend your response to story text details.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
@@ -906,7 +906,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
+        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - Do not extend your response to story text details.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
@@ -1011,7 +1011,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
+        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - Do not extend your response to story text details.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
@@ -1113,7 +1113,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
+        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - Do not extend your response to story text details.
         - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
         - Never explicitly include the acceptance criteria in the whole response.
@@ -1196,7 +1196,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
     
     **Instructions for Whole Response**:
-        - Your response MUST cover ALL the points of the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) to strengthen understanding.
+        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - Do not extend your response to story text details.
         - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
         `;

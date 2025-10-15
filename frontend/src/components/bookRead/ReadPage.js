@@ -681,24 +681,22 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         - the evaluation of the child's latest response: ${evaluation};
 
-    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgement, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgement, 2. repeat answer, and 3. conclusion.
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history.
         - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
 
-    **Instructions for Explanation**:
-        - Your explanation should be suitable for children aged 6 to 8.
-        - Keep your explanation simple, engaging, and under 20 words.
-        - Cover ALL points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) here with easy-to-understand words.
+    **Instructions for Repeating Answer**:
+        - Cover all key points to the answer and do not omit details.
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
     **Instructions for Conclusion**:
-        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+        - Your conclusion should include ONLY ONE question "Do you have any questions about this page?"
         - Keep the conclusion part concise, under 15 words. 
         - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
        
@@ -706,8 +704,8 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking).
         - Do not extend your response to story text details.
-        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
-        - The whole response should only include and end with ONE question: "Do you have any questions about this page?" No other question allowed.
+        - Your response MUST repeat the answer to strengthen understanding.
+        - The whole response should only include and end with ONE question: "Do you have any questions about this page?" *No other question allowed*
         `
         return instruction4Correct;
     }
@@ -738,9 +736,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Only hint at ONE part of the answer at once.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live without mentioning 'water and land'." : ''}
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
-        ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' or 'save energy' when you are hinting about frogs' heart rate and breathing. These are the key points you need to scaffold the child to come up with.": ''}
-        ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You must implicitly guide the child to figure out the purpose of frogs using their voice. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
+        ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
+        ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'how wide can frogs see', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint. You must implicitly guide the child to figure out the characteristics and functions of frogs’ tongue. These are the key points you need to scaffold the child to come up with." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -754,7 +752,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. DO NOT directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 11 ? " - !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed?" : ''}
         ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold an insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching an insect?'" : ''}
-        - !!! The question should not be phrased as a yes/no question like “Can you … ?” or “Do you … ?” Make it open-ended instead.
+        - !!! NO yes/no question like “Can you … ?” or “Do you … ?”.
         - !!! Ask exactly *ONE* question.
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
 
@@ -767,7 +765,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question).
         - !!! Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
         - !!! ONLY INCLUDE ***ONE QUESTION*** IN THE WHOLE RESPONSE.
-        - !!! The question should not be phrased as a yes/no question like “Can you … ?” or “Do you … ?” Make it open-ended instead.
+        - !! NO yes/no question like “Can you … ?” or “Do you … ?”.
         - Strictly focus your response on scaffolding the child to find the answer. Do not diverge the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `
@@ -775,8 +773,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         
         - the evaluation of the child's latest response: ${evaluation};
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
 
-    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. repeat answer, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -785,12 +784,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., 'Great start!', 'Nice work! There's more to it', 'You got part of it!', etc.)."}
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
-    **Instructions for Explanation**:
-        - Your explanation should be concise and suitable for children aged 6 to 8.
-        - Cover ALL points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) here with easy-to-understand words.
+    **Instructions for Repeating Answer**:
+        - Cover all key points to the answer and do not omit details.
+        ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
+
 
     **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
@@ -800,11 +800,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
+        - Your response MUST repeat the answer to strengthen understanding.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Do not extend your response to story text details.
         - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
-        - Never explicitly include the acceptance criteria in the whole response.
         `;
         let sumCount = 0;
         for (const answer of answerRecord) {
@@ -849,8 +848,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live without mentioning 'water and land'." : ''}
         ${currentPageRef.current === 3 ? " - Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' when you are hinting the child to think about frogs' heart rate and breathing": ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You must implicitly guide the child to figure out the purpose of frogs using their voice." : ''}
+        ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate": ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
          ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -880,8 +879,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the evaluation of the child's latest response: ${evaluation};
-        
-    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+        - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
+
+    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. repeat answer, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -890,9 +890,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'Let's try it again', 'Let's think about it together!', 'That's a good try!', and other similar acknowledgments)."}
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
-    **Instructions for Explanation**:
+    **Instructions for Repeating Answer**:
         - Your explanation should be concise and suitable for children aged 6 to 8.
-        - Cover ALL points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) here with easy-to-understand words.
+        - Cover all key points to the answer and do not omit details.
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
@@ -906,9 +906,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
+        - Your response MUST repeat the answer to strengthen understanding.
         - Do not extend your response to story text details.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
@@ -954,8 +954,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live." : ''}
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' when you are hinting the child to think about frogs' heart rate and breathing": ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You must implicitly guide the child to figure out the purpose of frogs using their voice." : ''} 
+         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
          ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -985,8 +985,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the evaluation of the child's latest response: ${evaluation};
+        - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer};
 
-    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
+    Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. repeat answer, and 3. conclusion.
 
     **Instructions for acknowledgment**:
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
@@ -995,9 +996,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Let's think about what the question is asking,' 'Thanks for sharing that! Let's focus on what we are reading here,' 'I heard you! Let's think about what the question is asking' and other similar acknowledgments)."}
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
-    **Instructions for Explanation**:
-        - Your explanation should be concise and suitable for children aged 6 to 8.
-        - Cover ALL points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) here with easy-to-understand words.
+    **Instructions for Repeating Answer**:
+        - Cover all key points to the answer and do not omit details.
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
@@ -1011,9 +1011,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
-        - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
+        - Your response MUST repeat the answer to strengthen understanding.
         - Do not extend your response to story text details.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
@@ -1055,7 +1055,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' when you are hinting the child to think about frogs' heart rate and breathing": ''}
+        ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
          ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
      
@@ -1087,6 +1087,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
+        - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer};
 
     Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. explanation, and 3. conclusion.
 
@@ -1097,9 +1098,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Since the evaluation of the child's response is 'uncertainty', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
-    **Instructions for Explanation**:
-        - Your explanation should be concise and suitable for children aged 6 to 8.
-        - Cover ALL points in the acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}) here with easy-to-understand words.
+    **Instructions for Repeating Answer**:
+        - Cover all key points to the answer and do not omit details.
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
@@ -1115,7 +1115,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - Do not extend your response to story text details.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?"
+        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
         

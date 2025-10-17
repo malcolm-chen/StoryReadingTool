@@ -690,9 +690,10 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
 
     **Instructions for Repeating Answer**:
         - Cover all key points to the answer and do not omit details.
+        ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
-        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
+        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
     **Instructions for Conclusion**:
@@ -734,24 +735,24 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - NO QUESTION in hint! Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
         - Only hint at ONE part of the answer at once.
-        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live without mentioning 'water and land'." : ''}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places." : ''}
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'how wide can frogs see', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
-        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint. You must implicitly guide the child to figure out the characteristics and functions of frogs’ tongue. These are the key points you need to scaffold the child to come up with." : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'how wide can frogs see', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint. You must implicitly guide the child to figure out the characteristics and functions of frogs’ tongue. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ***ONE*** reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to find the missing part in the acceptance criteria;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         - DO NOT include multiple elements in the reprompt question.
-        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live. You can ask about 'what are the two places where amphibians live'." : ""}
-        ${currentPageRef.current === 3 ? "- If the child did not come up with wet skin, you can ask 'what allows amphibians breathe in different places'" : ""}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places. You can ask about 'what feature do amphibians need to live in different places?'." : ""}
+        ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' or 'save energy' when you are asking about frogs' heart rate and breathing, you can ask 'what happens to frogs' heart/breathing'": ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. DO NOT directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 11 ? " - !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed?" : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold an insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching an insect?'" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
         - !!! NO yes/no question like “Can you … ?” or “Do you … ?”.
         - !!! Ask exactly *ONE* question.
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
@@ -762,6 +763,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction.
         ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
+        ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question).
         - !!! Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
         - !!! ONLY INCLUDE ***ONE QUESTION*** IN THE WHOLE RESPONSE.
@@ -786,9 +788,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Repeating Answer**:
         - Cover all key points to the answer and do not omit details.
+         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
-        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
+        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
 
@@ -845,22 +848,22 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
-        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live without mentioning 'water and land'." : ''}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places." : ''}
         ${currentPageRef.current === 3 ? " - Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
         - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live'." : ''}
+        ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? ": ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold an insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching an insect?'" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -870,6 +873,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
+         ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer instead of diverging the page content details to the importance of something.
@@ -893,9 +897,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Repeating Answer**:
         - Your explanation should be concise and suitable for children aged 6 to 8.
         - Cover all key points to the answer and do not omit details.
+         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
-        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
+        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
    **Instructions for Conclusion**:
@@ -951,22 +956,22 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
-        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live." : ''}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places." : ''}
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
          ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
+        ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What directions can frog's eyes see? " : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold an insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching an insect?'" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -976,6 +981,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
+         ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer instead of diverging the page content details to the importance of something.
@@ -998,9 +1004,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Repeating Answer**:
         - Cover all key points to the answer and do not omit details.
+         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
-        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
+        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
    **Instructions for Conclusion**:
@@ -1053,22 +1060,23 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
+        ${currentPageRef.current === 3 ? "- Do not explicitly mention 'water and land' in the hint." : ''}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. If the child did not mention frogs can see well when their eyes are partly closed, you should hint them to think about it. Do not disclose that frogs can see well when their eyes are partly closed. These are the key points you need to scaffold the child to come up with." : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not divert the question to the page details. Do not include answer details in the reprompt question.
-        ${currentPageRef.current === 3 ? "- If the child did not come up with 'water and land' yet, prioritizing guiding them to think about the two places that amphibians live." : ''}
-        ${currentPageRef.current === 3 ? "- Do not explicitly mention water and land in the reprompt question if the child's answer doesn't mention both. You can ask about 'what are the two places where amphibians live' instead." : ''}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places. You can ask about 'what feature do amphibians need to live in different places?'." : ""}
+        ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What directions can frog's eyes see? " : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold an insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching an insect?'" : ''}
+        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: Why are frogs' big, bulging eyes helpful? / How can frogs still see when they are half way closed? / What directions can frog's eyes see? " : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1078,6 +1086,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
+         ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
         - I noticed that you sometimes ask more than one question in a single turn. You must ask only ONE question in the whole response.
         - Your hint and reprompt question should focus on guiding the child coming up with correct the answer instead of diverging the page content details to the importance of something.
@@ -1100,9 +1109,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Repeating Answer**:
         - Cover all key points to the answer and do not omit details.
+         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
-        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
+        ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
     **Instructions for Conclusion**:

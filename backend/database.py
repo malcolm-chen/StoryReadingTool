@@ -219,9 +219,8 @@ def delete_user_files(username):
 def get_all_users():
     return users.find()
 
-# delete_user_files("Julian")
-# if __name__ == "__main__":
-    # delete_user_files("Leo1")
-    # for user in get_all_users():
-    #     print(user["username"])
+
+if __name__ == "__main__":
+    for user in get_all_users():
+        print(user["username"])
     

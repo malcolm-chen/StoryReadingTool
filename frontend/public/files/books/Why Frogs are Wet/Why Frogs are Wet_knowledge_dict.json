@@ -12,7 +12,7 @@
     "4": {
         "question": "How does a frog breathe?",
         "answer": "A frog breathes in two ways! Underwater, it breathes through its wet skin. On land, it breathes through its lungs and wet skin. Its skin has to stay wet, like a damp sponge. If the skin dries out, the air can’t pass through, and the frog can’t breathe properly. ",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: frogs 1. use skin in water, 2. use LUNGS and skin on land, and 3. the skin needs to be wet. Note: the third one is the KEY"
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: frogs 1. Use WET skin in water, 2. use LUNGS and WET skin on land, and 3. the skin needs to be wet. Note: the third one is the KEY, and the organs should correspond to the locations."
     },
     "5": {
         "question": "What do frogs do during the winter?",

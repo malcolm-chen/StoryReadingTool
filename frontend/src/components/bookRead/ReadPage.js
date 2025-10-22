@@ -589,7 +589,7 @@ const ReadChatPage = () => {
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
-        You need to evaluate whether the child's response covers all the key points in the answer.
+You need to evaluate whether the child's response covers all the key points in the answer.
         
         **Instructions for Evaluation**:
         You need to evaluate the child's latest response based on the following inputs:
@@ -603,10 +603,10 @@ const ReadChatPage = () => {
         If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        Ignore the child’s all reply. If and ONLY if the assistant already asked, “Do you have any questions about this page?”, mark the evaluation as "conv end". If the child does not reply, do NOT mark the evaluation as "conv end". It should be "irrelevant".
+        Ignore the child’s all reply. If and ONLY if the assistant already asked, “What questions do you have for me about this page?”, mark the evaluation as "conv end". If the child does not reply, do NOT mark the evaluation as "conv end". It should be "irrelevant".
         
         Step 3: Check if the child asks a question
-        If the assistant has not asked “Do you have any questions about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
+        If the assistant has not asked “What questions do you have for me about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
         
         Step 4: Evaluate Valid Responses if the conversation is not ended
         For meaningful responses (and if conversation is not ended):
@@ -616,7 +616,8 @@ const ReadChatPage = () => {
         Compare all of the child’s responses on this page against the acceptance criteria:
         - **Fully correct**: Children's responses collectively ${currentPageRef.current === 13 || currentPageRef.current === 4 ? "COVER ALL THREE POINTS" : "COVER ALL TWO POINTS"} in the acceptance criteria without any incorrect information. The acceptance criteria is: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
         ${currentPageRef.current === 3 ? "!!! If the child only mentions 'amphibians live on both land and water' without mentioning 'wet skin', DO NOT mark it as 'fully correct'. Vice versa." : ''}
-        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'frogs breathe through their lungs' or 'skin needs to be wet', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+        ${currentPageRef.current === 4 ? "!!! If the child only mentions 'frogs breathe through their skin' without mentioning 'lungs' or 'skin needs to be wet', DO NOT mark it as 'fully correct'. Vice versa." : ''}
+${currentPageRef.current === 4 ? "!!! If the child doesn’t clearly identify which body parts are used for breathing in each location, DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 9 ? "!!! If the child only mentions 'frogs use their voices to scare others when frightened' without mentioning 'hunt for mates', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 11 ? "!!! If the child only mentions 'frogs can see through their lower eyelids' without mentioning 'frogs can see in all directions', DO NOT mark it as 'fully correct'. Vice versa." : ''}
         ${currentPageRef.current === 13 ? "!!! If the child only mentions part of the actions of frogs' eating process, DO NOT mark it as 'fully correct'. Vice versa." : ''}
@@ -645,6 +646,7 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
         **Important Reminder**:
         - Always consider the entire conversation history on this page, not just the latest response. If all responses combined meet the acceptance criteria, mark as fully correct.
         - Only return valid JSON from the list above. No extra text, no empty outputs.
+
         `;
         console.log(instruction4Evaluation);
         return instruction4Evaluation;
@@ -697,16 +699,16 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
     **Instructions for Conclusion**:
-        - Your conclusion should include ONLY ONE question "Do you have any questions about this page?"
+        - Your conclusion should include ONLY ONE question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "What questions do you have for me about this page?")
        
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking).
         - Do not extend your response to story text details.
         - Your response MUST repeat the answer to strengthen understanding.
-        - The whole response should only include and end with ONE question: "Do you have any questions about this page?" *No other question allowed*
+        - The whole response should only include and end with ONE question: "What questions do you have for me about this page?" *No other question allowed*
         `
         return instruction4Correct;
     }
@@ -739,8 +741,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'how wide can frogs see', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
-        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint. You must implicitly guide the child to figure out the characteristics and functions of frogs’ tongue. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- ! You should make sure to mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ***ONE*** reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to find the missing part in the acceptance criteria;
@@ -751,8 +753,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' or 'save energy' when you are asking about frogs' heart rate and breathing, you can ask 'what happens to frogs' heart/breathing'": ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. DO NOT directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? " - !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed?" : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
+        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. \n- !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. \n- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What’s special about frogs’ eyes?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - !!! NO yes/no question like “Can you … ?” or “Do you … ?”.
         - !!! Ask exactly *ONE* question.
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
@@ -796,9 +798,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
 
     **Instructions for Conclusion**:
-        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+        - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
@@ -806,7 +808,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Your response MUST repeat the answer to strengthen understanding.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
         - Do not extend your response to story text details.
-        - The whole response should only include and end with ONE question sentence, which is the question "Do you have any questions about this page?"
+        - The whole response should only include and end with ONE question sentence, which is the question "What questions do you have for me about this page?"
         `;
         let sumCount = 0;
         for (const answer of answerRecord) {
@@ -853,7 +855,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- ! You should make sure to mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -862,8 +865,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? ": ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
+        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. \n- !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. \n- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What’s special about frogs’ eyes?": ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -904,16 +907,16 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
    **Instructions for Conclusion**:
-        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+        - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer to strengthen understanding.
         - Do not extend your response to story text details.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?" * No Other Question Allowed *
+        - The whole response should only include ONE question sentence, which is the question "What questions do you have for me about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
@@ -961,7 +964,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
          ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- ! You should make sure to mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -970,8 +974,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What directions can frog's eyes see? " : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
+        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. \n- !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. \n- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What’s special about frogs’ eyes?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1011,16 +1015,16 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
    **Instructions for Conclusion**:
-        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+        - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer to strengthen understanding.
         - Do not extend your response to story text details.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?" * No Other Question Allowed *
+        - The whole response should only include ONE question sentence, which is the question "What questions do you have for me about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
@@ -1065,7 +1069,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint them to think about 'all directions', without mentioning 'frogs can see in all directions/everything around them'. \n ! You should make sure to mention the word 'bulging' to help children understand its meaning." : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- ! You should make sure to mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -1075,8 +1080,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- !!! Do not explicitly mention 'water and land' in the hint or reprompt question. If the child did not come up with wet skin, do not disclose wet skin either." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. UES THESE CANDIDATE QUESTIONS: Why are frogs' big, bulging eyes helpful? / How can frogs still see when they are half way closed? / What directions can frog's eyes see? " : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' If the child did not mention frogs' tongue moves quickly, you can ask 'What's the speed of a frog's tongue when catching a living, moving insect?'" : ''}
+        ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. \n- !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. \n- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What’s special about frogs’ eyes?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1116,16 +1121,16 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
     **Instructions for Conclusion**:
-        - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+        - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "Do you have any questions about this page?")
+        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
         - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
         - Do not extend your response to story text details.
-        - The whole response should only include ONE question sentence, which is the question "Do you have any questions about this page?" * No Other Question Allowed *
+        - The whole response should only include ONE question sentence, which is the question "What questions do you have for me about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
         
@@ -1278,7 +1283,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 invalidCount++;
             }
         }
-        if (invalidCount > 1) {
+        if (invalidCount > 2) {
             console.log('instruction4Invalid2');
             return instruction4Invalid2;
         } else {
@@ -1334,10 +1339,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             - Since the evaluation of the child's response is 'correct', provide a concise explanation to deepen their understanding.
             - Do not include a question in the explanation.
         3. Conclusion:
-            - Your conclusion should include ONE EXACT question "Do you have any questions about this page?"
+            - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
             - Keep the conclusion part concise, under 15 words. 
-            - Here is an example: "It was fun chatting with you! Do you have any questions about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "Do you have any questions about this page?")
-        - When organizing all the elements above to form a whole response, make sure the whole response only includes and ends with ONE question sentence, which is the question "Do you have any questions about this page?"
+            - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "What questions do you have for me about this page?")
+        - When organizing all the elements above to form a whole response, make sure the whole response only includes and ends with ONE question sentence, which is the question "What questions do you have for me about this page?"
 
         **Instructions for Response to Answers that are NOT correct**:
         - Your response should include two parts: acknowledgement, hint, and ONE restated question.
@@ -1357,7 +1362,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             - *DO NOT* ask a question that is not the main question.
 
         **Instructions for Whole Response**:
-            - If the child's response is CORRECT, make sure to only include and end with your response with ONE question "Do you have any questions about this page?" in the whole response.
+            - If the child's response is CORRECT, make sure to only include and end with your response with ONE question "What questions do you have for me about this page?" in the whole response.
             - If the child's response is NOT correct, make sure your response ends with ONLY ONE restated question (RESTATING THE MAIN QUESTION (${knowledgeRef.current[currentPageRef.current]?.question})).
         `;
 
@@ -1406,12 +1411,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         if (noResponseReminderCountRef.current == 1) {
             const lastQuestion = items[items.length - 1]?.content[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
-            if (lastQuestion?.toLowerCase().includes('do you have any questions')) {
+            if (lastQuestion?.toLowerCase().includes('what questions')) {
                 const instruction4NoResponse1_1 = `
     **Instructions**:
-        1. Ignore the chat history. Say "Hey, I didn't hear your answer. Do you have any questions about this page?"
+        1. Ignore the chat history. Say "Hey, I didn't hear your answer. What questions do you have for me about this page?"
     **Important Reminder**:
-        - Make sure to only ask this exact question ONCE ("Hey, I didn't hear your answer. Do you have any questions about this page?"), and DO NOT SAY ANYTHING ELSE. DO NOT PROVIDE ANSWER TO YOUR QUESTION.`;
+        - Make sure to only ask this exact question ONCE ("Hey, I didn't hear your answer. What questions do you have for me about this page?"), and DO NOT SAY ANYTHING ELSE. DO NOT PROVIDE ANSWER TO YOUR QUESTION.`;
                 console.log(instruction4NoResponse1_1);
                 return instruction4NoResponse1_1;
             } else {
@@ -1429,10 +1434,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         } else if (noResponseReminderCountRef.current == 2) {
             const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
-            if (lastQuestion?.toLowerCase().includes('do you have any questions')) {
+            if (lastQuestion?.toLowerCase().includes('what questions')) {
                 const instruction4NoResponse1_2 = `
     **Instructions**:
-        1. Ignore the chat history. Say "Hey, are you still there? Do you have any questions about this page?"
+        1. Ignore the chat history. Say "Hey, are you still there? What questions do you have for me about this page?"
     **Important Reminder**:
         - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.`;
                 console.log(instruction4NoResponse1_2);
@@ -1452,7 +1457,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         } else {
             const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
-            if (lastQuestion?.toLowerCase().includes('do you have any questions')) {
+            if (lastQuestion?.toLowerCase().includes('what questions')) {
                 const instruction4NoResponse1_3 = `
         **Instructions**:
             1. Ignore the chat history. Say "Hey, let's continue reading the story."

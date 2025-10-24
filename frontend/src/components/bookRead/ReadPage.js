@@ -603,10 +603,11 @@ You need to evaluate whether the child's response covers all the key points in t
         If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        Ignore the child’s all reply. If and ONLY if the assistant already asked, “What questions do you have for me about this page?”, mark the evaluation as "conv end". If the child does not reply, do NOT mark the evaluation as "conv end". It should be "irrelevant".
+        - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
+        Ignore the child’s all reply. Check the conversation history, if the assistant already asked, “What questions do you have for me about this page?”, mark the evaluation as "conv end". Ignore all the following instructions and jump to the output. (If the child has no reply, mark it as "irrelevant".)
         
         Step 3: Check if the child asks a question
-        If the assistant has not asked “What questions do you have for me about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
+        If the assistant has NOT asked “What questions do you have for me about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
         
         Step 4: Evaluate Valid Responses if the conversation is not ended
         For meaningful responses (and if conversation is not ended):
@@ -755,7 +756,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. DO NOT directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 11 ? "- !!! Do not pose questions about 'what happens to frogs eyes...'/'how frogs can see ...'/'how ... helps them catch food'. \n- !!! Do not mention 'see in all directions/everything around them/see through lower eyelids' in your question. These are the key points you need to scaffold the child to come up with. \n- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? What directions can frog's eyes see? Why are frogs' big eyes helpful? How can frogs still see when they are half way closed? What’s special about frogs’ eyes?" : ''}
         ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
-        - !!! NO yes/no question like “Can you … ?” or “Do you … ?”.
+        - !!! DO NOT ASK "Can you ..." or "Do you ...".
         - !!! Ask exactly *ONE* question.
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
 
@@ -769,7 +770,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question).
         - !!! Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
         - !!! ONLY INCLUDE ***ONE QUESTION*** IN THE WHOLE RESPONSE.
-        - !! NO yes/no question like “Can you … ?” or “Do you … ?”.
+        - !! DO NOT ASK "Can you ..." or "Do you ...".
         - Strictly focus your response on scaffolding the child to find the answer. Do not diverge the page content details to the importance of something.
         `
         const instruction4Incomplete2 = `

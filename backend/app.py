@@ -9,7 +9,6 @@ from pydub import AudioSegment
 import pymongo
 from gridfs import GridFS
 import sys
-from pydub import AudioSegment
 from bson.binary import Binary
 import numpy as np
 from datetime import datetime
@@ -92,7 +91,7 @@ def get_users():
 @app.route('/audio/<filename>')
 def get_audio(filename):
     print('filename', filename)
-    return send_from_directory('/audio_files', filename)
+    return send_from_directory('./audio', filename)
 
 @app.route('/api/get_asked_questions', methods=['POST'])
 def get_asked_questions():
@@ -187,6 +186,15 @@ def evaluate_response():
 
     ** Evaluation Criteria **
     If the child's response correctly addresses the question and matches most of the ideas in the answer, the evaluation result should be correct.
+    """
+    
+    # Add special case for page 13
+    if int(page) == 13:
+        prompt += """
+        As long as the child's response indicates 'yes' (i.e., confirms that frogs can see what is around them without moving), the evaluation result should be correct.
+        """
+    
+    prompt += """
     If the child's response is not relevant to the question, the evaluation result should be off-topic.
     If the child's response is unsure about the answer, such as "I don't know" or "I have no idea", the evaluation result should be uncertainty.
     In all other cases, the evaluation result should be incorrect.

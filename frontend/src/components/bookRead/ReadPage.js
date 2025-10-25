@@ -1065,6 +1065,20 @@ const ReadChatPage = () => {
         }
     }, [currentPageRef.current]);
 
+    const bookImgStyle = {
+        width: isKnowledge ? (currentPageRef.current === 2 ? '70%' : '75%') : '100%'
+    };
+
+    const chatContainerStyle = {
+        // height: isKnowledge 
+        //     ? (currentPageRef.current === 2 || currentPageRef.current === 5) ? '40%' : (currentPageRef.current === 7)
+        //         ? '35%'
+        //         : '55%'
+        //     : chatBoxSize.height
+        height: '36%'
+    };
+
+
     return (
         <Box className="background-container">
             <Header user={user} title={title} hasTitle={true} />
@@ -1122,7 +1136,7 @@ const ReadChatPage = () => {
                             </div>
                         )}
 
-                    <Box id='book-img'>
+                    <Box id='book-img' style={bookImgStyle}>
                         <img src={pages[currentPageRef.current]?.image} alt={`Page ${currentPageRef.current + 1}`}/>
                     </Box>
 
@@ -1158,7 +1172,7 @@ const ReadChatPage = () => {
                 </div>
             </div>
             {(isAskingRef.current || isKnowledge) && !isMinimizedChat && (
-                    <Box id='chat-container' sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
+                    <Box id='chat-container' style={chatContainerStyle} sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
                         {isRecording && (
                             <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>

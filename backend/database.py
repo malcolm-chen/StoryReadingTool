@@ -221,6 +221,5 @@ def get_all_users():
 
 
 if __name__ == "__main__":
-    for user in get_all_users():
-        print(user["username"])
-    
+    # for user in get_all_users():
+    #     print(user["username"])

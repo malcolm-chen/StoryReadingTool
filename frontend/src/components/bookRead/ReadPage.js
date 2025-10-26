@@ -692,7 +692,7 @@ ${currentPageRef.current === 13 ? "E.g., only 'frogs' tongue is sticky' OR only 
         - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
 
     **Instructions for Repeating Answer**:
-        - Cover all key points to the answer and do not omit details.
+        - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
@@ -742,7 +742,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -790,8 +790,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
     **Instructions for Repeating Answer**:
-        - Cover all key points to the answer and do not omit details.
-         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
+        - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
+        ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
@@ -856,7 +856,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
          ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -899,9 +899,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
     **Instructions for Repeating Answer**:
-        - Your explanation should be concise and suitable for children aged 6 to 8.
-        - Cover all key points to the answer and do not omit details.
-         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
+        - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
+        ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
@@ -965,7 +964,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
          ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -1008,8 +1007,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
     **Instructions for Repeating Answer**:
-        - Cover all key points to the answer and do not omit details.
-         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
+        - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
+        ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}
@@ -1070,7 +1069,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' to help children understand that it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -1114,8 +1113,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
 
     **Instructions for Repeating Answer**:
-        - Cover all key points to the answer and do not omit details.
-         ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
+        - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
+        ${currentPageRef.current == 3 ? " - !!! Highlight that frogs' skin needs to be wet." : ''}
         ${currentPageRef.current === 5 ? " - !!! Highlight the word 'hibernation' when explaining the answer." : ''}
         ${currentPageRef.current === 4 ? "- !!! Highlight frogs can breathe through both LUNGS and SKIN in your response.": ""}
         ${currentPageRef.current === 11 ? "- !!! Highlight frogs' eyes are bulging, and can 1) see in all directions without moving and 2) see through their lower eyelids in your response.": ""}

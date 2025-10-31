@@ -63,6 +63,7 @@ const ReadChatPage = () => {
     const [audioSpeed, setAudioSpeed] = useState(localStorage.getItem(`${title}-audioSpeed`) ? parseFloat(localStorage.getItem(`${title}-audioSpeed`)) : 1);
     const [speedSliderValue, setSpeedSliderValue] = useState(audioSpeed);
     const penguin = './files/imgs/penguin1.svg';
+    const chatWindowRef = useRef(null);
 
     // currentPage = localStorage.getItem(`${title}-currentPage`) ? parseInt(localStorage.getItem(`${title}-currentPage`), 10) : 0;
     
@@ -741,8 +742,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places." : ''}
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
+        ${currentPageRef.current === 6 ? "- When you prompt children to think about how tadpoles' way of breathing changes as they grow, you can encourage them to compare how they breathe in water as tadpoles and how frogs breathe on land after they grow up." : ''}
         ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -855,8 +857,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? " - Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate": ''}
+        ${currentPageRef.current === 6 ? "- When you prompt children to think about how tadpoles' way of breathing changes as they grow, you can encourage them to compare how they breathe in water as tadpoles and how frogs breathe on land after they grow up." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
          ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -963,8 +966,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- Do not explicitly mention amphibians live both in water and on land in the hint." : ''}
          ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
          ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
+         ${currentPageRef.current === 6 ? "- When you prompt children to think about how tadpoles' way of breathing changes as they grow, you can encourage them to compare how they breathe in water as tadpoles and how frogs breathe on land after they grow up." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -1068,8 +1072,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about that amphibians need wet skin to live in different places." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 5 ? "- If the child did not come up with 'moist place', hint the child to come up with the environment feature where frogs hibernate.": ''}
+        ${currentPageRef.current === 6 ? "- When you prompt children to think about how tadpoles' way of breathing changes as they grow, you can encourage them to compare how they breathe in water as tadpoles and how frogs breathe on land after they grow up." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- !!You must mention the word 'bulging' and explain it means the eyes are big and stick out.\n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”" : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention 'all directions', you should hint 'the features of frogs’ eyes', without mentioning 'frogs can see in all directions/everything around them'. \n- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -1698,10 +1703,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                         setCurrentPageChatHistory(items);
                         //chatHistoryRef.current[currentPageRef.current] = items;
                         // get the chat-window element by class name
-                        const chatWindow = document.getElementsByClassName('chat-window')[0];
-                        if (chatWindow) {
-                            chatWindow.scrollTop = chatWindow.scrollHeight;
-                        }
+                        // const chatWindow = document.getElementsByClassName('chat-window')[0];
+                        // if (chatWindow) {
+                        //     chatWindow.scrollTop = chatWindow.scrollHeight;
+                        // }
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
                             if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.endsWith('? ') && !item?.content[0]?.transcript?.endsWith('talk.')) {
@@ -2196,6 +2201,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         }
     };
 
+    // Auto-scroll chat window to bottom when content changes
+    useEffect(() => {
+        if (chatWindowRef.current) {
+            chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+        }
+    }, [currentPageChatHistory, currentPageRef.current]);
+
     return (
         <Box className="background-container">
             <Header user={user} title={title} hasTitle={true} />
@@ -2300,7 +2312,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
                         )}
                         {isRecording && (
-                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 101 }}>
+                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 105 }}>
                                 <VoiceVisualizer 
                                     controls={recorderControls} 
                                     isControlPanelShown={false} 
@@ -2354,7 +2366,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             <IoMdCloseCircle size={36} color='#7AA2E3' />
                         </IconButton> */}
                        
-                    <Box className='chat-window'>
+                    <Box className='chat-window' ref={chatWindowRef}>
                         
                         {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].length == 0 && (
                             <Box id='loading-box'>

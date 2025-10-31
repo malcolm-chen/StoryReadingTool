@@ -181,8 +181,6 @@ def save_json_to_file(data, filename):
 
 # save_json_to_file(read_chat_history("Saud"), "Saud_chat_history.json")
 # save_json_to_file(read_chat_history("Iris"), "Iris_chat_history.json")
-save_json_to_file(read_chat_history("Fredrik"), "Fredrik_chat_history.json")
-save_json_to_file(read_chat_history("Reed"), "Reed_chat_history.json")
 # save_json_to_file(read_chat_history("Sylvie"), "Sylvie_chat_history.json")
 # save_json_to_file(read_chat_history("Sal"), "Sal_chat_history.json")
 
@@ -223,3 +221,5 @@ def get_all_users():
 if __name__ == "__main__":
     # for user in get_all_users():
     #     print(user["username"])
+    # save_json_to_file(read_chat_history("Macy"), "Macy_chat_history.json")
+    save_json_to_file(read_chat_history("JT"), "JT_chat_history.json")

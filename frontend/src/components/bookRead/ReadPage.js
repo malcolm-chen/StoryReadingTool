@@ -77,6 +77,7 @@ const ReadChatPage = () => {
 
     const mediaRecorderRef = useRef(null);
     const recordedChunksRef = useRef([]);
+    const chatWindowRef = useRef(null);
 
     // Declare recognition as a ref at the component level
     const recognitionRef = useRef(null);
@@ -396,6 +397,13 @@ const ReadChatPage = () => {
     useEffect(() => {
         console.log('currentPageChatHistory', currentPageChatHistory);
     }, [currentPageChatHistory]);
+
+    // Auto-scroll chat window to bottom when content changes
+    useEffect(() => {
+        if (chatWindowRef.current) {
+            chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+        }
+    }, [currentPageChatHistory, currentPageRef.current]);
     
     useEffect(() => {
         console.log('playPageSentences', currentPageRef.current, sentenceIndexRef.current, knowledgeRef.current.length);
@@ -1212,7 +1220,7 @@ const ReadChatPage = () => {
                             <FaMinusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }}/>
                         </IconButton>
                        
-                    <Box className='chat-window'>
+                    <Box className='chat-window' ref={chatWindowRef}>
                         
                         {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].length == 0 && (
                             <Box id='loading-box'>

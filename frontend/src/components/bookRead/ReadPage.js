@@ -242,40 +242,16 @@ const ReadChatPage = () => {
                 const transcript = event.results[0][0].transcript;
                 console.log('Transcription:', transcript);
                 
-                // Use the state setter function to properly update the chat history
-                setCurrentPageChatHistory(prevHistory => [
-                    ...prevHistory,
-                    {
-                        role: 'user',
-                        content: transcript,
-                        audio: new Blob(recordedChunksRef.current, { type: 'audio/webm' })
-                    }
-                ]);
-                
-                console.log('apiUrl', apiUrl);
-                // Send transcription to backend
-                fetch(`${apiUrl}/api/evaluate_response`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user: user,
-                        title: title,
-                        page: currentPageRef.current,
-                        transcript: transcript
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Backend response:', data);
-                    playResponseAudio(data.response);
-                })
-                .catch(error => console.error('Error sending transcription to backend:', error));
+                // Store the transcript for later processing after recording stops
+                recognitionRef.current.transcript = transcript;
             };
 
             recognitionRef.current.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
+            };
+
+            recognitionRef.current.onend = () => {
+                console.log('Speech recognition ended');
             };
 
             // Start recognition
@@ -298,21 +274,61 @@ const ReadChatPage = () => {
         setIsRecording(false);
         isStartingRecordingRef.current = false;
         console.log('stop recording');
-        mediaRecorderRef.current.stop();
         
-        // Check if recognition is defined before stopping
+        // Stop speech recognition immediately
         if (recognitionRef.current) {
-            setTimeout(() => {
-                recognitionRef.current.stop();
-            }, 1000);
+            recognitionRef.current.stop();
         } else {
             console.error('SpeechRecognition is not initialized');
         }
+        
+        mediaRecorderRef.current.stop();
 
         mediaRecorderRef.current.onstop = async () => {
             const audioBlob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
             const audioUrl = URL.createObjectURL(audioBlob);
             console.log('Recorded audio URL:', audioUrl);
+            
+            // Wait for speech recognition to finalize
+            setTimeout(() => {
+                if (recognitionRef.current && recognitionRef.current.transcript) {
+                    const transcript = recognitionRef.current.transcript;
+                    
+                    // Use the state setter function to properly update the chat history
+                    setCurrentPageChatHistory(prevHistory => [
+                        ...prevHistory,
+                        {
+                            role: 'user',
+                            content: transcript,
+                            audio: audioBlob
+                        }
+                    ]);
+                    
+                    console.log('apiUrl', apiUrl);
+                    // Send transcription to backend
+                    fetch(`${apiUrl}/api/evaluate_response`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user: user,
+                            title: title,
+                            page: currentPageRef.current,
+                            transcript: transcript
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Backend response:', data);
+                        playResponseAudio(data.response);
+                    })
+                    .catch(error => console.error('Error sending transcription to backend:', error));
+                    
+                    // Clear the transcript
+                    recognitionRef.current.transcript = null;
+                }
+            }, 500);
         };
     };
 

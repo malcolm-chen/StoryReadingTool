@@ -249,15 +249,15 @@ You are a friendly chatbot engaging with a child named ${user}, who is reading a
         Your task is to help the child get familiar with the interaction with the chatbot.
 
         **Greeting Instructions**:
-        - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When moving on to a new page, I will ask you questions about the story. You can press AND hold the big yellow button to talk. When you release the button, your response will be sent to me. Let's try it! Since the story is about frogs, what do you know about frogs?' (end the first turn with a question mark)
-        - If the child's response is not clear, you can ask the child to repeat it, and you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done'.
+        - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When moving on to a new page, I will ask you questions about the story. You can press AND hold the black space button to talk. When you release the button, your response will be sent to me. Let's try it! Since the story is about frogs, what do you know about frogs?' (end the first turn with a question mark)
+        - If the child's response is not clear, you can ask the child to repeat it, and you should instruct the child to 'press and hold the black space button to talk, and release it when you are done'.
         - After the child's response is clearly recognized, you should first acknowledge the child's response and their effort in successfully talking to you, and conclude the conversation by saying 'Great! Now, let's explore the story together!'
         - When concluding the conversation, you should not ask any more questions.
 
         **Conversation Rules**:
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
         - Keep the conversation within two rounds.
-        - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the big yellow button to talk, and release it when you are done', and then you should ask the child to repeat it.
+        - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the black space button to talk, and release it when you are done', and then you should ask the child to repeat it.
         - IF THE CONVERSATION IS NOT ENDED, ALWAYS END EACH TURN WITH A QUESTION.
 
         **Important Reminders**:
@@ -422,7 +422,7 @@ You are a friendly chatbot engaging with a child named ${user}, who is reading a
                     }
                     if (item.role === 'assistant') {
                         // if the last item does not end with a question mark, it means the conversation is ended
-                        if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.includes('big yellow button') && !item?.content[0]?.transcript?.includes('when you are done')) {
+                        if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.includes('black space button') && !item?.content[0]?.transcript?.includes('when you are done')) {
                             while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                 await new Promise(resolve => setTimeout(resolve, 100));
                             }

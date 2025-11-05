@@ -78,9 +78,7 @@ const ReadChatPage = () => {
     const mediaRecorderRef = useRef(null);
     const recordedChunksRef = useRef([]);
     const chatWindowRef = useRef(null);
-
-    // Declare recognition as a ref at the component level
-    const recognitionRef = useRef(null);
+    const audioContextRef = useRef(null);
 
     useEffect(() => {
         if (user === null) {
@@ -195,6 +193,62 @@ const ReadChatPage = () => {
     }, []);
 
     /**
+     * Transcribe audio using OpenAI Whisper API
+     */
+    const transcribeWithOpenAI = async (audioBlob) => {
+        const openaiKey = process.env.REACT_APP_OPENAI_API_KEY;
+        if (!openaiKey) {
+            throw new Error('Missing REACT_APP_OPENAI_API_KEY');
+        }
+
+        const form = new FormData();
+        // Provide a filename extension matching mime when possible
+        const ext = audioBlob.type.includes('webm') ? 'webm' : audioBlob.type.includes('ogg') ? 'ogg' : audioBlob.type.includes('mp3') ? 'mp3' : 'wav';
+        form.append('file', audioBlob, `recording.${ext}`);
+        // Use Whisper v1 for REST audio transcription
+        form.append('model', 'whisper-1');
+        form.append('response_format', 'json');
+
+        const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${openaiKey}`
+            },
+            body: form
+        });
+
+        if (!resp.ok) {
+            const errText = await resp.text().catch(() => '');
+            throw new Error(`OpenAI transcription failed: ${resp.status} ${errText}`);
+        }
+
+        const json = await resp.json();
+        return json.text;
+    };
+
+    /**
+     * Analyze audio to detect invalid inputs (too short, tiny size, near-silence)
+     */
+    const analyzeAudioBlob = async (audioBlob) => {
+        if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const arrayBuf = await audioBlob.arrayBuffer();
+        const audioBuf = await audioContextRef.current.decodeAudioData(arrayBuf);
+        const channelData = audioBuf.getChannelData(0);
+        let peak = 0;
+        let sumSquares = 0;
+        for (let i = 0; i < channelData.length; i++) {
+            const v = channelData[i];
+            const av = Math.abs(v);
+            if (av > peak) peak = av;
+            sumSquares += v * v;
+        }
+        const rms = Math.sqrt(sumSquares / channelData.length);
+        return { durationSec: audioBuf.duration, peak, rms };
+    };
+
+    /**
      * In push-to-talk mode, start recording
      * .appendInputAudio() for each sample
      */
@@ -228,35 +282,6 @@ const ReadChatPage = () => {
 
             mediaRecorderRef.current.start();
             isStartingRecordingRef.current = false;
-
-            // Initialize SpeechRecognition
-            console.log('Initializing SpeechRecognition');
-            recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            console.log('SpeechRecognition initialized');
-            recognitionRef.current.lang = 'en-US';
-            recognitionRef.current.interimResults = false;
-            recognitionRef.current.maxAlternatives = 1;
-
-            recognitionRef.current.onresult = (event) => {
-                console.log('SpeechRecognition result event triggered');
-                const transcript = event.results[0][0].transcript;
-                console.log('Transcription:', transcript);
-                
-                // Store the transcript for later processing after recording stops
-                recognitionRef.current.transcript = transcript;
-            };
-
-            recognitionRef.current.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-            };
-
-            recognitionRef.current.onend = () => {
-                console.log('Speech recognition ended');
-            };
-
-            // Start recognition
-            console.log('Starting SpeechRecognition');
-            recognitionRef.current.start();
         } catch (error) {
             console.error('Error starting recording:', error);
             setIsRecording(false);
@@ -275,13 +300,6 @@ const ReadChatPage = () => {
         isStartingRecordingRef.current = false;
         console.log('stop recording');
         
-        // Stop speech recognition immediately
-        if (recognitionRef.current) {
-            recognitionRef.current.stop();
-        } else {
-            console.error('SpeechRecognition is not initialized');
-        }
-        
         mediaRecorderRef.current.stop();
 
         mediaRecorderRef.current.onstop = async () => {
@@ -289,46 +307,61 @@ const ReadChatPage = () => {
             const audioUrl = URL.createObjectURL(audioBlob);
             console.log('Recorded audio URL:', audioUrl);
             
-            // Wait for speech recognition to finalize
-            setTimeout(() => {
-                if (recognitionRef.current && recognitionRef.current.transcript) {
-                    const transcript = recognitionRef.current.transcript;
-                    
-                    // Use the state setter function to properly update the chat history
-                    setCurrentPageChatHistory(prevHistory => [
-                        ...prevHistory,
-                        {
-                            role: 'user',
-                            content: transcript,
-                            audio: audioBlob
-                        }
-                    ]);
-                    
-                    console.log('apiUrl', apiUrl);
-                    // Send transcription to backend
-                    fetch(`${apiUrl}/api/evaluate_response`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            user: user,
-                            title: title,
-                            page: currentPageRef.current,
-                            transcript: transcript
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Backend response:', data);
-                        playResponseAudio(data.response);
-                    })
-                    .catch(error => console.error('Error sending transcription to backend:', error));
-                    
-                    // Clear the transcript
-                    recognitionRef.current.transcript = null;
+            try {
+                // Analyze audio to check if it's valid
+                const audioAnalysis = await analyzeAudioBlob(audioBlob);
+                console.log('Audio analysis:', audioAnalysis);
+                
+                // Optional: Skip transcription if audio is too short or too quiet
+                // You can adjust these thresholds as needed
+                if (audioAnalysis.durationSec < 0.1) {
+                    console.warn('Audio too short, skipping transcription');
+                    return;
                 }
-            }, 500);
+                
+                // Transcribe using OpenAI
+                const transcript = await transcribeWithOpenAI(audioBlob);
+                console.log('Transcription:', transcript);
+                
+                if (!transcript || transcript.trim() === '') {
+                    console.warn('Empty transcription, skipping');
+                    return;
+                }
+                
+                // Use the state setter function to properly update the chat history
+                setCurrentPageChatHistory(prevHistory => [
+                    ...prevHistory,
+                    {
+                        role: 'user',
+                        content: transcript,
+                        audio: audioBlob
+                    }
+                ]);
+                
+                console.log('apiUrl', apiUrl);
+                // Send transcription to backend
+                fetch(`${apiUrl}/api/evaluate_response`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user: user,
+                        title: title,
+                        page: currentPageRef.current,
+                        transcript: transcript
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Backend response:', data);
+                    playResponseAudio(data.response);
+                })
+                .catch(error => console.error('Error sending transcription to backend:', error));
+            } catch (error) {
+                console.error('Error transcribing audio:', error);
+                // Optionally show an error message to the user
+            }
         };
     };
 

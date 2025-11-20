@@ -92,6 +92,7 @@ const ReadChatPage = () => {
     const [regenerateIndex, setRegenerateIndex] = useState(null);
     const itemToRespondRef = useRef(null);
     const deletedItemsRef = useRef(new Set());
+    const recordingStartTimeRef = useRef(null);
     const isWaitingForEvaluationRef = useRef(false);
     const replayAudioRef = useRef(new Audio());
     const askedPageRef = useRef([]);
@@ -306,6 +307,8 @@ const ReadChatPage = () => {
         setIsRecording(true);
         setIsConversationEnded(false);
         console.log('start recording');
+        // Record the start time for duration validation
+        recordingStartTimeRef.current = Date.now();
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
         if (timerRef.current) clearInterval(timerRef.current);
@@ -329,6 +332,7 @@ const ReadChatPage = () => {
 
     /**
      * In push-to-talk mode, stop recording
+     * Filters invalid responses: if recording duration is less than 0.3 seconds, skip response creation
      */
     const stopRecording = async () => {
         if (!isRecording) {
@@ -341,6 +345,21 @@ const ReadChatPage = () => {
         await wavRecorder.pause();
         recorderControls.stopRecording();
         console.log('stop recording');
+        
+        // Calculate recording duration and filter invalid responses
+        const recordingDuration = recordingStartTimeRef.current 
+            ? (Date.now() - recordingStartTimeRef.current) / 1000 
+            : 0;
+        
+        // If recording duration is less than 0.3 seconds, skip response creation
+        if (recordingDuration < 0.3) {
+            console.log(`Recording duration (${recordingDuration.toFixed(2)}s) is too short, skipping response creation`);
+            recordingStartTimeRef.current = null;
+            isWaitingForResponseRef.current = false;
+            return;
+        }
+        
+        recordingStartTimeRef.current = null;
         isWaitingForResponseRef.current = false;
         if (isKnowledge) {
             const items = client.conversation.getItems();

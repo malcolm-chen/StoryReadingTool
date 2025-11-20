@@ -3,6 +3,7 @@
     "4": {
       "question": "To become the forefathers of frogs, do fish grow feathers, or do they grow lungs and legs?",
       "answer": "Fish grow lungs and legs.",
+      "criteria": "The correct response should mention BOTH legs and lungs.",
       "init_feedback": {
         "correct": "That’s right! To become the forefathers of frogs, fish grow lungs and legs. ",
         "incorrect": "Good try! Let’s think about it again! To become the forefathers of frogs, do fish grow feathers, or do they grow lungs and legs?",
@@ -37,6 +38,7 @@
     "5": {
       "question": "Do amphibians live in water or on land?",
       "answer": "Amphibians live both on land and in water.",
+      "criteria": "The correct response should mention BOTH land and water.",
       "init_feedback": {
         "correct": "Good job! Amphibians do live both on land and in water.",
         "incorrect": "Not quite! Want to try again? Do amphibians live in water or on land?",
@@ -71,6 +73,7 @@
     "6": {
       "question": "Does a frog breathe through its lungs, its skin, or both?",
       "answer": "A frog breathes through both its skin and lungs.",
+      "criteria": "The correct response should mention BOTH skin and lungs.",
       "init_feedback": {
         "correct": "Excellent! A frog breathes through both its skin and lungs.",
         "incorrect": "Good effort! Let’s give it another thought! Does a frog breathe through its lungs, its skin, or both?",
@@ -105,6 +108,7 @@
     "7": {
       "question": "During the winter, do frogs run around to stay warm or stay in the mud and hibernate?",
       "answer": "During the winter, frogs stay in the mud and hibernate.",
+      "criteria": "As long as the child's response mentions hibernate, it is correct.",
       "init_feedback": {
         "correct": "Great job! During the winter, frogs stay in the mud and hibernate.",
         "incorrect": "Almost there! Let’s try again! During the winter, do frogs run around to stay warm or stay in the mud and hibernate?",
@@ -139,6 +143,7 @@
     "8": {
       "question": "Can tadpoles breathe through their gills on land?",
       "answer": "No, tadpoles can't breathe through their gills on land.",
+      "criteria": "As long as the child's response mentions no, it is correct.",
       "init_feedback": {
         "correct": "You got it! Tadpoles can't breathe through their gills on land.",
         "incorrect": "That’s a good try! Let’s give it another try. Can tadpoles breathe through their gills on land?",
@@ -173,6 +178,7 @@
     "11": {
       "question": "Do frogs use their voices to hunt for mates or attract insects?",
       "answer": "Frogs use their voices to hunt for mates.",
+      "criteria": "As long as the child's response mentions hunt for mates, it is correct.",
       "init_feedback": {
         "correct": "Excellent! Frogs use their voices to hunt for mates.",
         "incorrect": "Good effort. Let’s think about how frogs use their voices again. Do frogs use their voices to hunt for mates or attract insects?",
@@ -207,6 +213,7 @@
     "13": {
       "question": "Can frogs see what is around them without moving?",
       "answer": "Yes, frogs can see what is around them without moving because their eyes can see in all directions.",
+      "criteria": "As long as the child's response mentions yes, it is correct.",
       "init_feedback": {
         "correct": "Well done! Frogs can see what is around them without moving because their eyes can see in all directions.",
         "incorrect": "You are really close! Want to take another guess? Can frogs see what is around them without moving?",
@@ -241,6 +248,7 @@
     "15": {
       "question": "Is a frog’s tongue sticky or not sticky?",
       "answer": "A frog’s tongue is sticky which helps them catch insects.",
+      "criteria": "As long as the child's response mentions sticky, it is correct.",
       "init_feedback": {
         "correct": "You’re paying great attention! A frog’s tongue is sticky which helps them catch insects.",
         "incorrect": "Almost there! Let’s check that again. Is a frog’s tongue sticky or not sticky?",

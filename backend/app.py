@@ -183,9 +183,10 @@ def evaluate_response():
     The question is: {multichoice_questions['pages'][page]['question']}
     The answer is: {multichoice_questions['pages'][page]['answer']}
     The child's response is: {response}
+    The evaluation criteria is: {multichoice_questions['pages'][page]['criteria']}
 
     ** Evaluation Criteria **
-    If the child's response correctly addresses the question and matches most of the ideas in the answer, the evaluation result should be correct.
+    If the child's response meets the evaluation criteria, the evaluation result should be correct.
     """
     
     # Add special case for page 13

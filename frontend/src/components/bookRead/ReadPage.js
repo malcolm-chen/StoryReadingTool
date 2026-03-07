@@ -32,6 +32,7 @@ const ReadChatPage = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [canPushToTalk, setCanPushToTalk] = useState(true);
+    const [isVoiceInputDisabled, setIsVoiceInputDisabled] = useState(false);
     const [isConversationEnded, setIsConversationEnded] = useState(false);
     const [realtimeEvents, setRealtimeEvents] = useState([]);
     const [items, setItems] = useState([]);
@@ -94,6 +95,7 @@ const ReadChatPage = () => {
     const deletedItemsRef = useRef(new Set());
     const recordingStartTimeRef = useRef(null);
     const isWaitingForEvaluationRef = useRef(false);
+    const responseTimeoutRef = useRef(null);
     const replayAudioRef = useRef(new Audio());
     const askedPageRef = useRef([]);
     const audioRef = useRef(new Audio());
@@ -124,28 +126,16 @@ const ReadChatPage = () => {
         const handleKeyDown = (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                console.log('space key pressed');
-                if (clientRef.current.realtime.isConnected() && !isRecording) {
-                    startRecording();
-                }
-            }
-        };
-        const handleKeyUp = (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                console.log('space key released');
-                if (clientRef.current.realtime.isConnected() && isRecording) {
-                    stopRecording();
+                if (clientRef.current.realtime.isConnected() && !isVoiceInputDisabled) {
+                    toggleRecording();
                 }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isRecording]);
+    }, [isRecording, isVoiceInputDisabled]);
     // const [currentPage, setCurrentPage] = useState(() => {
     //     const savedPage = localStorage.getItem(`${title}-currentPage`);
     //     console.log('savedPage', savedPage);
@@ -272,6 +262,10 @@ const ReadChatPage = () => {
      */
     const disconnectConversation = useCallback(async () => {
         console.log('disconnecting conversation');
+        if (responseTimeoutRef.current) {
+            clearTimeout(responseTimeoutRef.current);
+            responseTimeoutRef.current = null;
+        }
         setIsConnected(false);
         setRealtimeEvents([]);
         setItems([]);
@@ -296,7 +290,19 @@ const ReadChatPage = () => {
     }, []);
 
     /**
-     * In push-to-talk mode, start recording
+     * Toggle recording: click to start, click again to send
+     */
+    const toggleRecording = () => {
+        if (isVoiceInputDisabled) return;
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+
+    /**
+     * In click-to-talk mode, start recording
      * .appendInputAudio() for each sample
      */
     const startRecording = async () => {
@@ -361,19 +367,49 @@ const ReadChatPage = () => {
         
         recordingStartTimeRef.current = null;
         isWaitingForResponseRef.current = false;
+        setIsVoiceInputDisabled(true);
         if (isKnowledge) {
             const items = client.conversation.getItems();
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
             client.inputAudioBuffer = new Int16Array(0);
-            await client.realtime.send('response.create', {
-                response: {
-                    "modalities": ["text"],
-                    "instructions": getInstruction4Evaluation(items),
-                }
-            });
+            if (responseTimeoutRef.current) {
+                clearTimeout(responseTimeoutRef.current);
+                responseTimeoutRef.current = null;
+            }
+            const sendEvaluationResponse = async () => {
+                const currentItems = client.conversation.getItems();
+                await client.realtime.send('response.create', {
+                    response: {
+                        "modalities": ["text"],
+                        "instructions": getInstruction4Evaluation(currentItems),
+                    }
+                });
+            };
+            await sendEvaluationResponse();
             isWaitingForEvaluationRef.current = true;
             responseResendRef.current = false;
+            const scheduleFallbackRetry = () => {
+                responseTimeoutRef.current = setTimeout(async () => {
+                    if (!isWaitingForEvaluationRef.current || !client.realtime.isConnected()) return;
+                    responseTimeoutRef.current = null;
+                    console.log('No response within 3 seconds, canceling and resending response.create');
+                    try {
+                        await client.realtime.send('response.cancel');
+                        const currentItems = client.conversation.getItems();
+                        await client.realtime.send('response.create', {
+                            response: {
+                                "modalities": ["text"],
+                                "instructions": getInstruction4Evaluation(currentItems),
+                            }
+                        });
+                        scheduleFallbackRetry();
+                    } catch (error) {
+                        console.error('Error in response fallback:', error);
+                    }
+                }, 3000);
+            };
+            scheduleFallbackRetry();
         }
         // else {
         //     client.createResponse();
@@ -409,7 +445,8 @@ const ReadChatPage = () => {
       }, [audioSpeed, title]);
 
     const playPageSentences = () => {
-        if (pages[currentPageRef.current]?.text) {
+        const pageText = pages[currentPageRef.current]?.text;
+        if (pageText && pageText.length > 0) {
             sentenceIndexRef.current = 0;
             const audio = audioRef.current;
             const playNextSentence = async () => {
@@ -430,6 +467,9 @@ const ReadChatPage = () => {
                         setIsPlaying(true);
                     } catch (error) {
                         console.error('Error playing audio:', error);
+                        // Advance to next sentence to avoid getting stuck when audio fails (e.g. missing file)
+                        sentenceIndexRef.current += 1;
+                        playNextSentence();
                     }
                 } else {
                     // setIsPlaying(false);
@@ -1571,6 +1611,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     useEffect(() => {
         return () => {
           if (timerRef.current) clearInterval(timerRef.current);
+          if (responseTimeoutRef.current) clearTimeout(responseTimeoutRef.current);
         };
       }, []);
 
@@ -1596,13 +1637,20 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 }
                 userRespondedRef.current = true;
                 isWaitingForResponseRef.current = false;
+                setIsVoiceInputDisabled(false);
                 noResponseReminderCountRef.current = 0; // 重置无响应提醒计数器
                 if (timerRef.current) clearInterval(timerRef.current);
                 setTimer(0);
             });
             client.on('conversation.item.appended', (item) => {
                 console.log('conversation.item.appended');
-                // console.log(item);
+                // Clear response fallback timeout when we receive any assistant response
+                if (item.role === 'assistant' && isWaitingForEvaluationRef.current) {
+                    if (responseTimeoutRef.current) {
+                        clearTimeout(responseTimeoutRef.current);
+                        responseTimeoutRef.current = null;
+                    }
+                }
             });
             client.on('conversation.updated', async ({ item, delta }) => {
                 const items = client.conversation.getItems();
@@ -1610,6 +1658,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 setTimer(0);
                 // console.log('item', item);
                 if(timerRef.current) clearInterval(timerRef.current);
+                // Clear response fallback timeout when we receive assistant content
+                if ((delta?.transcript || delta?.audio) && item.role === 'assistant' && isWaitingForEvaluationRef.current) {
+                    if (responseTimeoutRef.current) {
+                        clearTimeout(responseTimeoutRef.current);
+                        responseTimeoutRef.current = null;
+                    }
+                }
                 // if the item starts with <eval>, delete it
                 if (delta?.transcript) {
                     // setChatHistory(items);
@@ -1734,6 +1789,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                 }
                                 console.log('conversation ended');
                                 if (!isReplayingRef.current && !isAskingRef.current) {
+                                    setIsVoiceInputDisabled(false);
                                     setIsConversationEnded(true);
                                 }
                             } else {
@@ -1746,12 +1802,25 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                         await new Promise(resolve => setTimeout(resolve, 100));
                                     }
                                     if (!isReplayingRef.current) {
+                                        setIsVoiceInputDisabled(false);
                                         startResponseTimer();
                                     }
                                 }
                             }
                         } else {
                             setIsFirstTime(false);
+                        }
+                    } else if (item.role === 'assistant' && item.content[0]?.transcript) {
+                        // Conversation end detection when response has transcript but no audio (e.g. API edge case, async audio)
+                        // Skip evaluation items (JSON format, get deleted - they have content[0].text with "evaluation")
+                        const transcript = item.content[0].transcript;
+                        const isEvaluationItem = transcript.trim().startsWith('{') || transcript.includes('"evaluation"');
+                        if (!isEvaluationItem && !transcript.endsWith('?') && !transcript.endsWith('? ') && !transcript.endsWith('talk.')) {
+                            console.log('conversation ended (transcript only, no audio)');
+                            if (!isReplayingRef.current && !isAskingRef.current) {
+                                setIsVoiceInputDisabled(false);
+                                setIsConversationEnded(true);
+                            }
                         }
                     }
                 }
@@ -1877,6 +1946,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             replayAudio.currentTime = 0;
             isReplayingRef.current = false;
             setReplayingIndex(null);
+            // Keep disabled - we're about to play another message
         }
 
         // If clicking on the currently playing message
@@ -1884,10 +1954,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             if (isReplayingRef.current) {
                 replayAudio.pause();
                 isReplayingRef.current = false;
+                setIsVoiceInputDisabled(false);
             }
             else {
                 // Resume playing
                 await wavStreamPlayer.interrupt();
+                setIsVoiceInputDisabled(true);
                 replayAudio.play();
                 isReplayingRef.current = true;
             }
@@ -1896,6 +1968,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
         // Start playing a new message
         await wavStreamPlayer.interrupt();
+        setIsVoiceInputDisabled(true);
         replayAudio.src = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory][index].formatted.file.url;
         replayAudio.currentTime = 0;
         try {
@@ -1903,9 +1976,15 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             setReplayingIndex(index);
             isReplayingRef.current = true;
             
+            const enableVoiceInput = () => {
+                isReplayingRef.current = false;
+                setReplayingIndex(null);
+                setIsVoiceInputDisabled(false);
+            };
+            
             // 添加暂停事件监听器
             replayAudio.onpause = () => {
-                isReplayingRef.current = false;
+                enableVoiceInput();
             };
     
             // 添加播放事件监听器
@@ -1915,13 +1994,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             
             replayAudio.onended = () => {
                 console.log('replay ended');
-                isReplayingRef.current = false;
-                setReplayingIndex(null);
+                enableVoiceInput();
             };
         } catch (error) {
             console.error('Error playing audio:', error);
             isReplayingRef.current = false;
             setReplayingIndex(null);
+            setIsVoiceInputDisabled(false);
         }
     }
 
@@ -1985,6 +2064,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         } catch (error) {
             console.error('Error sending chat history to backend', error);
         }
+        setIsVoiceInputDisabled(false);
         if (isKnowledge) {
             console.log('isKnowledge', isKnowledge);
             setIsKnowledge(false);
@@ -2458,32 +2538,30 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             )}
                             <button id='chat-input' 
                                 className='no-selection'
-                                disabled={!isConnected || !canPushToTalk}
-                                onMouseDown={startRecording}
-                                onTouchStart={startRecording}
-                                onPointerDown={startRecording}
-                                onMouseUp={stopRecording}
-                                onTouchEnd={stopRecording}
-                                onPointerUp={stopRecording}
+                                disabled={!isConnected || !canPushToTalk || isVoiceInputDisabled}
+                                onClick={toggleRecording}
                                 onContextMenu={(e) => e.preventDefault()}
                                 style={{
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isVoiceInputDisabled ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     backgroundColor: '#F4A011',
                                     position: 'relative',
-                                    zIndex: 103
+                                    zIndex: 103,
+                                    opacity: isVoiceInputDisabled ? 0.8 : 1
                                 }}
                             >
                                 {/* <FaMicrophone size={40} color='white'/> */}
-                                {isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Talking...</h4>
+                                {isVoiceInputDisabled && !isRecording ? (
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }} className="loading-dots">...</h4>
+                                ) : isRecording ? 
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to send</h4>
                                 : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Hold to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to talk!</h4>
                                 </div>}
                             </button>
                         </div>

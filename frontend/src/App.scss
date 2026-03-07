@@ -918,6 +918,17 @@ button {
   animation: loading 2s linear infinite;
 }
 
+/* Loading dots animation for voice input button */
+@keyframes loading-dots {
+  0%, 20% { opacity: 0.3; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0.3; }
+}
+
+.loading-dots {
+  animation: loading-dots 1.5s ease-in-out infinite;
+}
+
 #close-message {
   position: absolute;
   background-color: #e6e8f5;

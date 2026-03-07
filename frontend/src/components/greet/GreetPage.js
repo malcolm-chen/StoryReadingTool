@@ -24,6 +24,9 @@ const GreetPage = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [canPushToTalk, setCanPushToTalk] = useState(true);
+    const [isVoiceInputDisabled, setIsVoiceInputDisabled] = useState(true);
+    const [microphoneDevices, setMicrophoneDevices] = useState([]);
+    const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [isConversationEnded, setIsConversationEnded] = useState(false);
     const [realtimeEvents, setRealtimeEvents] = useState([]);
     const [items, setItems] = useState([]);
@@ -41,6 +44,9 @@ const GreetPage = () => {
     const [timer, setTimer] = useState(0);
     const timerRef = useRef(null);
     const isStartingRecordingRef = useRef(false);
+    const recordingStartTimeRef = useRef(null);
+    const isFirstAnswerRef = useRef(true);
+    const firstAnswerAudioBufferRef = useRef([]);
     // const [evaluation, setEvaluation] = useState(null);
     
     const penguin = './files/imgs/penguin1.svg';
@@ -105,44 +111,41 @@ const GreetPage = () => {
         const handleKeyDown = (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                console.log('space key pressed');
-                if (clientRef.current.realtime.isConnected() && !isRecording) {
-                    startRecording();
-                }
-            }
-        };
-        const handleKeyUp = (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                console.log('space key released');
-                if (clientRef.current.realtime.isConnected() && isRecording) {
-                    stopRecording();
+                if (clientRef.current.realtime.isConnected() && !isVoiceInputDisabled) {
+                    toggleRecording();
                 }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isRecording]);
+    }, [isRecording, isVoiceInputDisabled]);
 
 
     useEffect(() => {
         const setupGreet = async () => {
-            console.log('setting up client for guiding');
-            setupClient(await getInstruction4Greet());
-            setIsClientSetup(true);
-        }
+            try {
+                const wavRecorder = wavRecorderRef.current;
+                const devices = await wavRecorder.listDevices();
+                setMicrophoneDevices(devices);
+                const deviceId = devices.length > 0 ? devices[0].deviceId : undefined;
+                setSelectedDeviceId(deviceId || '');
+                console.log('setting up client for guiding');
+                await setupClient(await getInstruction4Greet(), deviceId);
+                setIsClientSetup(true);
+            } catch (err) {
+                console.error('Failed to setup greet:', err);
+            }
+        };
         setupGreet();
     }, []);
 
     /**
      * Connect to conversation:
-     * WavRecorder taks speech input, WavStreamPlayer output, client is API client
+     * WavRecorder takes speech input, WavStreamPlayer output, client is API client
      */
-    const connectConversation = useCallback(async () => {
+    const connectConversation = useCallback(async (deviceId) => {
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
         const wavStreamPlayer = wavStreamPlayerRef.current;
@@ -151,8 +154,8 @@ const GreetPage = () => {
         setRealtimeEvents([]);
         setItems(client.conversation.getItems());
 
-        // Connect to microphone
-        await wavRecorder.begin();
+        // Connect to microphone (with optional device selection)
+        await wavRecorder.begin(deviceId || undefined);
 
         // Connect to audio output
         await wavStreamPlayer.connect();
@@ -166,6 +169,18 @@ const GreetPage = () => {
             await wavRecorder.record((data) => client.appendInputAudio(data.mono));
         }
     }, []);
+
+    const handleMicrophoneChange = useCallback(async (newDeviceId) => {
+        if (!newDeviceId || newDeviceId === selectedDeviceId) return;
+        setSelectedDeviceId(newDeviceId);
+        const wavRecorder = wavRecorderRef.current;
+        const client = clientRef.current;
+        if (wavRecorder.processor && client.realtime.isConnected()) {
+            await wavRecorder.end();
+            await wavRecorder.begin(newDeviceId);
+            console.log('Switched to microphone:', newDeviceId);
+        }
+    }, [selectedDeviceId]);
 
 
     /**
@@ -195,7 +210,19 @@ const GreetPage = () => {
     }, []);
 
     /**
-     * In push-to-talk mode, start recording
+     * Toggle recording: click to start, click again to send
+     */
+    const toggleRecording = () => {
+        if (isVoiceInputDisabled) return;
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+
+    /**
+     * In click-to-talk mode, start recording
      * .appendInputAudio() for each sample
      */
     const startRecording = async () => {
@@ -205,6 +232,7 @@ const GreetPage = () => {
         isStartingRecordingRef.current = true;
         setIsRecording(true);
         setIsConversationEnded(false);
+        recordingStartTimeRef.current = Date.now();
         console.log('start recording');
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
@@ -222,23 +250,64 @@ const GreetPage = () => {
             await client.cancelResponse(trackId, offset);
         }
         recorderControls.startRecording();
-        await wavRecorder.record((data) => client.appendInputAudio(data.mono));
+        firstAnswerAudioBufferRef.current = [];
+        await wavRecorder.record((data) => {
+            client.appendInputAudio(data.mono);
+            if (isFirstAnswerRef.current && data.mono) {
+                firstAnswerAudioBufferRef.current.push(new Int16Array(data.mono));
+            }
+        });
         isStartingRecordingRef.current = false;
     };
 
     /**
-     * In push-to-talk mode, stop recording
+     * In click-to-talk mode, stop recording
      */
     const stopRecording = async () => {
         if (!isRecording) {
             return;
         }
         setIsRecording(false);
+        setIsVoiceInputDisabled(true);
         const client = clientRef.current;
         const wavRecorder = wavRecorderRef.current;
         await wavRecorder.pause();
         recorderControls.stopRecording();
         console.log('stop recording');
+
+        const duration = recordingStartTimeRef.current
+            ? (Date.now() - recordingStartTimeRef.current) / 1000
+            : 0;
+        recordingStartTimeRef.current = null;
+
+        if (isFirstAnswerRef.current) {
+            const chunks = firstAnswerAudioBufferRef.current;
+            const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
+            const mergedBuffer = new Int16Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+                mergedBuffer.set(chunk, offset);
+                offset += chunk.length;
+            }
+            const rms = computeAudioRMS(mergedBuffer);
+            const valid = isFirstAnswerValid(duration, rms);
+
+            if (!valid) {
+                console.log(`First answer invalid: duration=${duration.toFixed(2)}s, rms=${rms.toFixed(4)}`);
+                if (client.inputAudioBuffer !== undefined) {
+                    client.inputAudioBuffer = new Int16Array(0);
+                }
+                client.realtime.send('response.create', {
+                    response: {
+                        "modalities": ["text", "audio"],
+                        "instructions": getInstruction4CannotHear()
+                    }
+                });
+                setIsVoiceInputDisabled(false);
+                return;
+            }
+            isFirstAnswerRef.current = false;
+        }
 
         client.createResponse();
     };
@@ -249,15 +318,15 @@ const GreetPage = () => {
         Your task is to help the child get familiar with the interaction with the chatbot.
 
         **Greeting Instructions**:
-        - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When moving on to a new page, I will ask you questions about the story. You can press AND hold the black space button to talk. When you release the button, your response will be sent to me. Let's try it! Since the story is about frogs, what do you know about frogs?' (end the first turn with a question mark)
-        - If the child's response is not clear, you can ask the child to repeat it, and you should instruct the child to 'press and hold the black space button to talk, and release it when you are done'.
+        - Always start by asking 'Hey ${user}, I am your reading partner. We are going to read the storybook ${title}. When moving on to a new page, I will ask you questions about the story. Let's check your microphone first! You can click once to start talking. When you finish talking, click again to send your response to me. Let's try it! Since the story is about frogs, what do you know about frogs?' (end the first turn with a question mark)
+        - If the child's response is not clear, you can ask the child to repeat it, and you should instruct the child to 'click once to start talking, and click again when you are done to send'.
         - After the child's response is clearly recognized, you should first acknowledge the child's response and their effort in successfully talking to you, and conclude the conversation by saying 'Great! Now, let's explore the story together!'
         - When concluding the conversation, you should not ask any more questions.
 
         **Conversation Rules**:
         - Maintain concise responses: each should be no more than 25 words, using simple tier1 or tier2 vocabulary.
         - Keep the conversation within two rounds.
-        - Do not make up child's response. If the response is not clear, you should instruct the child to 'press and hold the black space button to talk, and release it when you are done', and then you should ask the child to repeat it.
+        - Do not make up child's response. If the response is not clear, you should instruct the child to 'click once to start talking, and click again when you are done to send', and then you should ask the child to repeat it.
         - IF THE CONVERSATION IS NOT ENDED, ALWAYS END EACH TURN WITH A QUESTION.
 
         **Important Reminders**:
@@ -308,6 +377,34 @@ const GreetPage = () => {
         `;
         console.log(instruction4NoResponse);
         return instruction4NoResponse;
+    }
+
+    const getInstruction4CannotHear = () => {
+        const instruction4CannotHear = `
+        **Instructions**:
+        1. Read the chat history to find the last question you asked (about frogs).
+        2. Ignore the chat history. Say "I cannot hear your response. Can you try again?" and ADD the last question you asked.
+        
+        **Important Reminder**:
+        - Make sure to only ask this exact question ONCE, and do not say or ask anything else. DO not provide answer to your question.
+        `;
+        return instruction4CannotHear;
+    }
+
+    const computeAudioRMS = (int16Array) => {
+        if (!int16Array || int16Array.length === 0) return 0;
+        let sum = 0;
+        for (let i = 0; i < int16Array.length; i++) {
+            const normalized = int16Array[i] / 32768;
+            sum += normalized * normalized;
+        }
+        return Math.sqrt(sum / int16Array.length);
+    }
+
+    const isFirstAnswerValid = (duration, rms) => {
+        const MIN_DURATION_SEC = 0.5;
+        const MIN_RMS = 0.01;
+        return duration >= MIN_DURATION_SEC && rms >= MIN_RMS;
     }
 
     const updateClientInstruction = async (instruction) => {
@@ -362,7 +459,7 @@ const GreetPage = () => {
         };
       }, []);
 
-    const setupClient = async (instruction) => {
+    const setupClient = async (instruction, deviceId) => {
         (async () => {
             console.log('setting up client');
             const wavStreamPlayer = wavStreamPlayerRef.current;
@@ -379,6 +476,7 @@ const GreetPage = () => {
                 }
                 userRespondedRef.current = true;
                 isWaitingForResponseRef.current = false;
+                setIsVoiceInputDisabled(false);
                 if (timerRef.current) clearInterval(timerRef.current);
                 setTimer(0);
             });
@@ -422,12 +520,13 @@ const GreetPage = () => {
                     }
                     if (item.role === 'assistant') {
                         // if the last item does not end with a question mark, it means the conversation is ended
-                        if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.includes('black space button') && !item?.content[0]?.transcript?.includes('when you are done')) {
+                        if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.includes('click once to start') && !item?.content[0]?.transcript?.includes('click again when you are done')) {
                             while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                 await new Promise(resolve => setTimeout(resolve, 100));
                             }
                             console.log('conversation ended');
                             if (!isReplayingRef.current && !isAskingRef.current) {
+                                setIsVoiceInputDisabled(false);
                                 setIsConversationEnded(true);
                             }
                         } else {
@@ -440,6 +539,7 @@ const GreetPage = () => {
                                     await new Promise(resolve => setTimeout(resolve, 100));
                                 }
                                 if (!isReplayingRef.current) {
+                                    setIsVoiceInputDisabled(false);
                                     startResponseTimer();
                                 }
                             }
@@ -454,7 +554,7 @@ const GreetPage = () => {
 
             
             if (!client.isConnected()) {
-                await connectConversation();
+                await connectConversation(deviceId);
             }   
         
             client.realtime.send('response.create');
@@ -483,6 +583,7 @@ const GreetPage = () => {
         replayAudio.pause();
         replayAudio.currentTime = 0;
         if (isReplayingRef.current === false) {
+            setIsVoiceInputDisabled(true);
             replayAudio.play();
             setReplayingIndex(index); // Set the replaying index
             isReplayingRef.current = true;
@@ -490,6 +591,7 @@ const GreetPage = () => {
                 console.log('replay ended');
                 isReplayingRef.current = false;
                 setReplayingIndex(null); // Reset the replaying index when done
+                setIsVoiceInputDisabled(false);
             };
         }
         // setIsPlaying(true);
@@ -637,6 +739,41 @@ const GreetPage = () => {
                                 </Box>
                             )))}
                     </Box>
+                    {microphoneDevices.length > 0 && (
+                        <Box sx={{
+                            width: '50%',
+                            margin: 'auto',
+                            zIndex: 999,
+                            background: '#F5F0E8',
+                            padding: '16px',
+                            borderRadius: '20px',
+                            mb: 1,
+                            boxShadow: '0 4px 20px rgba(42, 34, 120, 0.55)'
+                        }}>
+                            <Typography level="body-sm" sx={{ color: '#2A2278', mb: 0.5, fontWeight: 500 }}>Microphone</Typography>
+                            <select
+                                value={selectedDeviceId}
+                                onChange={(e) => handleMicrophoneChange(e.target.value)}
+                                disabled={isRecording}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(42, 34, 120, 0.2)',
+                                    backgroundColor: '#FFFFFF',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    color: '#2A2278'
+                                }}
+                            >
+                                {microphoneDevices.map((device) => (
+                                    <option key={device.deviceId} value={device.deviceId}>
+                                        {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                                    </option>
+                                ))}
+                            </select>
+                        </Box>
+                    )}
                     {canPushToTalk && !isEnding && (
                         <div id='recording-box' style={{height: '100px'}}>
                             {/* only show these boxes when recording */}
@@ -648,17 +785,12 @@ const GreetPage = () => {
                             )}
                             <button id='chat-input' 
                                 className='no-selection'
-                                disabled={!isConnected || !canPushToTalk}
-                                onMouseDown={startRecording}
-                                onTouchStart={startRecording}
-                                onPointerDown={startRecording}
-                                onMouseUp={stopRecording}
-                                onTouchEnd={stopRecording}
-                                onPointerUp={stopRecording}
+                                disabled={!isConnected || !canPushToTalk || isVoiceInputDisabled}
+                                onClick={toggleRecording}
                                 onContextMenu={(e) => e.preventDefault()}
                                 style={{
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isVoiceInputDisabled ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -666,16 +798,18 @@ const GreetPage = () => {
                                     position: 'relative',
                                     width: '90%',
                                     height: '100%',
-                                    zIndex: 102
+                                    zIndex: 102,
+                                    opacity: isVoiceInputDisabled ? 0.8 : 1
                                 }}
                             >
-                                {/* <FaMicrophone size={40} color='white'/> */}
-                                {isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Talking...</h4>
+                                {isVoiceInputDisabled && !isRecording ? (
+                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }} className="loading-dots">...</h4>
+                                ) : isRecording ? 
+                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Click to send</h4>
                                 : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Hold to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Click to talk!</h4>
                                 </div>}
                             </button>
                         </div>

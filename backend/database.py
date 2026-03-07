@@ -6,6 +6,8 @@ import gridfs
 from dotenv import load_dotenv
 import json
 import requests
+import pandas as pd
+import openpyxl
 load_dotenv()
 
 # MongoDB connection options
@@ -179,6 +181,44 @@ def save_json_to_file(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
+def save_to_excel_file(data, filename):
+    """
+    Save chat history to an Excel file with four columns: Page ID, Speaker, AI Message, Child Message.
+    
+    Args:
+        data: Chat history data from read_chat_history() function
+        filename: Output Excel filename (e.g., "chat_history.xlsx")
+    """
+    rows = []
+    
+    # Iterate through all pages in the chat history
+    for page_key, messages in data.items():
+        # Iterate through each message in the page
+        for message in messages:
+            speaker = message.get("role", "")
+            content = message.get("content", "")
+            
+            # Create row based on speaker role
+            if speaker == "assistant":
+                rows.append({
+                    "Page ID": page_key,
+                    "Speaker": "assistant",
+                    "AI Message": content,
+                    "Child Message": ""
+                })
+            elif speaker == "user":
+                rows.append({
+                    "Page ID": page_key,
+                    "Speaker": "user",
+                    "AI Message": "",
+                    "Child Message": content
+                })
+    
+    # Create DataFrame and save to Excel
+    df = pd.DataFrame(rows)
+    df.to_excel(filename, index=False, engine='openpyxl')
+    print(f"Chat history saved to {filename}")
+
 # save_json_to_file(read_chat_history("Saud"), "Saud_chat_history.json")
 # save_json_to_file(read_chat_history("Iris"), "Iris_chat_history.json")
 # save_json_to_file(read_chat_history("Sylvie"), "Sylvie_chat_history.json")
@@ -222,4 +262,5 @@ if __name__ == "__main__":
     # for user in get_all_users():
     #     print(user["username"])
     # save_json_to_file(read_chat_history("Macy"), "Macy_chat_history.json")
-    save_json_to_file(read_chat_history("JT"), "JT_chat_history.json")
+    # save_json_to_file(read_chat_history("Akane"), "Akane_chat_history.json")
+    save_to_excel_file(read_chat_history("Akane"), "Akane_chat_history.xlsx")

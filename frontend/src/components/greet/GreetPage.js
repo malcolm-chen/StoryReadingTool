@@ -803,10 +803,10 @@ const GreetPage = () => {
                                 }}
                             >
                                 {isVoiceInputDisabled && !isRecording ? (
-                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }} className="loading-dots">...</h4>
+                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb', pointerEvents: 'none' }} className="loading-dots">...</h4>
                                 ) : isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Click to send</h4>
-                                : <div>
+                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb', pointerEvents: 'none' }}>Click to send</h4>
+                                : <div style={{ pointerEvents: 'none' }}>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
                                         <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Click to talk!</h4>

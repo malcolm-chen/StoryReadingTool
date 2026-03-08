@@ -2555,10 +2555,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             >
                                 {/* <FaMicrophone size={40} color='white'/> */}
                                 {isVoiceInputDisabled && !isRecording ? (
-                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }} className="loading-dots">...</h4>
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104, pointerEvents: 'none' }} className="loading-dots">...</h4>
                                 ) : isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to send</h4>
-                                : <div>
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104, pointerEvents: 'none' }}>Click to send</h4>
+                                : <div style={{ pointerEvents: 'none' }}>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
                                         <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to talk!</h4>

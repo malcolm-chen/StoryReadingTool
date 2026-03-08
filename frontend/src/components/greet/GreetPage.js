@@ -672,7 +672,7 @@ const GreetPage = () => {
                         <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
                     )}
                     {isRecording && (
-                        <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 101 }}>
+                        <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 101, pointerEvents: 'none' }}>
                             <VoiceVisualizer 
                                 controls={recorderControls} 
                                 isControlPanelShown={false} 
@@ -783,10 +783,13 @@ const GreetPage = () => {
                                     <div id='recording-box-2' style={{width: '90%', left: '5%'}} />
                                 </>
                             )}
-                            <button id='chat-input' 
+                            <div 
+                                id='chat-input'
+                                role="button"
+                                tabIndex={0}
+                                aria-disabled={!isConnected || !canPushToTalk || isVoiceInputDisabled}
                                 className='no-selection'
-                                disabled={!isConnected || !canPushToTalk || isVoiceInputDisabled}
-                                onClick={toggleRecording}
+                                onKeyDown={(e) => { if (e.key === 'Enter' && isConnected && canPushToTalk && !isVoiceInputDisabled) toggleRecording(); }}
                                 onContextMenu={(e) => e.preventDefault()}
                                 style={{
                                     border: 'none',
@@ -802,16 +805,26 @@ const GreetPage = () => {
                                     opacity: isVoiceInputDisabled ? 0.8 : 1
                                 }}
                             >
+                                {/* Invisible overlay to capture clicks on entire button area */}
+                                <div 
+                                    style={{ 
+                                        position: 'absolute', 
+                                        inset: 0, 
+                                        zIndex: 2,
+                                        pointerEvents: (!isConnected || !canPushToTalk || isVoiceInputDisabled) ? 'none' : 'auto'
+                                    }} 
+                                    onClick={(e) => { e.stopPropagation(); toggleRecording(); }}
+                                />
                                 {isVoiceInputDisabled && !isRecording ? (
-                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb', pointerEvents: 'none' }} className="loading-dots">...</h4>
+                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }} className="loading-dots">...</h4>
                                 ) : isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb', pointerEvents: 'none' }}>Click to send</h4>
-                                : <div style={{ pointerEvents: 'none' }}>
+                                    <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Click to send</h4>
+                                : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
                                         <h4 style={{ color: 'white', fontSize: '40px', fontFamily: 'Cherry Bomb' }}>Click to talk!</h4>
                                 </div>}
-                            </button>
+                            </div>
                         </div>
                     )}
                     <div id='moon-chat-box'>

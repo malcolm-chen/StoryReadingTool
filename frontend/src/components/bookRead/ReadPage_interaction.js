@@ -2304,7 +2304,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
                         )}
                         {isRecording && (
-                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 101 }}>
+                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 101, pointerEvents: 'none' }}>
                                 <VoiceVisualizer 
                                     controls={recorderControls} 
                                     isControlPanelShown={false} 

@@ -337,8 +337,22 @@ const ReadChatPage = () => {
     };
 
     /**
+     * Compute RMS (root mean square) of Int16Array for volume detection
+     * @param {Int16Array} samples
+     * @returns {number}
+     */
+    const getAudioRMS = (samples) => {
+        if (!samples || samples.length === 0) return 0;
+        let sum = 0;
+        for (let i = 0; i < samples.length; i++) {
+            sum += samples[i] * samples[i];
+        }
+        return Math.sqrt(sum / samples.length);
+    };
+
+    /**
      * In push-to-talk mode, stop recording
-     * Filters invalid responses: if recording duration is less than 0.3 seconds, skip response creation
+     * Filters invalid responses: duration < 0.3s or volume too low, skip response creation
      */
     const stopRecording = async () => {
         if (!isRecording) {
@@ -352,16 +366,36 @@ const ReadChatPage = () => {
         recorderControls.stopRecording();
         console.log('stop recording');
         
-        // Calculate recording duration and filter invalid responses
+        // Validity check 1: recording duration
         const recordingDuration = recordingStartTimeRef.current 
             ? (Date.now() - recordingStartTimeRef.current) / 1000 
             : 0;
         
-        // If recording duration is less than 0.3 seconds, skip response creation
-        if (recordingDuration < 0.3) {
-            console.log(`Recording duration (${recordingDuration.toFixed(2)}s) is too short, skipping response creation`);
+        // Validity check 2: volume (RMS threshold ~300 for 16-bit audio, catches near-silence)
+        const MIN_VOLUME_RMS = 300;
+        const audioBuffer = client.inputAudioBuffer;
+        const rms = getAudioRMS(audioBuffer);
+        
+        const isInvalid = recordingDuration < 0.3 || rms < MIN_VOLUME_RMS;
+        
+        if (isInvalid) {
+            if (recordingDuration < 0.3) {
+                console.log(`Recording duration (${recordingDuration.toFixed(2)}s) is too short, skipping evaluation`);
+            } else {
+                console.log(`Recording volume too low (RMS: ${rms.toFixed(0)}), skipping evaluation`);
+            }
             recordingStartTimeRef.current = null;
             isWaitingForResponseRef.current = false;
+            if (client.inputAudioBuffer) client.inputAudioBuffer = new Int16Array(0);
+            setIsVoiceInputDisabled(true);
+            if (isKnowledge) {
+                const items = client.conversation.getItems();
+                const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
+                if (answerOrder > answerRecord.length - 1) {
+                    setAnswerRecord(prev => [...prev, 'invalid']);
+                }
+                await sendResponse(client, 'invalid', items);
+            }
             return;
         }
         
@@ -2411,7 +2445,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
                         )}
                         {isRecording && (
-                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 105 }}>
+                            <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 105, pointerEvents: 'none' }}>
                                 <VoiceVisualizer 
                                     controls={recorderControls} 
                                     isControlPanelShown={false} 
@@ -2536,10 +2570,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                     <div id='recording-box-2' />
                                 </>
                             )}
-                            <button id='chat-input' 
+                            <div 
+                                id='chat-input'
+                                role="button"
+                                tabIndex={0}
+                                aria-disabled={!isConnected || !canPushToTalk || isVoiceInputDisabled}
                                 className='no-selection'
-                                disabled={!isConnected || !canPushToTalk || isVoiceInputDisabled}
-                                onClick={toggleRecording}
+                                onKeyDown={(e) => { if (e.key === 'Enter' && isConnected && canPushToTalk && !isVoiceInputDisabled) toggleRecording(); }}
                                 onContextMenu={(e) => e.preventDefault()}
                                 style={{
                                     border: 'none',
@@ -2553,17 +2590,26 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                     opacity: isVoiceInputDisabled ? 0.8 : 1
                                 }}
                             >
-                                {/* <FaMicrophone size={40} color='white'/> */}
+                                {/* Invisible overlay to capture clicks on entire button area */}
+                                <div 
+                                    style={{ 
+                                        position: 'absolute', 
+                                        inset: 0, 
+                                        zIndex: 104,
+                                        pointerEvents: (!isConnected || !canPushToTalk || isVoiceInputDisabled) ? 'none' : 'auto'
+                                    }} 
+                                    onClick={(e) => { e.stopPropagation(); toggleRecording(); }}
+                                />
                                 {isVoiceInputDisabled && !isRecording ? (
-                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104, pointerEvents: 'none' }} className="loading-dots">...</h4>
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb' }} className="loading-dots">...</h4>
                                 ) : isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104, pointerEvents: 'none' }}>Click to send</h4>
-                                : <div style={{ pointerEvents: 'none' }}>
+                                    <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb' }}>Click to send</h4>
+                                : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '27px', fontFamily: 'Cherry Bomb' }}>Click to talk!</h4>
                                 </div>}
-                            </button>
+                            </div>
                         </div>
                     )}
                     <div id='moon-chat-box'>

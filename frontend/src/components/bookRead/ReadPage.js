@@ -183,7 +183,7 @@ const ReadChatPage = () => {
     }, []);
 
     /**
-     * Transcribe audio using OpenAI Whisper API
+     * Transcribe audio using OpenAI Whisper API, always output in English (translates if needed)
      */
     const transcribeWithOpenAI = async (audioBlob) => {
         const openaiKey = process.env.REACT_APP_OPENAI_API_KEY;
@@ -195,11 +195,11 @@ const ReadChatPage = () => {
         // Provide a filename extension matching mime when possible
         const ext = audioBlob.type.includes('webm') ? 'webm' : audioBlob.type.includes('ogg') ? 'ogg' : audioBlob.type.includes('mp3') ? 'mp3' : 'wav';
         form.append('file', audioBlob, `recording.${ext}`);
-        // Use Whisper v1 for REST audio transcription
         form.append('model', 'whisper-1');
         form.append('response_format', 'json');
 
-        const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        // Use translations endpoint to always output in English (transcribes + translates)
+        const resp = await fetch('https://api.openai.com/v1/audio/translations', {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${openaiKey}`
@@ -209,11 +209,21 @@ const ReadChatPage = () => {
 
         if (!resp.ok) {
             const errText = await resp.text().catch(() => '');
-            throw new Error(`OpenAI transcription failed: ${resp.status} ${errText}`);
+            throw new Error(`OpenAI audio translation failed: ${resp.status} ${errText}`);
         }
 
         const json = await resp.json();
         return json.text;
+    };
+
+    const MIN_DURATION_SEC = 0.3;
+    const MIN_RMS = 0.01;
+
+    /**
+     * Check if audio is invalid (too short or too quiet) - skip evaluation in these cases
+     */
+    const isAnswerInvalid = (durationSec, rms) => {
+        return durationSec < MIN_DURATION_SEC || rms < MIN_RMS;
     };
 
     /**
@@ -314,11 +324,10 @@ const ReadChatPage = () => {
                 const audioAnalysis = await analyzeAudioBlob(audioBlob);
                 console.log('Audio analysis:', audioAnalysis);
                 
-                // Optional: Skip transcription if audio is too short or too quiet
-                // You can adjust these thresholds as needed
-                if (audioAnalysis.durationSec < 0.1) {
-                    console.warn('Audio too short, skipping transcription');
-                    setIsVoiceInputDisabled(false);
+                // If duration too short (<0.3s) or volume too low, treat as invalid - skip evaluation and play invalid response
+                if (isAnswerInvalid(audioAnalysis.durationSec, audioAnalysis.rms)) {
+                    console.warn(`Answer invalid: duration=${audioAnalysis.durationSec.toFixed(2)}s, rms=${audioAnalysis.rms.toFixed(4)}`);
+                    playNoAnswer();
                     return;
                 }
                 

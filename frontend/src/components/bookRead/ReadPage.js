@@ -1656,10 +1656,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             const client = clientRef.current;
             client.updateSession({ instructions: instruction });
             client.updateSession({ voice: 'alloy' });
-            client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
+            client.updateSession({ input_audio_transcription: { model: 'whisper-1', language: 'en' } });
             // client.updateSession({
             //     turn_detection: { type: 'server_vad' }, // or 'server_vad'
-            //     input_audio_transcription: { model: 'whisper-1' },
+            //     input_audio_transcription: { model: 'whisper-1', language: 'en' },
             // });
             client.on('error', (event) => console.error(event));
             client.on('conversation.interrupted', async () => {
@@ -1870,7 +1870,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     // 重新设置client配置
                     client.updateSession({ instructions: instruction });
                     client.updateSession({ voice: 'alloy' });
-                    client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
+                    client.updateSession({ input_audio_transcription: { model: 'whisper-1', language: 'en' } });
                 } catch (error) {
                     console.error('Failed to reconnect:', error);
                 }

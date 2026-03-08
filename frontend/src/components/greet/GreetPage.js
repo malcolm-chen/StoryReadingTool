@@ -466,7 +466,7 @@ const GreetPage = () => {
             const client = clientRef.current;
             client.updateSession({ instructions: instruction });
             client.updateSession({ voice: 'alloy' });
-            client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
+            client.updateSession({ input_audio_transcription: { model: 'whisper-1', language: 'en' } });
             client.on('error', (event) => console.error(event));
             client.on('conversation.interrupted', async () => {
                 const trackSampleOffset = await wavStreamPlayer.interrupt();

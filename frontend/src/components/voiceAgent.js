@@ -10,7 +10,7 @@ const VoiceAgent = () => {
     client.updateSession({ voice: 'alloy' });
     client.updateSession({
       turn_detection: { type: 'none' }, // or 'server_vad'
-      input_audio_transcription: { model: 'whisper-1' },
+      input_audio_transcription: { model: 'whisper-1', language: 'en' },
     });
 
     // Set up event handling

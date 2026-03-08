@@ -29,6 +29,7 @@ const ReadChatPage = () => {
     const [isEnding, setIsEnding] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
+    const [isVoiceInputDisabled, setIsVoiceInputDisabled] = useState(false);
     const [canPushToTalk, setCanPushToTalk] = useState(true);
     const [isConversationEnded, setIsConversationEnded] = useState(false);
     const [showCaption, setShowCaption] = useState(true);
@@ -74,6 +75,7 @@ const ReadChatPage = () => {
     const noResponseAttemptsRef = useRef(0);
     const firstTurnCategoryRef = useRef(null); // incorrect | uncertainty | off-topic
     const isSecondTurnRef = useRef(false);
+    const hasProcessedConversationEndRef = useRef(false);
 
     const mediaRecorderRef = useRef(null);
     const recordedChunksRef = useRef([]);
@@ -94,28 +96,16 @@ const ReadChatPage = () => {
         const handleKeyDown = (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                console.log('space key pressed');
-                if (!isRecording) {
-                    startRecording();
-                }
-            }
-        };
-        const handleKeyUp = (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                console.log('space key released');
-                if (isRecording) {
-                    stopRecording();
+                if (isKnowledge && !isVoiceInputDisabled) {
+                    toggleRecording();
                 }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isRecording]);
+    }, [isRecording, isVoiceInputDisabled, isKnowledge]);
     // const [currentPage, setCurrentPage] = useState(() => {
     //     const savedPage = localStorage.getItem(`${title}-currentPage`);
     //     console.log('savedPage', savedPage);
@@ -249,8 +239,19 @@ const ReadChatPage = () => {
     };
 
     /**
-     * In push-to-talk mode, start recording
-     * .appendInputAudio() for each sample
+     * Toggle recording: click to start, click again to send
+     */
+    const toggleRecording = () => {
+        if (isVoiceInputDisabled) return;
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+
+    /**
+     * In click-to-talk mode, start recording
      */
     const startRecording = async () => {
         if (isStartingRecordingRef.current || isRecording) {
@@ -290,13 +291,14 @@ const ReadChatPage = () => {
     };
 
     /**
-     * In push-to-talk mode, stop recording
+     * In click-to-talk mode, stop recording and send
      */
     const stopRecording = async () => {
         if (!isRecording) {
             return;
         }
         setIsRecording(false);
+        setIsVoiceInputDisabled(true);
         isStartingRecordingRef.current = false;
         console.log('stop recording');
         
@@ -316,6 +318,7 @@ const ReadChatPage = () => {
                 // You can adjust these thresholds as needed
                 if (audioAnalysis.durationSec < 0.1) {
                     console.warn('Audio too short, skipping transcription');
+                    setIsVoiceInputDisabled(false);
                     return;
                 }
                 
@@ -325,6 +328,7 @@ const ReadChatPage = () => {
                 
                 if (!transcript || transcript.trim() === '') {
                     console.warn('Empty transcription, skipping');
+                    setIsVoiceInputDisabled(false);
                     return;
                 }
                 
@@ -339,28 +343,50 @@ const ReadChatPage = () => {
                 ]);
                 
                 console.log('apiUrl', apiUrl);
-                // Send transcription to backend
-                fetch(`${apiUrl}/api/evaluate_response`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user: user,
-                        title: title,
-                        page: currentPageRef.current,
-                        transcript: transcript
+                // Send transcription to backend with 3s timeout fallback: cancel and retry if no response
+                const evaluateWithRetry = (retryCount = 0) => {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+                    fetch(`${apiUrl}/api/evaluate_response`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user: user,
+                            title: title,
+                            page: currentPageRef.current,
+                            transcript: transcript
+                        }),
+                        signal: controller.signal
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Backend response:', data);
-                    playResponseAudio(data.response);
-                })
-                .catch(error => console.error('Error sending transcription to backend:', error));
+                    .then(response => response.json())
+                    .then(data => {
+                        clearTimeout(timeoutId);
+                        if (data?.response) {
+                            console.log('Backend response:', data);
+                            playResponseAudio(data.response);
+                        } else if (retryCount < 2) {
+                            console.warn('Empty response, retrying evaluate...', retryCount + 1);
+                            evaluateWithRetry(retryCount + 1);
+                        } else {
+                            console.error('No valid response after retries');
+                            setIsVoiceInputDisabled(false);
+                        }
+                    })
+                    .catch(error => {
+                        clearTimeout(timeoutId);
+                        if (error.name === 'AbortError' && retryCount < 2) {
+                            console.warn('Evaluate timeout, retrying...', retryCount + 1);
+                            evaluateWithRetry(retryCount + 1);
+                        } else {
+                            console.error('Error sending transcription to backend:', error);
+                            setIsVoiceInputDisabled(false);
+                        }
+                    });
+                };
+                evaluateWithRetry();
             } catch (error) {
                 console.error('Error transcribing audio:', error);
-                // Optionally show an error message to the user
+                setIsVoiceInputDisabled(false);
             }
         };
     };
@@ -396,7 +422,11 @@ const ReadChatPage = () => {
                     audio.src = `/files/books/${title}/audio/p${currentPageRef.current}sec${sentenceIndexRef.current}.mp3`;
 
                     audio.onended = () => {
-                        // console.log('end');
+                        sentenceIndexRef.current += 1;
+                        playNextSentence();
+                    };
+                    audio.onerror = () => {
+                        console.error('Narration audio error, advancing to next');
                         sentenceIndexRef.current += 1;
                         playNextSentence();
                     };
@@ -407,6 +437,8 @@ const ReadChatPage = () => {
                         setIsPlaying(true);
                     } catch (error) {
                         console.error('Error playing audio:', error);
+                        sentenceIndexRef.current += 1;
+                        playNextSentence();
                     }
                 } else {
                     // setIsPlaying(false);
@@ -416,6 +448,7 @@ const ReadChatPage = () => {
                         audio.pause();
                         setIsPlaying(false);
                         setIsConversationEnded(false);
+                        hasProcessedConversationEndRef.current = false;
                         setAnswerRecord([]);
                         noReponseCntRef.current = 0;
                         setCurrentPageChatHistory([]);
@@ -543,7 +576,12 @@ const ReadChatPage = () => {
     };
 
     const showWords = (convAudio, timestamps, onComplete) => {
-        if (currentWordIndexRef.current >= timestamps?.length) {
+        // Fallback: if timestamps missing or empty, complete immediately to ensure auto page-turn
+        if (!timestamps || !Array.isArray(timestamps) || timestamps.length === 0) {
+            if (onComplete) onComplete();
+            return;
+        }
+        if (currentWordIndexRef.current >= timestamps.length) {
             console.log('All words displayed');
             console.log('Final transcript:', currentTranscriptRef.current);
             // console.log('currentPageChatHistory', currentPageChatHistory);
@@ -577,9 +615,9 @@ const ReadChatPage = () => {
             return;
         } else {
             const now = convAudio.seek();
-            if (now >= timestamps?.[currentWordIndexRef.current]?.time) {
+            if (now >= timestamps[currentWordIndexRef.current]?.time) {
                 console.log('now', now, 'timestamps', timestamps);
-                const wordToAdd = timestamps?.[currentWordIndexRef.current]?.word;
+                const wordToAdd = timestamps[currentWordIndexRef.current]?.word;
                 currentTranscriptRef.current += wordToAdd;
                 console.log('Added word:', wordToAdd, 'Current transcript:', currentTranscriptRef.current);
                 setCurrentPageChatHistory(prevHistory => {
@@ -609,18 +647,20 @@ const ReadChatPage = () => {
     const playOpening = () => {
         console.log('chat history', chatHistoryRef.current);
         console.log('currentPageChatHistory', currentPageChatHistory);
+        setIsVoiceInputDisabled(true);
         const openingIndex = Math.floor(Math.random() * 6);
         const openingAudioSrc = `/files/books/${title}/conv_audio/opening_${openingIndex}.mp3`;
+        const onComplete = () => {
+            console.log('Opening showWords completed, transcript:', currentTranscriptRef.current);
+            setTimeout(() => playQuestion(), 700);
+        };
+        const onceComplete = (() => { let done = false; return () => { if (!done) { done = true; onComplete(); } }; })();
         const convAudio = new Howl({
             src: [openingAudioSrc],
             onplay: () => {
-                showWords(convAudio, timestampsRef.current['opening'][openingIndex], () => {
-                    console.log('Opening showWords completed, transcript:', currentTranscriptRef.current);
-                    setTimeout(() => {
-                        playQuestion();
-                    }, 700); // Small delay to ensure state is updated
-                });
-            }
+                showWords(convAudio, timestampsRef.current?.['opening']?.[openingIndex], onceComplete);
+            },
+            onend: () => onceComplete() // fallback if showWords does not complete (e.g. missing timestamps)
         });
         // Ensure chat history is updated before playing question
         currentWordIndexRef.current = 0;
@@ -640,18 +680,19 @@ const ReadChatPage = () => {
     const playNoAnswer = () => {
         console.log('playNoAnswer called');
         const noAnswerAudioSrc = `/files/books/${title}/conv_audio/no_answer_0.mp3`;
+        const onComplete = () => {
+            console.log('No answer showWords completed');
+            setTimeout(() => playQuestion(), 700);
+        };
+        const onceComplete = (() => { let done = false; return () => { if (!done) { done = true; onComplete(); } }; })();
         const convAudio = new Howl({
             src: [noAnswerAudioSrc],
             onplay: () => {
                 setTimeout(() => {
-                    showWords(convAudio, timestampsRef.current['no-answer'], () => {
-                        console.log('No answer showWords completed');
-                        setTimeout(() => {
-                            playQuestion();
-                        }, 700);
-                    });
+                    showWords(convAudio, timestampsRef.current?.['no-answer'], onceComplete);
                 }, 700);
-            }
+            },
+            onend: () => onceComplete()
         });
         currentWordIndexRef.current = 0;
         currentTranscriptRef.current = '';
@@ -670,18 +711,19 @@ const ReadChatPage = () => {
     const playNoResponseAndMoveOn = () => {
         console.log('playNoResponseAndMoveOn called');
         const noResponseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_no_response.mp3`;
+        const onComplete = () => {
+            console.log('No response showWords completed');
+            setTimeout(() => handleCloseChat(), 500);
+        };
+        const onceComplete = (() => { let done = false; return () => { if (!done) { done = true; onComplete(); } }; })();
         const convAudio = new Howl({
             src: [noResponseAudioSrc],
             onplay: () => {
                 setTimeout(() => {
-                    showWords(convAudio, timestampsRef.current[currentPageRef.current]['no_response'], () => {
-                        console.log('No response showWords completed');
-                        setTimeout(() => {
-                            handleCloseChat();
-                        }, 500);
-                    });
+                    showWords(convAudio, timestampsRef.current?.[currentPageRef.current]?.['no_response'], onceComplete);
                 }, 700);
-            }
+            },
+            onend: () => onceComplete()
         });
         currentWordIndexRef.current = 0;
         currentTranscriptRef.current = '';
@@ -701,15 +743,18 @@ const ReadChatPage = () => {
         console.log('playQuestion called');
         console.log('Transcript at start of playQuestion:', currentTranscriptRef.current);
         const questionAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_question.mp3`;
+        const onComplete = () => {
+            console.log('Question showWords completed');
+            startResponseTimer();
+        };
+        const onceComplete = (() => { let done = false; return () => { if (!done) { done = true; onComplete(); } }; })();
         const convAudio = new Howl({
             src: [questionAudioSrc],
             onplay: () => {
                 console.log('Question audio started playing, current transcript:', currentTranscriptRef.current);
-                showWords(convAudio, timestampsRef.current[currentPageRef.current]['question'], () => {
-                    console.log('Question showWords completed');
-                    startResponseTimer();
-                });
-            }
+                showWords(convAudio, timestampsRef.current?.[currentPageRef.current]?.['question'], onceComplete);
+            },
+            onend: () => onceComplete()
         });
         
         // Reset word index for the question timestamps (each audio file has its own timestamp sequence)
@@ -789,36 +834,30 @@ const ReadChatPage = () => {
             responseAudioSrc = `/files/books/${title}/conv_audio/page_${currentPageRef.current}_${file}.mp3`;
         }
         
+        const onComplete = () => {
+            if (isFirstTurn && ['incorrect', 'uncertainty', 'off-topic'].includes(response)) {
+                firstTurnCategoryRef.current = response;
+                hasPlayedNoAnswerRef.current = false;
+                noResponseAttemptsRef.current = 0;
+                setTimeout(() => startResponseTimer(), 500);
+                isSecondTurnRef.current = true;
+            } else {
+                setTimeout(() => setIsConversationEnded(true), 500);
+            }
+        };
+        const onceComplete = (() => { let done = false; return () => { if (!done) { done = true; onComplete(); } }; })();
+        let timestamps;
+        if (isSecondTurnRef.current && firstTurnCategoryRef.current) {
+            timestamps = timestampsRef.current?.[currentPageRef.current]?.[ts[0]]?.[ts[1]]?.[ts[2]];
+        } else {
+            timestamps = timestampsRef.current?.[currentPageRef.current]?.[ts];
+        }
         const convAudio = new Howl({
             src: [responseAudioSrc],
             onplay: () => {
-                let timestamps;
-                if (isSecondTurnRef.current && firstTurnCategoryRef.current) {
-                    // Second turn timestamps
-                    timestamps = timestampsRef.current[currentPageRef.current][ts[0]][ts[1]][ts[2]];
-                } else {
-                    // First turn timestamps
-                    timestamps = timestampsRef.current[currentPageRef.current][ts];
-                }
-                
-                showWords(convAudio, timestamps, () => {
-                    // If first turn and not correct, start second turn; else end conversation
-                    if (isFirstTurn && ['incorrect', 'uncertainty', 'off-topic'].includes(response)) {
-                        firstTurnCategoryRef.current = response;
-                        // reset no-response trackers for second turn
-                        hasPlayedNoAnswerRef.current = false;
-                        noResponseAttemptsRef.current = 0;
-                        setTimeout(() => {
-                            startResponseTimer();
-                        }, 500);
-                        isSecondTurnRef.current = true;
-                    } else {
-                        setTimeout(() => {
-                            setIsConversationEnded(true);
-                        }, 500);
-                    }
-                });
-            }
+                showWords(convAudio, timestamps, onceComplete);
+            },
+            onend: () => onceComplete()
         });
         currentWordIndexRef.current = 0;
         currentTranscriptRef.current = '';
@@ -838,6 +877,7 @@ const ReadChatPage = () => {
     const startResponseTimer = async () => {
         // update the response timer every 1 second
         console.log('startResponseTimer');
+        setIsVoiceInputDisabled(false);
         userRespondedRef.current = false;
         isWaitingForResponseRef.current = true;
         setTimer(0); // 计时器从 0 开始
@@ -891,7 +931,8 @@ const ReadChatPage = () => {
       }, []);
 
     useEffect(() => {
-        if (isConversationEnded) {
+        if (isConversationEnded && !hasProcessedConversationEndRef.current) {
+            hasProcessedConversationEndRef.current = true;
             handleCloseChat();
         }
     }, [isConversationEnded]);
@@ -935,13 +976,15 @@ const ReadChatPage = () => {
             replayAudio.currentTime = 0;
             isReplayingRef.current = false;
             setReplayingIndex(null);
+            setIsVoiceInputDisabled(false);
         }
 
-        // If clicking on the currently playing message
+        // If clicking on the currently playing message (pause)
         if (replayingIndex === index) {
             if (isReplayingRef.current) {
                 replayAudio.pause();
                 isReplayingRef.current = false;
+                setIsVoiceInputDisabled(false);
             }
             return;
         }
@@ -951,9 +994,11 @@ const ReadChatPage = () => {
             if (currentIndex >= sources.length) {
                 isReplayingRef.current = false;
                 setReplayingIndex(null);
+                setIsVoiceInputDisabled(false);
                 return;
             }
 
+            setIsVoiceInputDisabled(true);
             replayAudio.src = sources[currentIndex];
             replayAudio.currentTime = 0;
             
@@ -1324,32 +1369,29 @@ const ReadChatPage = () => {
                             )}
                             <button id='chat-input' 
                                 className='no-selection'
-                                disabled={!isConnected || !canPushToTalk}
-                                onMouseDown={startRecording}
-                                onTouchStart={startRecording}
-                                onPointerDown={startRecording}
-                                onMouseUp={stopRecording}
-                                onTouchEnd={stopRecording}
-                                onPointerUp={stopRecording}
+                                disabled={!canPushToTalk || isVoiceInputDisabled}
+                                onClick={toggleRecording}
                                 onContextMenu={(e) => e.preventDefault()}
                                 style={{
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isVoiceInputDisabled ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     backgroundColor: '#F4A011',
                                     position: 'relative',
-                                    zIndex: 103
+                                    zIndex: 103,
+                                    opacity: isVoiceInputDisabled ? 0.8 : 1
                                 }}
                             >
-                                {/* <FaMicrophone size={40} color='white'/> */}
-                                {isRecording ? 
-                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Talking...</h4>
+                                {isVoiceInputDisabled && !isRecording ? (
+                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }} className="loading-dots">...</h4>
+                                ) : isRecording ? 
+                                    <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to send</h4>
                                 : <div>
                                         <div style={{ width: '90%', height: '25%', backgroundColor: '#FFFFFF4D', position: 'absolute', top: '7px', left: '3%', borderRadius: '20px' }}></div>
                                         <img src='./files/imgs/ring.svg' alt='ring' style={{ width: '35px', height: '35px', position: 'absolute', top: '2px', right: '6px', borderRadius: '50%' }} />
-                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Hold to talk!</h4>
+                                        <h4 style={{ color: 'white', fontSize: '30px', fontFamily: 'Cherry Bomb', zIndex: 104 }}>Click to talk!</h4>
                                 </div>}
                             </button>
                         </div>

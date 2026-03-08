@@ -1334,8 +1334,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     const getInstruction4Invalid = (items, evaluation) => {
         const instruction4Invalid1 = `
-        You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook. Now your task is to generate a response to the child's latest answer, based on the following information: 
         
         - the evaluation of the child's latest response: ${evaluation};
 

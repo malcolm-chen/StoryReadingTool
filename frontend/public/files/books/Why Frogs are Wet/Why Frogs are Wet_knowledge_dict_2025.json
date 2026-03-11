@@ -1,0 +1,42 @@
+{
+    "2": {
+        "question": "How did fish change to become the forefathers of frogs?",
+        "answer": "A long time ago, some fish developed lungs so they could breathe air when water didn’t have enough oxygen. Later, some also grew legs, which let them move onto land to find food and escape danger. These changes—lungs for air and legs for land—made it possible for them to live in both water and on land, giving them more chances to survive.",
+        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: fish 1. grew legs and 2. grew lungs."
+    },
+    "3": {
+        "question": "What are “amphibians”?",
+        "answer": "Amphibians are animals that can live in both water and on land, just like frogs. Something very special about amphibians is that their skin works like a breathing organ. When they are in water, they mostly breathe through their skin. When they are on land, they use both their lungs and their skin to breathe.",
+        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. two places where amphibians live (water and land), and 2. amphibians' WET SKIN allows them to breathe both on land and in water."
+    },
+    "4": {
+        "question": "How does a frog breathe?",
+        "answer": "A frog breathes in two ways! Underwater, it breathes through its wet skin. On land, it breathes through its lungs and wet skin. Its skin has to stay wet, like a damp sponge. If the skin dries out, the air can’t pass through, and the frog can’t breathe properly. ",
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: frogs 1. Only use WET skin in water, 2. use both LUNGS and WET skin on land, and 3. the skin needs to be wet. Note: the third one is the KEY, and *the organs should correspond to the locations*."
+    },
+    "5": {
+        "question": "What do frogs do during the winter?",
+        "answer": "During the winter, frogs hibernate. They hardly breathe, and their hearts slow down so they can save energy. Frogs are careful about where they hibernate–they need to find a place that is warm and moist. This protects them from freezing and keeps their skin wet enough so they can still breathe. ",
+        "acceptance_criteria": "The acceptance criteria are that the answer must include that frogs (1) hibernate, (2) stay in a moist place, and 3) hardly breathe and slow down their heart rate. Note: the second one is the KEY."
+    },
+    "6": {
+        "question": "Why can’t tadpoles live on land?",
+        "answer": "Tadpoles can’t live on land because their bodies aren’t ready yet. They still have tails instead of legs, so they can’t move on land. They also breathe in water through gills, just like fish. To live on land, they need to grow legs and develop lungs so they can breathe air.",
+        "acceptance_criteria": "The acceptance criteria are to answer that tadpoles’ bodies are not ready yet. They need to develop 1) a lung, 2) lose tails, and 3) develop legs."
+    },
+    "9": {
+        "question": "What do frogs use their voices for?",
+        "answer": "Frogs use their voices in different ways. When they are frightened, some frogs make a loud scream to scare others away. And in the spring, most male frogs use their voices to find mates.",
+        "acceptance_criteria": "The child’s responses must mention the TWO functions of frogs' voice to be considered fully correct: 1) hunt/look for mates, and 2) use a scream to scare others."
+    }, 
+    "11": {
+        "question": "How can frogs see what’s around them without moving?",
+        "answer": "Frogs have bulging eyes that look big and stick out. These bulging eyes let them see in all directions without moving. Even when their eyes are partly closed, they can still see through their lower eyelids.",
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. Frogs have bulging eyes that look big and stick out, 2. their eyes allow them to see in all directions, and 3. they can see when their eyes are halfway closed."
+    },
+    "13": {
+        "question": "How does a frog’s tongue help them catch insects?",
+        "answer": "Frogs eat living and moving insects. When a frog spots a living insect, its long, sticky tongue flips out quickly. The insect sticks to the tongue, and the tongue wraps around it. Then the frog pulls the insect back into its mouth. The sticky, fast tongue is important because insects move quickly, and without it the frog wouldn’t be able to catch its food.",
+        "acceptance_criteria": "The child’s responses must mention all the FOUR features of frogs' tongue to be considered fully correct: 1) frogs only eat living insects,2) their tongues are sticky, 3) their tongues flip forward quickly, and 4) their tongues can wrap around a living insect."
+    }
+}

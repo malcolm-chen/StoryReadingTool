@@ -242,8 +242,23 @@ const ReadChatPage = () => {
         setRealtimeEvents([]);
         setItems(client.conversation.getItems());
 
-        // Connect to microphone
-        await wavRecorder.begin();
+        // Try to connect to microphone. Prefer the device selected on the
+        // greeting page (stored in localStorage) so that the user’s choice
+        // carries over into the reading interaction.
+        const storedDeviceId = localStorage.getItem('selectedMicrophoneDeviceId') || '';
+
+        // On iPad/Safari or when another app (e.g. Zoom) is using the microphone,
+        // this can fail. In that case, we still want to connect the realtime
+        // client so that the AI can respond (at least via audio/text), but we
+        // disable voice input.
+        let microphoneAvailable = true;
+        try {
+            await wavRecorder.begin(storedDeviceId || undefined);
+        } catch (err) {
+            console.error('Failed to start microphone stream:', err);
+            microphoneAvailable = false;
+            setIsVoiceInputDisabled(true);
+        }
 
         // Connect to audio output
         await wavStreamPlayer.connect();
@@ -253,7 +268,7 @@ const ReadChatPage = () => {
         console.log('connected')
         setIsConnected(true);
 
-        if (client.getTurnDetectionType() === 'server_vad') {
+        if (microphoneAvailable && client.getTurnDetectionType() === 'server_vad') {
             await wavRecorder.record((data) => client.appendInputAudio(data.mono));
         }
     }, []);
@@ -897,7 +912,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 2) {
             console.log('instruction4Incomplete1');
             console.log(instruction4Incomplete1)
             return instruction4Incomplete1;
@@ -1003,7 +1018,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             }
         }
 
-        if (sumCount < 3) {
+        if (sumCount < 2) {
             console.log('instruction4FactuallyIncorrect1');
             return instruction4FactuallyIncorrect1;
         } else {
@@ -1107,7 +1122,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 2) {
             console.log('instruction4IrrelevantResponse1');
             return instruction4IrrelevantResponse1;
         } else {
@@ -1210,7 +1225,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 2) {
             console.log('instruction4Uncertainty1');
             return instruction4Uncertainty1;
         } else {
@@ -1467,7 +1482,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 sumCount++;
             }
         }
-        if (sumCount < 3) {
+        if (sumCount < 2) {
             console.log('instruction4FollowUp1');
             return instruction4FollowUp1;
         } else {

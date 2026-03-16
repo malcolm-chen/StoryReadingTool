@@ -129,8 +129,18 @@ const GreetPage = () => {
                 const wavRecorder = wavRecorderRef.current;
                 const devices = await wavRecorder.listDevices();
                 setMicrophoneDevices(devices);
-                const deviceId = devices.length > 0 ? devices[0].deviceId : undefined;
+
+                // Prefer previously selected device if still available
+                const storedDeviceId = localStorage.getItem('selectedMicrophoneDeviceId') || '';
+                let deviceId = devices.length > 0 ? devices[0].deviceId : undefined;
+                if (storedDeviceId && devices.some(d => d.deviceId === storedDeviceId)) {
+                    deviceId = storedDeviceId;
+                }
+
                 setSelectedDeviceId(deviceId || '');
+                if (deviceId) {
+                    localStorage.setItem('selectedMicrophoneDeviceId', deviceId);
+                }
                 console.log('setting up client for guiding');
                 await setupClient(await getInstruction4Greet(), deviceId);
                 setIsClientSetup(true);
@@ -154,8 +164,18 @@ const GreetPage = () => {
         setRealtimeEvents([]);
         setItems(client.conversation.getItems());
 
-        // Connect to microphone (with optional device selection)
-        await wavRecorder.begin(deviceId || undefined);
+        // Try to connect to microphone (with optional device selection).
+        // On iPad/Safari or when another app (e.g. Zoom) is using the microphone,
+        // this can fail. In that case, we still connect the realtime client but
+        // keep voice input disabled.
+        let microphoneAvailable = true;
+        try {
+            await wavRecorder.begin(deviceId || undefined);
+        } catch (err) {
+            console.error('Failed to start microphone stream:', err);
+            microphoneAvailable = false;
+            setIsVoiceInputDisabled(true);
+        }
 
         // Connect to audio output
         await wavStreamPlayer.connect();
@@ -165,7 +185,7 @@ const GreetPage = () => {
         console.log('connected')
         setIsConnected(true);
 
-        if (client.getTurnDetectionType() === 'server_vad') {
+        if (microphoneAvailable && client.getTurnDetectionType() === 'server_vad') {
             await wavRecorder.record((data) => client.appendInputAudio(data.mono));
         }
     }, []);
@@ -173,6 +193,7 @@ const GreetPage = () => {
     const handleMicrophoneChange = useCallback(async (newDeviceId) => {
         if (!newDeviceId || newDeviceId === selectedDeviceId) return;
         setSelectedDeviceId(newDeviceId);
+        localStorage.setItem('selectedMicrophoneDeviceId', newDeviceId);
         const wavRecorder = wavRecorderRef.current;
         const client = clientRef.current;
         if (wavRecorder.processor && client.realtime.isConnected()) {

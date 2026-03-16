@@ -263,4 +263,5 @@ if __name__ == "__main__":
     #     print(user["username"])
     # save_json_to_file(read_chat_history("Macy"), "Macy_chat_history.json")
     # save_json_to_file(read_chat_history("Akane"), "Akane_chat_history.json")
-    save_to_excel_file(read_chat_history("Akane"), "Akane_chat_history.xlsx")
+    # save_to_excel_file(read_chat_history("Akane"), "Akane_chat_history.xlsx")
+    delete_user_files("Jiaju")

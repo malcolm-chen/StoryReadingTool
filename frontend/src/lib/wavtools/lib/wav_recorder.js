@@ -239,23 +239,53 @@ export class WavRecorder {
    * @returns {Promise<true>}
    */
   async requestPermission() {
-    const permissionStatus = await navigator.permissions.query({
-      name: 'microphone',
-    });
-    if (permissionStatus.state === 'denied') {
-      window.alert('You must grant microphone access to use this feature.');
-    } else if (permissionStatus.state === 'prompt') {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => track.stop());
-      } catch (e) {
-        window.alert('You must grant microphone access to use this feature.');
+    // Some browsers (notably Safari/iOS) do not support the Permissions API for microphones.
+    // In those cases, fall back to directly calling getUserMedia and handling any errors.
+    try {
+      if (
+        !navigator.mediaDevices ||
+        !('getUserMedia' in navigator.mediaDevices)
+      ) {
+        // No media devices available; nothing we can do here.
+        return true;
       }
+
+      if (!navigator.permissions || !navigator.permissions.query) {
+        // Fallback path for Safari / older browsers: trigger a one‑time getUserMedia prompt.
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => track.stop());
+        } catch (e) {
+          window.alert('You must grant microphone access to use this feature.');
+        }
+        return true;
+      }
+
+      const permissionStatus = await navigator.permissions.query({
+        name: 'microphone',
+      });
+      if (permissionStatus.state === 'denied') {
+        window.alert('You must grant microphone access to use this feature.');
+      } else if (permissionStatus.state === 'prompt') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => track.stop());
+        } catch (e) {
+          window.alert('You must grant microphone access to use this feature.');
+        }
+      }
+      return true;
+    } catch (e) {
+      // As a final fallback, do not block the rest of the app – just log the error.
+      console.error('Error while requesting microphone permission:', e);
+      return true;
     }
-    return true;
   }
 
   /**

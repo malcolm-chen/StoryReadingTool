@@ -1313,7 +1313,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 correctCount++;
             }
         }
-        if (sumCount > 2 || correctCount > 0) {
+        // check if correct
+        if (sumCount === 2 && answerRecord[answerRecord.length - 1] === "child asks question") {
+            console.log('instruction4ChildQuestion2');
+            return instruction4ChildQuestion2;
+        }
+        else if (sumCount > 2 || correctCount > 0 ) {
             console.log('instruction4ChildQuestion2');
             return instruction4ChildQuestion2;
         } else {

@@ -368,7 +368,7 @@ const ReadChatPage = () => {
 
     /**
      * In push-to-talk mode, stop recording
-     * Filters invalid responses: duration < 0.3s or volume too low, skip response creation
+     * Filters invalid responses: duration < 0.1s or volume too low, skip response creation
      */
     const stopRecording = async () => {
         if (!isRecording) {
@@ -387,15 +387,15 @@ const ReadChatPage = () => {
             ? (Date.now() - recordingStartTimeRef.current) / 1000 
             : 0;
         
-        // Validity check 2: volume (RMS threshold ~300 for 16-bit audio, catches near-silence)
+        // Validity check 2: volume (RMS threshold ~100 for 16-bit audio, catches near-silence)
         const MIN_VOLUME_RMS = 300;
         const audioBuffer = client.inputAudioBuffer;
         const rms = getAudioRMS(audioBuffer);
         
-        const isInvalid = recordingDuration < 0.3 || rms < MIN_VOLUME_RMS;
+        const isInvalid = recordingDuration < 0.1 || rms < MIN_VOLUME_RMS;
         
         if (isInvalid) {
-            if (recordingDuration < 0.3) {
+            if (recordingDuration < 0.1) {
                 console.log(`Recording duration (${recordingDuration.toFixed(2)}s) is too short, skipping evaluation`);
             } else {
                 console.log(`Recording volume too low (RMS: ${rms.toFixed(0)}), skipping evaluation`);
@@ -714,7 +714,10 @@ You need to evaluate whether the child's response covers all the key points in t
        
         Step 2: Check the status of the conversation
         - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
-        Ignore the child’s all reply. Check the conversation history, if the assistant already asked, “What questions do you have for me about this page?”, mark the evaluation as "conv end". Ignore all the following instructions and jump to the output. (If the child has no reply, mark it as "irrelevant".)
+        - Check if the assistant already asked "What questions do you have for me about this page?"
+        - If YES, AND the child's latest response contains a question mark (child is asking a question), mark the evaluation as "child asks question". Ignore all the following instructions and jump to **Response Format**.
+        - If YES, AND the child's latest response does NOT contain a question mark, mark the evaluation as "conv end". Ignore all the following instructions and jump to **Response Format**. (If the child has no reply, mark it as "irrelevant".)
+        - If NO (assistant hasn't asked the conv end question yet), continue to Step 3.
         
         Step 3: Check if the child asks a question
         If the assistant has NOT asked “What questions do you have for me about this page?” and the child asks any question (relevant or not), mark the evaluation as "child asks question". Jumping straight to **Response Format**.
@@ -839,7 +842,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Only hint at ONE part of the answer at once.
         ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
         ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out.  \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -850,7 +853,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' or 'save energy' when you are asking about frogs' heart rate and breathing, you can ask 'what happens to frogs' heart/breathing'": ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. DO NOT directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What’s special about frogs’ eyes?" : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?" : ''}
         ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - !!! DO NOT ASK "Can you ..." or "Do you ...".
         - !!! Ask exactly *ONE* question.
@@ -949,7 +952,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
+         ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out.  \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
          ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -958,7 +961,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What’s special about frogs’ eyes?": ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?": ''}
         ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
@@ -1054,7 +1057,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
-        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -1063,7 +1066,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What’s special about frogs’ eyes?" : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?" : ''}
         ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
@@ -1155,7 +1158,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. " : ''}
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out.  \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
@@ -1165,7 +1168,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin. You can ask about 'what feature does a frog's skin have?'." : ""}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What’s special about frogs’ eyes?" : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?" : ''}
         ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.

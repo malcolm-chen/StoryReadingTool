@@ -7,7 +7,7 @@
     "3": {
         "question": "What is special about the frog’s skin?",
         "answer": "A frog’s skin is wet. This special skin helps frogs live in two different places.",
-        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. frog's skin is WET, and 2. this special skin helps frogs live in two different places."
+        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. frog's skin is WET, and 2. this special skin helps frogs live in water and on land."
     },
     "4": {
         "question": "What body part does a frog use to breathe?",
@@ -22,21 +22,21 @@
     "6": {
         "question": "How do tadpoles breathe?",
         "answer": "Tadpoles breathe through gills like fish. They haven’t developed lungs yet so that is why they can’t live on land.",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. tadpoles breathe through gills, and 2. they haven’t developed lungs yet, so they can’t live on land."
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. tadpoles breathe through gills, and 2. they haven’t developed lungs and legs yet, so they can’t walk and breathe."
     },
     "9": {
         "question": "What do frogs do to attract mates?",
         "answer": "Some frogs scream loudly to scare others away when they are frightened. In the spring, most male frogs use their voice to find mates.",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1) frogs scream when they are frightened, and 2) frogs use their voice to find mates."
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1) frogs scream when they are frightened, and 2) frogs use their voice."
     }, 
     "11": {
         "question": "What do frogs’ eyes look like?",
         "answer": "Frogs’ eyes are bulging. They pop out from the sides of their heads and help frogs see all around them.",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. frogs' eyes are bulging: they pop out from the sides of their heads, and 2. they help frogs see all around them."
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. frogs' eyes are bulging: they stick out or pop out from the sides of their heads, and 2. they help frogs see all around them."
     },
     "13": {
         "question": "How does a frog’s tongue help them catch insects?",
         "answer": "When a frog spots a living insect, its long, sticky tongue flips out quickly. The insect sticks to the tongue, and the tongue wraps around it. Then the frog pulls the insect back into its mouth.",
-        "acceptance_criteria": "The child’s responses must mention all the FOUR features of frogs' tongue to be considered fully correct: 1) frogs only eat living insects,2) their tongues are sticky, 3) their tongues flip forward quickly, and 4) their tongues can wrap around a living insect."
+        "acceptance_criteria": "The child’s responses must mention all the THREE features of frogs' tongue to be considered fully correct: 1) their tongues are sticky, 2) their tongues flip forward quickly, and 3) their tongues can wrap around a living insect."
     }
 }

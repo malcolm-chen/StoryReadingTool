@@ -261,7 +261,12 @@ const ReadChatPage = () => {
         }
 
         // Connect to audio output
-        await wavStreamPlayer.connect();
+        try {
+            await wavStreamPlayer.connect();
+        } catch (err) {
+            console.error('Failed to start audio output:', err);
+            // Continue anyway so text can still work
+        }
 
         // Connect to realtime API
         await client.connect();

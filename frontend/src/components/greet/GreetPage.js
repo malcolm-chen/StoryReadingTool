@@ -178,7 +178,13 @@ const GreetPage = () => {
         }
 
         // Connect to audio output
-        await wavStreamPlayer.connect();
+        let audioOutputAvailable = true;
+        try {
+            await wavStreamPlayer.connect();
+        } catch (err) {
+            console.error('Failed to start audio output:', err);
+            audioOutputAvailable = false;
+        }
 
         // Connect to realtime API
         await client.connect();
@@ -187,6 +193,11 @@ const GreetPage = () => {
 
         if (microphoneAvailable && client.getTurnDetectionType() === 'server_vad') {
             await wavRecorder.record((data) => client.appendInputAudio(data.mono));
+        }
+
+        // If we couldn't initialize audio output, keep the conversation usable (text still works).
+        if (!audioOutputAvailable) {
+            console.log('Audio output unavailable; continuing with text-only rendering.');
         }
     }, []);
 
@@ -574,12 +585,17 @@ const GreetPage = () => {
             });
 
             
-            if (!client.isConnected()) {
-                await connectConversation(deviceId);
-            }   
-        
-            client.realtime.send('response.create');
-            setItems(client.conversation.getItems());
+            try {
+                if (!client.isConnected()) {
+                    await connectConversation(deviceId);
+                }
+                client.realtime.send('response.create');
+                setItems(client.conversation.getItems());
+            } catch (err) {
+                console.error('Failed to start greeting conversation:', err);
+                // Keep the page usable even if audio I/O cannot be initialized (common on iPad + Zoom).
+                setIsVoiceInputDisabled(true);
+            }
 
             return () => {
                 // cleanup; resets to defaults

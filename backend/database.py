@@ -1,3 +1,7 @@
+"""
+Legacy MongoDB helpers (GridFS, bulk user reset). The Flask API uses PostgreSQL via db_pg.py.
+To migrate off MongoDB, run: python migrate_mongo_to_postgres_s3.py
+"""
 import pymongo
 from pymongo.server_api import ServerApi
 import sys

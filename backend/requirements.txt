@@ -1,0 +1,7 @@
+flask>=2.3
+flask-cors>=4.0
+python-dotenv>=1.0
+openai>=1.0
+psycopg2-binary>=2.9
+sqlalchemy>=2.0
+boto3>=1.34

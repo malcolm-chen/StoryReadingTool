@@ -2,6 +2,7 @@
 /build
 /coverage
 /logs
+/user_export
 
 __pycache__/
 .env

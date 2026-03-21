@@ -5,6 +5,7 @@ import { MdArrowCircleLeft, MdArrowCircleRight, MdOutlineReplayCircleFilled } fr
 import { Button, Dropdown, Image } from 'react-bootstrap';
 import { AiOutlineLoading } from "react-icons/ai";
 import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
+import { uploadChatHistoryToBackend } from '../../lib/uploadChatHistoryToS3';
 import Header from '../header';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 import { FaCirclePlay, FaCirclePause } from "react-icons/fa6";
@@ -645,41 +646,19 @@ const GreetPage = () => {
         localStorage.setItem(`${title}-audioSpeed`, audioSpeed);
     }, [audioSpeed]);
 
-    const processChatHistory = (chatHistory) => {
-        const formData = new FormData();
-        // add the user, title, page to the formData
-        formData.append('user', user);
-        formData.append('title', title);
-        chatHistory.forEach((item, index) => {
-            const prefix = `item_${index}`;
-            const itemDict = {
-                id: item.id,
-                role: item.role,
-                content: item?.content?.[0]?.transcript,
-            }
-            formData.append(`${prefix}_dict`, JSON.stringify(itemDict));
-            if (item.role === 'user' && item.formatted?.file?.blob) {
-                formData.append(`${prefix}_audioBlob`, item.formatted.file.blob, `${user}-${title}-Greeting-ID_${index}.mp3`);
-            }
-        });
-        console.log('formData', formData);
-        return formData;
-    }
-
     const handleCloseChat = async () => {
         console.log('handleCloseChat');
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
         setIsAsked(true);
-        // send the chat history to backend
-        // console.log('chatHistory to save', chatHistory);
-        const formData = processChatHistory(chatHistory);
         try {
-            const response = await fetch(`${apiUrl}/api/chat_history`, {
-                method: 'POST',
-                body: formData
+            await uploadChatHistoryToBackend({
+                apiUrl,
+                user,
+                title,
+                page: 'greeting',
+                chatHistory,
             });
-            console.log('response', response);
         } catch (error) {
             console.error('Error sending chat history to backend', error);
         }

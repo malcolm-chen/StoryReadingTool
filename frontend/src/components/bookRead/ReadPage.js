@@ -97,10 +97,18 @@ const ReadChatPage = () => {
     const deletedItemsRef = useRef(new Set());
     const recordingStartTimeRef = useRef(null);
     const isWaitingForEvaluationRef = useRef(false);
+    const evaluationInProgressRef = useRef(false);  // Guard against duplicate response.create
     const responseTimeoutRef = useRef(null);
     const replayAudioRef = useRef(new Audio());
     const askedPageRef = useRef([]);
     const audioRef = useRef(new Audio());
+    /** Bumps on each playPageSentences() so stale async chains (rapid page turns, aborted play()) cannot advance or trigger knowledge UI. */
+    const playbackSessionRef = useRef(0);
+    /** Only the latest scheduled knowledge guiding activation may run after await getInstruction4Guiding (dedupes double entry). */
+    const guidingActivationNonceRef = useRef(0);
+    /** client.reset() clears custom client.on handlers — set false after reset so setupClient can re-register. Prevents stacking duplicate handlers if setupClient runs twice before reset. */
+    const realtimeListenersAttachedRef = useRef(false);
+    const sessionInstructionRef = useRef('');
 
 
     const [audioPage, setAudioPage] = useState(() => {
@@ -339,6 +347,7 @@ const ReadChatPage = () => {
         recordingStartTimeRef.current = Date.now();
         userRespondedRef.current = true;
         isWaitingForResponseRef.current = false;
+        evaluationInProgressRef.current = false;  // Reset guard when user starts recording
         if (timerRef.current) clearInterval(timerRef.current);
         replayAudioRef.current.pause();
         setReplayingIndex(null);
@@ -424,7 +433,8 @@ const ReadChatPage = () => {
         recordingStartTimeRef.current = null;
         isWaitingForResponseRef.current = false;
         setIsVoiceInputDisabled(true);
-        if (isKnowledge) {
+        if (isKnowledge && !evaluationInProgressRef.current) {
+            evaluationInProgressRef.current = true;
             const items = client.conversation.getItems();
             client.realtime.send('input_audio_buffer.commit');
             client.conversation.queueInputAudio(client.inputAudioBuffer);
@@ -503,50 +513,95 @@ const ReadChatPage = () => {
     const playPageSentences = () => {
         const pageText = pages[currentPageRef.current]?.text;
         if (pageText && pageText.length > 0) {
+            const session = ++playbackSessionRef.current;
+            const startPage = currentPageRef.current;  // 记录开始播放时的页码
+            const pageSentences = pages[startPage]?.text ?? [];
+            /** Per-invocation index — must NOT use sentenceIndexRef here: rapid flips run overlapping playPageSentences and shared ref corrupts progress. */
+            let localSentenceIndex = 0;
             sentenceIndexRef.current = 0;
+            setCurrentSentence(0);
             const audio = audioRef.current;
+            const syncCaptionIndex = (idx) => {
+                if (session === playbackSessionRef.current && currentPageRef.current === startPage) {
+                    sentenceIndexRef.current = idx;
+                    setCurrentSentence(idx);
+                }
+            };
             const playNextSentence = async () => {
-                setAudioPage(currentPageRef.current);
-                if (sentenceIndexRef.current < pages[currentPageRef.current].text.length) {
-                    setCurrentSentence(sentenceIndexRef.current);
-                    audio.src = `/files/books/${title}/audio/p${currentPageRef.current}sec${sentenceIndexRef.current}.mp3`;
+                if (session !== playbackSessionRef.current) {
+                    return;
+                }
+                // 防止跨页触发：如果当前页已改变，不要继续播放或触发 AI 对话
+                if (currentPageRef.current !== startPage) {
+                    return;
+                }
+                setAudioPage(startPage);
+                if (localSentenceIndex < pageSentences.length) {
+                    syncCaptionIndex(localSentenceIndex);
+                    audio.src = `/files/books/${title}/audio/p${startPage}sec${localSentenceIndex}.mp3`;
 
                     audio.onended = () => {
-                        // console.log('end');
-                        sentenceIndexRef.current += 1;
+                        if (session !== playbackSessionRef.current || currentPageRef.current !== startPage) {
+                            return;
+                        }
+                        localSentenceIndex += 1;
+                        syncCaptionIndex(localSentenceIndex);
                         playNextSentence();
                     };
                     try {
                         await audio.play();
+                        if (session !== playbackSessionRef.current || currentPageRef.current !== startPage) {
+                            return;
+                        }
                         const currentSpeed = parseFloat(localStorage.getItem(`${title}-audioSpeed`)) || 1;
                         audio.playbackRate = currentSpeed;
                         setIsPlaying(true);
                     } catch (error) {
+                        // AbortError: rapid page turns / pause() — do not advance index or recurse (avoids fake "page complete" and double knowledge setup)
+                        if (error?.name === 'AbortError' || session !== playbackSessionRef.current || currentPageRef.current !== startPage) {
+                            return;
+                        }
                         console.error('Error playing audio:', error);
-                        // Advance to next sentence to avoid getting stuck when audio fails (e.g. missing file)
-                        sentenceIndexRef.current += 1;
+                        localSentenceIndex += 1;
+                        syncCaptionIndex(localSentenceIndex);
                         playNextSentence();
                     }
                 } else {
                     // setIsPlaying(false);
-                    if (currentPageRef.current in knowledgeRef.current) {
-                        console.log('currentPage in knowledge', currentPageRef.current);
-                        setIsKnowledge(true);
-                        audio.pause();
-                        setIsPlaying(false);
-                        setIsConversationEnded(false);
-                        setAnswerRecord([]);
-                        noReponseCntRef.current = 0;
-                        setCurrentPageChatHistory([]);
-                        // check if the client is not setup for guiding
-                        if (!clientRef.current.realtime.isConnected()) {
-                            console.log('setting up client for guiding');
-                            setupClient(await getInstruction4Guiding());
-                            setIsClientSetup(true);
-                        } else {
-                            console.log('resetting client for guiding');
-                            updateClientInstruction(await getInstruction4Guiding());
-                        }
+                    if (session !== playbackSessionRef.current || currentPageRef.current !== startPage) {
+                        return;
+                    }
+                    if (startPage in knowledgeRef.current) {
+                        const activatingPage = startPage;
+                        const guidingNonce = ++guidingActivationNonceRef.current;
+                        (async () => {
+                            const instruction = await getInstruction4Guiding();
+                            if (guidingNonce !== guidingActivationNonceRef.current) {
+                                return;
+                            }
+                            if (session !== playbackSessionRef.current || currentPageRef.current !== activatingPage) {
+                                return;
+                            }
+                            if (!(activatingPage in knowledgeRef.current)) {
+                                return;
+                            }
+                            console.log('currentPage in knowledge', activatingPage);
+                            setIsKnowledge(true);
+                            audio.pause();
+                            setIsPlaying(false);
+                            setIsConversationEnded(false);
+                            setAnswerRecord([]);
+                            noReponseCntRef.current = 0;
+                            setCurrentPageChatHistory([]);
+                            if (!clientRef.current.realtime.isConnected()) {
+                                console.log('setting up client for guiding');
+                                setupClient(instruction);
+                                setIsClientSetup(true);
+                            } else {
+                                console.log('resetting client for guiding');
+                                updateClientInstruction(instruction);
+                            }
+                        })();
                     }
                     else {
                         setIsKnowledge(false);
@@ -599,6 +654,7 @@ const ReadChatPage = () => {
                 await disconnectConversation();
                 const client = clientRef.current;
                 client.reset();
+                realtimeListenersAttachedRef.current = false;
                 setIsClientSetup(false);
             }
             const newPage = currentPageRef.current - 1;
@@ -690,6 +746,7 @@ const ReadChatPage = () => {
             await disconnectConversation();
             const client = clientRef.current;
             client.reset();
+            realtimeListenersAttachedRef.current = false;
             setIsClientSetup(false);
         }
         const newPage = ( currentPageRef.current + 1 ) % pages.length;
@@ -846,21 +903,21 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - NO QUESTION in hint! Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
         - Only hint at ONE part of the answer at once.
-        ${currentPageRef.current === 4 ? "- Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers. These are the key points you need to scaffold the child to come up with." : ''}
-        ${currentPageRef.current === 9 ? "- Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'. " : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out.  \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
-        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+        ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
+        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
+${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. \nIf the child did not mention 'see in all directions', you need to prompt them to think about the frog's range of their vision." : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect'/’sticks to the insect’ in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
 
     **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ***ONE*** reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept of the correct answer; 2) guides the child to find the missing part in the acceptance criteria;
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         - DO NOT include multiple elements in the reprompt question.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin. You can ask about 'what feature does a frog's skin have?'." : ""}
-        ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 5 ? "- Do not explicitly mention 'slow down' or 'save energy' when you are asking about frogs' heart rate and breathing, you can ask 'what happens to frogs' heart/breathing'": ''}
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. DO NOT directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?" : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
+        ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''} 
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about how they attract mates and when they scream. Do not directly include the ways (e.g., use their voice, and when they are frightened) in the followup question." : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges? What directions can a frog see without moving?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?\nIf the child did not mention frogs’ tongue sticks to an insect, you can ask ‘How does a frog’s tongue move to catch an insect?; What happens when the frog’s tongue touches the insect?’" : ''} 
         - !!! DO NOT ASK "Can you ..." or "Do you ...".
         - !!! Ask exactly *ONE* question.
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
@@ -956,19 +1013,21 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not hint at multiple parts of the answer at once.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
-        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''}
-         ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out.  \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
-         ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. \nIf the child did not mention 'see in all directions', you need to prompt them to think about the frog's range of their vision." : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect'/’sticks to the insect’ in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
         - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?": ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
+         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
+      
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about how they attract mates and when they scream. Do not directly include the ways (e.g., use their voice, and when they are frightened) in the followup question." : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges? What directions can a frog see without moving?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?\nIf the child did not mention frogs’ tongue sticks to an insect, you can ask ‘How does a frog’s tongue move to catch an insect?; What happens when the frog’s tongue touches the insect?’" : ''} 
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1061,19 +1120,20 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not hint at multiple parts of the answer at once.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
-        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others when frightened' in the hint. You can use implicit hint like 'in the spring' or 'when frogs encounter predators'." : ''} 
-        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
-        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. \nIf the child did not mention 'see in all directions', you need to prompt them to think about the frog's range of their vision." : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect'/’sticks to the insect’ in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
         - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?" : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about how they attract mates and when they scream. Do not directly include the ways (e.g., use their voice, and when they are frightened) in the followup question." : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges? What directions can a frog see without moving?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?\nIf the child did not mention frogs’ tongue sticks to an insect, you can ask ‘How does a frog’s tongue move to catch an insect?; What happens when the frog’s tongue touches the insect?’" : ''} 
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1162,10 +1222,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
         - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
-        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this is their answers." : ''}
-        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'hunt for mates' and 'scare others' in the hint. You can hint about 'how frogs use their voice in Spring' / 'how frogs use their voice when they are frightened' to guide the child to figure out the purpose of frogs using their voice." : ''}
-        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out.  \nIf the child did not mention 'see in all directions', you need to prompt them to think about frog's range of their vision." : ''}
-        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect' in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
+        ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
+        ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
+        ${currentPageRef.current === 11 ? "- If the child did not mention “big, bugling or stick out”, you should hint “the characteristics of frogs’ eyes”\n- If the child mentioned 'bulging', you must explain it means the eyes are big and stick out. \nIf the child did not mention 'see in all directions', you need to prompt them to think about the frog's range of their vision." : ''}
+        ${currentPageRef.current === 13 ? "- Do not mention 'frog’s tongue is sticky'/'moves quickly/fast'/'wraps around an insect'/’sticks to the insect’ in the hint.\n- Do not prompt the child to think about the speed of the frog’s tongue movement.\nYou must implicitly guide the child to figure out the characteristics of a frog's tongue and how it helps the frog catch living insects. These are the key points you need to scaffold the child to come up with. In addition, include 'living, moving insects' in your response to strengthen children's understanding of it." : ''}
+
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
@@ -1173,9 +1235,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not divert the question to the page details. Do not include answer details in the reprompt question.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin. You can ask about 'what feature does a frog's skin have?'." : ""}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
-        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about the purposes of frogs using their voice. Do not directly include the purpose (e.g., hunt for mates and scare others) in the reprompt question." : ''}
-        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges?" : ''}
-        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?'" : ''}
+        ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about how they attract mates and when they scream. Do not directly include the ways (e.g., use their voice, and when they are frightened) in the followup question." : ''}
+        ${currentPageRef.current === 11 ? "- USE THESE CANDIDATE QUESTIONS: What are the features of frogs’ eyes? Why are frogs' big eyes helpful? What are frogs’ vision ranges? What directions can a frog see without moving?" : ''}
+        ${currentPageRef.current === 13 ? "- If the child did not mention frogs' tongue wraps around an insect, you can ask 'What does a frog's tongue do to hold a living, moving insect?' \n- If the child did not mention frogs' tongue moves quickly, you can ask 'How does a frog’s tongue move when it catches a living insect?\nIf the child did not mention frogs’ tongue sticks to an insect, you can ask ‘How does a frog’s tongue move to catch an insect?; What happens when the frog’s tongue touches the insect?’" : ''} 
+
         - ***Do NOT start the question with "Can you xxx?", or "Do you xxx?" *** The reprompt question should be open-ended instead of in the form of a yes/no question.    
         - *DO NOT* ask a reprompt question that is not related to the hint you just provided OR not related to elements in the provided answer.
         - Ask exactly *ONE* question.
@@ -1577,7 +1640,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     }
 
     const updateClientInstruction = async (instruction) => {
+        if (evaluationInProgressRef.current) return;  // Guard against duplicate calls
+        evaluationInProgressRef.current = true;
         const client = clientRef.current;
+        sessionInstructionRef.current = instruction;
         client.updateSession({ instructions: instruction });
         client.realtime.send('response.create');
         console.log(instruction);
@@ -1614,7 +1680,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
           const client = clientRef.current;
           
           // if the client is connected, send a message
-          if (isClientSetup) {
+          if (isClientSetup && !evaluationInProgressRef.current) {
             noReponseCntRef.current = noReponseCntRef.current + 1;
             noResponseReminderCountRef.current += 1;
             
@@ -1652,6 +1718,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             console.log('currentPageRef.current', currentPageRef.current);
             const wavStreamPlayer = wavStreamPlayerRef.current;
             const client = clientRef.current;
+            sessionInstructionRef.current = instruction;
             client.updateSession({ instructions: instruction });
             client.updateSession({ voice: 'alloy' });
             client.updateSession({ input_audio_transcription: { model: 'whisper-1', language: 'en' } });
@@ -1659,6 +1726,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             //     turn_detection: { type: 'server_vad' }, // or 'server_vad'
             //     input_audio_transcription: { model: 'whisper-1', language: 'en' },
             // });
+            if (!realtimeListenersAttachedRef.current) {
             client.on('error', (event) => console.error(event));
             client.on('conversation.interrupted', async () => {
                 const trackSampleOffset = await wavStreamPlayer.interrupt();
@@ -1668,6 +1736,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 }
                 userRespondedRef.current = true;
                 isWaitingForResponseRef.current = false;
+                evaluationInProgressRef.current = false;  // Reset guard when conversation interrupted
                 setIsVoiceInputDisabled(false);
                 noResponseReminderCountRef.current = 0; // 重置无响应提醒计数器
                 if (timerRef.current) clearInterval(timerRef.current);
@@ -1764,6 +1833,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                 console.log('follow up response for empty evaluation');
                                 // another method is to use the follow up prompt
                                 isWaitingForEvaluationRef.current = false;
+                                    evaluationInProgressRef.current = false;
                                 await sendResponse(client, 'follow up', items);
                                 // await client.realtime.send('response.create', {
                                 //     response: {
@@ -1784,6 +1854,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                     item_id: item.id
                                 });
                                 isWaitingForEvaluationRef.current = false;
+                                    evaluationInProgressRef.current = false;
                                 const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                                 
                                 if (answerOrder > answerRecord.length - 1) {
@@ -1866,19 +1937,24 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                     await connectConversation();
                     console.log('Successfully reconnected');
                     // 重新设置client配置
-                    client.updateSession({ instructions: instruction });
+                    client.updateSession({ instructions: sessionInstructionRef.current });
                     client.updateSession({ voice: 'alloy' });
                     client.updateSession({ input_audio_transcription: { model: 'whisper-1', language: 'en' } });
                 } catch (error) {
                     console.error('Failed to reconnect:', error);
                 }
             });
+            realtimeListenersAttachedRef.current = true;
+            }
             
             if (!client.isConnected()) {
                 await connectConversation();
             }   
         
-            client.realtime.send('response.create');
+            if (!evaluationInProgressRef.current) {
+                evaluationInProgressRef.current = true;
+                client.realtime.send('response.create');
+            }
             setItems(client.conversation.getItems());
 
             return () => {
@@ -2269,6 +2345,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 userRespondedRef.current = false;
                 break;
         }
+        // Reset guard after response.create completes
+        evaluationInProgressRef.current = false;
     };
 
     // Define style objects for conditional rendering
@@ -2326,9 +2404,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                         variant='plain'
                         onClick={handlePrevPage}
                         disabled={currentPageRef.current === 0}
-                        sx={{ opacity: 0.7 }}
+                        sx={{ opacity: 0.7, padding: '12px', minWidth: '96px', minHeight: '96px' }}
                         >
-                            <FaCaretLeft size={60} color='#2A2278'/>
+                            <FaCaretLeft size={80} color='#2A2278'/>
                         </IconButton>
 
                         <Box id='book-img' style={bookImgStyle}>
@@ -2343,9 +2421,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                         id="next-btn"
                         variant='plain'
                         onClick={handleNextPage}
-                        sx={{ opacity: 0.7 }}
+                        sx={{ opacity: 0.7, padding: '12px', minWidth: '96px', minHeight: '96px' }}
                         >
-                        <FaCaretRight size={60} color='#2A2278'/>
+                        <FaCaretRight size={80} color='#2A2278'/>
                     </IconButton>
                     <div id='play-btn-box'>
                             <IconButton id='play-btn' variant='plain' onClick={togglePlayPause} style={{ zIndex: 2, color: 'white', fontSize: '25px', backgroundColor: 'rgba(0,0,0,0)' }}>
@@ -2398,7 +2476,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             {/* <Button onClick={togglePlayPause} variant="contained" color="primary">
                                 {isPlaying ? <FaPause /> : <FaPlay />}
                             </Button> */}
-                            {pages[currentPageRef.current]?.text[sentenceIndexRef.current]}
+                            {pages[currentPageRef.current]?.text[currentSentence]}
                         </h4>
                     </div>
                 }

@@ -2,7 +2,7 @@
     "2": {
         "question": "Where did the forefathers of frogs live a long time ago?",
         "answer": "Fish are forefathers of frogs and they lived in water a long time ago before they grew lungs and legs.",
-        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. they lived in water, and 2. fish are forefathers of frogs."
+        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. they lived in water,2. They need to grow lungs to breathe on land, and 3. They need to grow legs to walk on land."
     },
     "3": {
         "question": "What is special about the frog’s skin?",
@@ -22,12 +22,12 @@
     "6": {
         "question": "How do tadpoles breathe?",
         "answer": "Tadpoles breathe through gills like fish. They haven’t developed lungs yet so that is why they can’t live on land.",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. tadpoles breathe through gills, and 2. they haven’t developed lungs and legs yet, so they can’t walk and breathe."
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1. tadpoles breathe through gills, and 2. they haven’t developed lungs and legs yet, so they can’t walk and breathe on land."
     },
     "9": {
         "question": "What do frogs do to attract mates?",
         "answer": "Some frogs scream loudly to scare others away when they are frightened. In the spring, most male frogs use their voice to find mates.",
-        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1) frogs scream when they are frightened, and 2) frogs use their voice."
+        "acceptance_criteria": "The child’s responses must mention ALL of the following to be considered fully correct: 1) frogs scream when they are frightened, and 2) frogs use their voice "
     }, 
     "11": {
         "question": "What do frogs’ eyes look like?",
@@ -36,7 +36,7 @@
     },
     "13": {
         "question": "How does a frog’s tongue help them catch insects?",
-        "answer": "When a frog spots a living insect, its long, sticky tongue flips out quickly. The insect sticks to the tongue, and the tongue wraps around it. Then the frog pulls the insect back into its mouth.",
-        "acceptance_criteria": "The child’s responses must mention all the THREE features of frogs' tongue to be considered fully correct: 1) their tongues are sticky, 2) their tongues flip forward quickly, and 3) their tongues can wrap around a living insect."
+        "answer": "When a frog spots a living insect, its long, sticky tongue flips out quickly. The insect sticks to the tongue, and the tongue wraps around it. ",
+        "acceptance_criteria": "The child’s responses must mention all the FOUR features of frogs' tongue to be considered fully correct: 1) their tongues are sticky, 2) their tongue sticks insects, 3) their tongues flip forward quickly, and 4) their tongues can wrap around a living insect."
     }
 }

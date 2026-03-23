@@ -791,7 +791,7 @@ You need to evaluate whether the child's response covers all the key points in t
         - Answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
         Compare all of the child’s responses on this page against the acceptance criteria:
-        - **Fully correct**: Children's responses collectively cover all the points in the acceptance criteria without any incorrect information. The acceptance criteria is: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
+        - **Fully correct**: Children's responses in the conversation history collectively cover all the points in the acceptance criteria without any incorrect information. The acceptance criteria is: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}. (The child's responses do not need to be in the exact same words as the acceptance criteria, but they should cover the same key points.)
         - **Correct but incomplete**: As long as the response is missing one or more points in the acceptance criteria, mark it as 'correct but incomplete'.
         - **Factually incorrect**: The response contains incorrect information compared to the answer.
         - **Irrelevant response**: Unrelated to the question or story context (e.g., the child talks about other things, does not want to talk about frogs, does not want to keep talking). Do not use this if response is invalid.

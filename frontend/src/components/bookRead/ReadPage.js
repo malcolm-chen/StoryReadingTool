@@ -109,6 +109,21 @@ const ReadChatPage = () => {
     /** client.reset() clears custom client.on handlers — set false after reset so setupClient can re-register. Prevents stacking duplicate handlers if setupClient runs twice before reset. */
     const realtimeListenersAttachedRef = useRef(false);
     const sessionInstructionRef = useRef('');
+    const answerRecordRef = useRef([]);
+
+    const resetAnswerRecord = () => {
+        answerRecordRef.current = [];
+        setAnswerRecord([]);
+    };
+
+    const appendAnswerRecord = (answerOrder, value) => {
+        const current = answerRecordRef.current;
+        if (answerOrder > current.length - 1) {
+            const next = [...current, value];
+            answerRecordRef.current = next;
+            setAnswerRecord(next);
+        }
+    };
 
 
     const [audioPage, setAudioPage] = useState(() => {
@@ -124,6 +139,10 @@ const ReadChatPage = () => {
     useEffect(() => {
         console.log('chatHistoryRef', chatHistoryRef.current);
     }, [chatHistoryRef.current]);
+
+    useEffect(() => {
+        answerRecordRef.current = answerRecord;
+    }, [answerRecord]);
 
 
     useEffect(() => {
@@ -422,9 +441,7 @@ const ReadChatPage = () => {
             if (isKnowledge) {
                 const items = client.conversation.getItems();
                 const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
-                if (answerOrder > answerRecord.length - 1) {
-                    setAnswerRecord(prev => [...prev, 'invalid']);
-                }
+                appendAnswerRecord(answerOrder, 'invalid');
                 await sendResponse(client, 'invalid', items);
             }
             return;
@@ -590,7 +607,7 @@ const ReadChatPage = () => {
                             audio.pause();
                             setIsPlaying(false);
                             setIsConversationEnded(false);
-                            setAnswerRecord([]);
+                            resetAnswerRecord();
                             noReponseCntRef.current = 0;
                             setCurrentPageChatHistory([]);
                             if (!clientRef.current.realtime.isConnected()) {
@@ -644,7 +661,7 @@ const ReadChatPage = () => {
             isAskedRef.current = false;
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
-            setAnswerRecord([]);
+            resetAnswerRecord();
             noReponseCntRef.current = 0;
             // setChatHistory([]);
             isWaitingForResponseRef.current = false;
@@ -736,7 +753,7 @@ const ReadChatPage = () => {
         isAskedRef.current = false;
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
-        setAnswerRecord([]);
+        resetAnswerRecord();
         noReponseCntRef.current = 0;
         // setChatHistory([]);
         isWaitingForResponseRef.current = false;
@@ -901,7 +918,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for hint (one sentence)**:
         - Since the evaluation of child's response is 'incomplete', compare the child's response with acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), and provide an INDIRECT hint that guides children towards the missing parts of the correct answer. Do not disclose keywords in the answer.
         - NO QUESTION in hint! Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
-        - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
+        - Your hint should NOT be specific.
         - Only hint at ONE part of the answer at once.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
@@ -973,7 +990,7 @@ ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'u
         - The whole response should only include and end with ONE question sentence, which is the question "What questions do you have for me about this page?"
         `;
         let sumCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
@@ -1011,7 +1028,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Provide an INDIRECT hint that guides children towards the correct answer. Do not disclose keywords in the answer.
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
-        - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
+        - Your hint should NOT be specific.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
@@ -1080,7 +1097,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
@@ -1118,7 +1135,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Provide an INDIRECT hint that guides children towards the correct answer. Do not disclose keywords in the answer.
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
-        - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
+        - Your hint should NOT be specific.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
@@ -1186,7 +1203,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Never explicitly include the acceptance criteria in the whole response.
         `
         let sumCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
@@ -1221,7 +1238,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Provide an INDIRECT hint that guides children towards the correct answer. Do not disclose keywords in the answer.
         - Do not include any question or directly reveal parts of the correct answer and acceptance criteria in the hint.
         - Do not hint at multiple parts of the answer at once.
-        - Your hint should NOT be specific. More general hints like 'there's something special about ...' would be good.
+        - Your hint should be helpful but NOT too specific. 
          ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin." : ''}
         ${currentPageRef.current === 4 ? " - Do not explicitly mention lungs and skin in the hint. You must implicitly guide the child to figure out the fact that frogs use wet skin to breath in water, use lungs and wet skins to breath on land, if the child didn't mention this in their answers." : ''}
         ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'use their voices', ‘scream when frightened’ and 'scare others when frightened' in the hint. You can use implicit hint like 'when frogs encounter predators'." : ''} 
@@ -1292,7 +1309,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `
         
         let sumCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
@@ -1374,7 +1391,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `;
         let sumCount = 0;
         let correctCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
@@ -1439,7 +1456,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `;
 
         let invalidCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'invalid') {
                 invalidCount++;
             }
@@ -1554,7 +1571,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `;
 
         let sumCount = 0;
-        for (const answer of answerRecord) {
+        for (const answer of answerRecordRef.current) {
             if (answer === 'fully correct' || answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
                 sumCount++;
             }
@@ -1808,10 +1825,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             isWaitingForEvaluationRef.current = false;
                             const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                             
-                            if (answerOrder > answerRecord.length - 1) {
-                                answerRecord.push('follow up');
-                            }
-                            console.log('answerRecord', answerRecord);
+                            appendAnswerRecord(answerOrder, 'follow up');
+                            console.log('answerRecord', answerRecordRef.current);
                             await sendResponse(client, 'follow up', items);
                         } catch (error) {
                             console.error('Error sending response:', error);
@@ -1857,10 +1872,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                     evaluationInProgressRef.current = false;
                                 const answerOrder = Math.floor((items.length - noReponseCntRef.current) / 2) - 1;
                                 
-                                if (answerOrder > answerRecord.length - 1) {
-                                    answerRecord.push(evaluation);
-                                }
-                                console.log('answerRecord', answerRecord);
+                                appendAnswerRecord(answerOrder, evaluation);
+                                console.log('answerRecord', answerRecordRef.current);
                                 await sendResponse(client, evaluation, items);
                             } catch (error) {
                                 console.error('Error sending response:', error);

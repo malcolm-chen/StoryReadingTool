@@ -7,7 +7,7 @@
     "3": {
         "question": "What is special about the frog’s skin?",
         "answer": "A frog’s skin is wet. This special skin helps frogs live in two different places.",
-        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. frog's skin is WET, and 2. this special skin helps frogs live in water and on land."
+        "acceptance_criteria": "The child’s responses must mention BOTH of the following to be considered fully correct: 1. frog's skin is WET, and 2. this special skin helps frogs breathe underwater and on land."
     },
     "4": {
         "question": "What body part does a frog use to breathe?",

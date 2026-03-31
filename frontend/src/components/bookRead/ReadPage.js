@@ -12,7 +12,7 @@ import { RealtimeClient } from '@openai/realtime-api-beta';
 import { useSwipeable } from 'react-swipeable';
 import { FaCaretRight, FaCaretLeft } from "react-icons/fa6";
 import { FaPlay, FaPause, FaCirclePlay, FaCirclePause } from "react-icons/fa6";
-import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle } from "react-icons/fa";
+import { FaChevronCircleUp, FaChevronCircleDown, FaMinusCircle, FaPlusCircle } from "react-icons/fa";
 import { FaRegClosedCaptioning } from "react-icons/fa6";
 import { RiSpeedUpFill } from "react-icons/ri";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
@@ -57,6 +57,8 @@ const ReadChatPage = () => {
     const [currentPageChatHistory, setCurrentPageChatHistory] = useState([]);
     const [isShaking, setIsShaking] = useState(false);
     const timerRef = useRef(null);
+    // Remember the previous expanded state so "restore" goes back to original size.
+    const preMinimizeIsExpandedChatRef = useRef(false);
     const isStartingRecordingRef = useRef(false);
     const resendFlagRef = useRef(false);
     const responseResendRef = useRef(false);
@@ -114,6 +116,22 @@ const ReadChatPage = () => {
     const resetAnswerRecord = () => {
         answerRecordRef.current = [];
         setAnswerRecord([]);
+    };
+
+    const resetGuidingSessionState = () => {
+        // Keep ref/state reset centralized so page turn and close behave consistently.
+        evaluationInProgressRef.current = false;
+        isWaitingForEvaluationRef.current = false;
+        resendFlagRef.current = false;
+        responseResendRef.current = false;
+        isWaitingForResponseRef.current = false;
+        userRespondedRef.current = false;
+        noReponseCntRef.current = 0;
+        noResponseReminderCountRef.current = 0;
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTimer(0);
+        setCurrentPageChatHistory([]);
+        setIsConversationEnded(false);
     };
 
     const appendAnswerRecord = (answerOrder, value) => {
@@ -662,9 +680,7 @@ const ReadChatPage = () => {
             setIsMinimizedChat(false);
             setIsExpandedChat(false);
             resetAnswerRecord();
-            noReponseCntRef.current = 0;
-            // setChatHistory([]);
-            isWaitingForResponseRef.current = false;
+            resetGuidingSessionState();
             if (clientRef.current.realtime.isConnected()) {
                 console.log('disconnecting conversation');
                 // deleteConversationItem(items[0].id);
@@ -754,9 +770,7 @@ const ReadChatPage = () => {
         setIsMinimizedChat(false);
         setIsExpandedChat(false);
         resetAnswerRecord();
-        noReponseCntRef.current = 0;
-        // setChatHistory([]);
-        isWaitingForResponseRef.current = false;
+        resetGuidingSessionState();
         if (clientRef.current.realtime.isConnected()) {
             console.log('disconnecting conversation');
             // deleteConversationItem(items[0].id);
@@ -779,7 +793,7 @@ const ReadChatPage = () => {
 
     function getInstruction4Evaluation(items) {
         const instruction4Evaluation = `
-You need to evaluate whether the child's response covers all the key points in the answer.
+You need to evaluate whether the child's latest response covers all the key points in the answer.
         
         **Instructions for Evaluation**:
         You need to evaluate the child's latest response based on the following inputs:
@@ -793,7 +807,7 @@ You need to evaluate whether the child's response covers all the key points in t
         If the child’s response is empty, unintelligible (noise), too short, or clearly accidental, mark it as "invalid". Jumping straight to **Response Format**.
        
         Step 2: Check the status of the conversation
-        - Conversation History: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')}
+        - Conversation History: ${items.map(item => `${item.role}: ${item.content?.[0]?.transcript ?? ''}`).join('\n')}
         - Check if the assistant already asked "What questions do you have for me about this page?"
         - If YES, AND the child's latest response contains a question mark (child is asking a question), mark the evaluation as "child asks question". Ignore all the following instructions and jump to **Response Format**.
         - If YES, AND the child's latest response does NOT contain a question mark, mark the evaluation as "conv end". Ignore all the following instructions and jump to **Response Format**. (If the child has no reply, mark it as "irrelevant".)
@@ -842,11 +856,11 @@ You need to evaluate whether the child's response covers all the key points in t
         
         **Story Information**:
         - Story Title: ${title}
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story Text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - First Question: ${knowledgeRef.current[currentPageRef.current]?.question}
 
         **Instructions for initiating the Conversation**:
-            You should use different ways to open the conversation. For example: "Hmm, this part of the story is so interesting!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "Hey xxx, before we move to the next page, share with me what you think" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "xxx, before we move to the next page, let's chat about what you just read!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); etc. 
+            You must use one of the following ways to open the conversation. For example: "Hey xxx, before we move to the next page, share with me what you think" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); "xxx, before we move to the next page, let's chat about what you just read!" + first question (${knowledgeRef.current[currentPageRef.current]?.question}); etc. 
             ** Make sure to ask the first question (${knowledgeRef.current[currentPageRef.current]?.question}) in the conversation. **
             **DO NOT* ask the first question in the form of yes/no question (BAD Example: "Can you tell me xxx?", or "Do you know xxx?").
             ** Your first question must be identical to the provided main question, meaning that you should not substitute any keyword.
@@ -860,7 +874,7 @@ You need to evaluate whether the child's response covers all the key points in t
     const getInstruction4Correct = (items, evaluation) => {
         const instruction4Correct = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -871,7 +885,7 @@ You need to evaluate whether the child's response covers all the key points in t
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history.
-        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
+        - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the book details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
 
     **Instructions for Repeating Answer**:
         - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
@@ -884,12 +898,12 @@ You need to evaluate whether the child's response covers all the key points in t
     **Instructions for Conclusion**:
         - Your conclusion should include ONLY ONE question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "What questions do you have for me about this page?")
+        - Here is an example: "What questions do you have for me about this page? " (end with ONLY this question)
        
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking).
-        - Do not extend your response to story text details.
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking).
+        - Do not extend your response to book text details.
         - Your response MUST repeat the answer to strengthen understanding.
         - The whole response should only include and end with ONE question: "What questions do you have for me about this page?" *No other question allowed*
         `
@@ -899,7 +913,7 @@ You need to evaluate whether the child's response covers all the key points in t
     const getInstruction4Incomplete = (items, evaluation) => {
         const instruction4Incomplete1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 && currentPageRef.current !==  7 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 && currentPageRef.current !==  7 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the main question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -913,7 +927,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., 'Great start!', 'Nice work! There's more to it', 'You got part of it!', etc.)."}
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
     
     **Instructions for hint (one sentence)**:
         - Since the evaluation of child's response is 'incomplete', compare the child's response with acceptance criteria (${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}), and provide an INDIRECT hint that guides children towards the missing parts of the correct answer. Do not disclose keywords in the answer.
@@ -942,7 +956,7 @@ ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'u
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction.
         ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question).
@@ -955,7 +969,7 @@ ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'u
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
         
         - the evaluation of the child's latest response: ${evaluation};
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
 
     Building on previous conversation history, your response MUST contain three parts: 1. acknowledgment, 2. repeat answer, and 3. conclusion.
@@ -965,7 +979,7 @@ ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'u
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'correct but incomplete', you should first provide encouraging feedback (e.g., 'Great start!', 'Nice work! There's more to it', 'You got part of it!', etc.)."}
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for Repeating Answer**:
         - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
@@ -979,14 +993,14 @@ ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'u
     **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
+        - Here is an example: "What questions do you have for me about this page? " (include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer to strengthen understanding.
         ${currentPageRef.current === 5 ? " - Highlight the word 'hibernation' when explaining the answer." : ''}
-        - Do not extend your response to story text details.
+        - Do not extend your response to the book content text details.
         - The whole response should only include and end with ONE question sentence, which is the question "What questions do you have for me about this page?"
         `;
         let sumCount = 0;
@@ -1009,7 +1023,7 @@ ${currentPageRef.current === 9 ? " - Do not explicitly mention scenarios like 'u
     const getInstruction4FactuallyIncorrect = (items, evaluation) => {
         const instruction4FactuallyIncorrect1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -1022,7 +1036,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Your acknowledgment should be friendly, non-repetitive, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'Let's think about it together!', 'That's a good try!', 'Let's try it again', and other similar acknowledgments)."}
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for hint (one sentence)**:
         - Provide an INDIRECT hint that guides children towards the correct answer. Do not disclose keywords in the answer.
@@ -1038,7 +1052,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
  **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
+        - Strictly stick to acceptance criteria. Do not divergent the question to the book content details that not covered in the answer.
         - The reprompt question must focus on **connecting the hint to the answer and guiding the child to identify the missing part**. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
          ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
       
@@ -1052,7 +1066,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - End your response with a question.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
          ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
@@ -1061,7 +1075,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `
         const instruction4FactuallyIncorrect2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the evaluation of the child's latest response: ${evaluation};
         - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -1073,7 +1087,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the evaluation of the child's response is 'factually incorrect', you should acknowledge their efforts and tailor your acknowledgment to the context (e.g., 'Let's try it again', 'Let's think about it together!', 'That's a good try!', and other similar acknowledgments)."}
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for Repeating Answer**:
         - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
@@ -1086,13 +1100,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
    **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
+        - Here is an example: "What questions do you have for me about this page? " (include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer to strengthen understanding.
-        - Do not extend your response to story text details.
+        - Do not extend your response to the book content text details.
         - The whole response should only include ONE question sentence, which is the question "What questions do you have for me about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
@@ -1115,7 +1129,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     const getInstruction4IrrelevantResponse = (items, evaluation) => {
         const instruction4IrrelevantResponse1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -1129,7 +1143,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Your acknowledgment should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Great Thinking!', 'Let's think about what the question is asking,' 'Thanks for sharing that! Let's focus on what we are reading here,' 'I heard you! Let's think about what the question is asking' and other similar acknowledgments)."}
-        - The acknowledgment should always shift the focus back to story.
+        - The acknowledgment should always shift the focus back to the book content.
 
     **Instructions for hint (one sentence)**:
         - Provide an INDIRECT hint that guides children towards the correct answer. Do not disclose keywords in the answer.
@@ -1145,7 +1159,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
+        - Strictly stick to acceptance criteria. Do not divergent the question to the book content details that not covered in the answer.
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not diverge the question to the page details. DO NOT MAKE THE QUESTION OBVIOUS ABOUT THE ANSWER OR THE KEY IDEA.
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
         ${currentPageRef.current === 9 ? " - Do not pose questions about what sound the frogs would make. Instead, guide the child to think about how they attract mates and when they scream. Do not directly include the ways (e.g., use their voice, and when they are frightened) in the followup question." : ''}
@@ -1158,7 +1172,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
          ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
@@ -1167,7 +1181,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `
         const instruction4IrrelevantResponse2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the evaluation of the child's latest response: ${evaluation};
         - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer};
@@ -1179,7 +1193,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         ${currentPageRef.current === 7 ? `- If the child's answer is reasonable, you should accept the answers by saying 'Great!', 'Good job!', 'Nice work!', 'Great Thinking!', 'Wow, that is a great observation!' etc.` : "- Since the child's response is irrelevant, acknowledge their efforts, gently redirect their focus to the question, and tailor your acknowledgment to the context (e.g., 'Let's think about what the question is asking,' 'Thanks for sharing that! Let's focus on what we are reading here,' 'I heard you! Let's think about what the question is asking' and other similar acknowledgments)."}
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for Repeating Answer**:
         - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
@@ -1192,13 +1206,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
    **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
+        - Here is an example: "What questions do you have for me about this page? " (include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer to strengthen understanding.
-        - Do not extend your response to story text details.
+        - Do not extend your response to the book content text details.
         - The whole response should only include ONE question sentence, which is the question "What questions do you have for me about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
@@ -1220,7 +1234,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     const getInstruction4Uncertainty = (items, evaluation) => {
         const instruction4Uncertainty1 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -1248,7 +1262,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
      
        **Instructions for Asking a Reprompt Question (ONE question)**:   
         - After the hint, ask ONE reprompt question that 1) CONSISTENTLY follows the hint and reinforces the same underlying concept; 2) guides the child to think in the right direction toward the key idea the child missed from the provided correct answer;
-        - Strictly stick to acceptance criteria. Do not divergent the question to story details that not covered in the answer.
+        - Strictly stick to acceptance criteria. Do not divergent the question to the book content details that not covered in the answer.
         - The reprompt question must focus on connecting the hint to the answer and guiding the child to identify the missing part. Do not divert the question to the page details. Do not include answer details in the reprompt question.
         ${currentPageRef.current === 3 ? "- If the child did not come up with 'wet skin' yet, prioritizing guiding them to think about the unique feature of frogs' skin. You can ask about 'what feature does a frog's skin have?'." : ""}
         ${currentPageRef.current === 4 ? " - Do not pose questions about emphasizing frogs' wet skin. Instead, guide the child to think about the two ways frogs breathe underwater and on land." : ''}
@@ -1263,7 +1277,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Whole Response**:
         - Do not end the conversation.
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response (the acknowledgement, hint, and reprompt question taken together) should *NOT* reveal the answer. You should HINT the child to think more deeply and move in the right direction. Check if the hint can be used to answer your reprompt question. If so, you need to make it more implicit.
          ${currentPageRef.current === 11 ? "- !!! Make sure to mention the word 'bulging' in your response to help children understand its meaning." : ''}
         - The whole response must only include and end with *ONE question* (i.e., the reprompt question. *DO NOT* use yes/no questions like "Can you xxx?", or "Do you xxx?"
@@ -1272,8 +1286,8 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         `
         const instruction4Uncertainty2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
-        - conversation history: ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        - conversation history: ${items.map(item => `${item.role}: ${item.content?.[0]?.transcript ?? ''}`).join('\n')};
         - the evaluation of the child's latest response: ${evaluation};
         - the correct answer: ${knowledgeRef.current[currentPageRef.current]?.answer};
 
@@ -1284,7 +1298,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history. 
         - Since the evaluation of the child's response is 'uncertainty', you should first provide encouraging feedback (e.g., "Let's try it again!", "Let's think about it together!", "That's a good try!", etc.).
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for Repeating Answer**:
         - Repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) in this part. DO NOT OMIT ANY DETAILS.
@@ -1297,13 +1311,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     **Instructions for Conclusion**:
         - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
         - Keep the conclusion part concise, under 15 words. 
-        - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always include ONLY ONE question "What questions do you have for me about this page?")
+        - Here is an example: "What questions do you have for me about this page? " (include ONLY ONE question "What questions do you have for me about this page?")
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
-        - Do not extend your response to story text details.
+        - Do not extend your response to the book content text details.
         - The whole response should only include ONE question sentence, which is the question "What questions do you have for me about this page?" * No Other Question Allowed *
         - Never explicitly include the acceptance criteria in the whole response.
         `
@@ -1328,7 +1342,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     const getInstruction4ChildQuestion = (items, evaluation) => {
         const instruction4ChildQuestion1 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - child's latest response: the most recent input from the child.
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
@@ -1340,10 +1354,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
         - Since the child posed a question, you should first acknowledge their effort and tailor your acknowledgement to the context (e.g., Good thinking!", "Oh it's an interesting question!", and more).
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for Explanation**:
-        - If the child's question is not about the story, steer the conversation back to the story.
+        - If the child's question is not about the book, steer the conversation back to the book.
         - Give a concise explanation to the child's question.
         - Your explanation should be suitable for children aged 6 to 8.
         - Keep your explanation simple, engaging and under 20 words.
@@ -1356,13 +1370,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     **Instructions for Whole Response**:
         - Do not include any inappropriate content, such as violence, sex, drugs, etc.
-        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE STORY AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
+        - ALWAYS KEEP THE CONVERSATION FOCUS ON THE BOOK AND FROGS (even if the child says irrelevant things / do not want to talk about frogs / do not want to keep talking)
         - When organizing all the elements above to form a whole response, make sure the whole response only includes one question sentence at the end.
         `;
 
         const instruction4ChildQuestion2 = `
     You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - child's latest response: the most recent input from the child (user).
 
@@ -1372,32 +1386,45 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Your acknowledgement should be friendly, non-repetitive, and under 25 words.
         - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
         - Use various acknowledgements. Do not repeat the same acknowledgement as in the conversation history. 
-        - If the child does not want to talk about the story, the acknowledgment should always shift the focus back to story.
+        - If the child does not want to talk about the book, the acknowledgment should always shift the focus back to the book content.
 
     **Instructions for Explanation**:
-        - First, if the child's question is not about the story, steer the conversation back to the story.
+        - First, if the child's question is not about the book, steer the conversation back to the book.
         - Then, determine if you are able to answer the question correctly. If you can, provide a simple and concise explanation of the question being asked. If you cannot, just say "I am not very knowledgeable about [topic], you can refer to [related books] book to learn more!", and end the conversation.
         - Do not extend the explanation to the page details. Focus only on the provided answer.
 
     **Instructions for Conclusion**:
+        - You must choose from these examples: "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
         - DO NOT use question marks in the conclusion.
         - End the conversation with a declarative sentence.
-        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.))
     
     **Instructions for Whole Response**:
         - Your response MUST repeat the answer (${knowledgeRef.current[currentPageRef.current]?.answer}) to strengthen understanding.
-        - Do not extend your response to story text details.
+        - Do not extend your response to the book content text details.
         - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
         `;
         let sumCount = 0;
         let correctCount = 0;
         for (const answer of answerRecordRef.current) {
-            if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty') {
+            if (answer === 'correct but incomplete' || answer === 'factually incorrect' || answer === 'irrelevant' || answer === 'uncertainty' || answer === 'child asks question') {
                 sumCount++;
             }
             if (answer === 'fully correct') {
                 correctCount++;
             }
+        }
+        // If the assistant already asked the "conv end" question,
+        // we must always end the conversation with instruction4ChildQuestion2.
+        const hasAskedConvEndQuestion = items?.some((item) => {
+            if (item?.role !== 'assistant') return false;
+            const transcript = item?.content?.[0]?.transcript ?? '';
+            const lower = transcript.toLowerCase();
+            return lower.includes('what questions do you have') && lower.includes('about this page');
+        });
+
+        if (hasAskedConvEndQuestion) {
+            console.log('instruction4ChildQuestion2 (conv-end question detected)');
+            return instruction4ChildQuestion2;
         }
         // check if correct
         if (sumCount === 2 && answerRecord[answerRecord.length - 1] === "child asks question") {
@@ -1426,7 +1453,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
         const instruction4Invalid2 = `
 You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         - main question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
         
@@ -1446,10 +1473,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         - Keep your explanation simple, engaging and under 20 words.
 
     **Instructions for Conclusion**:
+        - You must choose from these examples: "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
         - DO NOT use question marks in the conclusion.
         - End the conversation with a declarative sentence.
-        - Here is an example: "It was fun chatting with you! Let's continue reading the story." (Make sure to use different conclusions based on the examples, but end the conclusion using declarative sentence, instead of questions.)
-    
+        
     **Instructions for Whole Response**:
         - End the conversation with a declarative sentence. Do not include any question marks in the whole response.
         - Never explicitly include the acceptance criteria in the whole response.
@@ -1474,11 +1501,11 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     const getInstruction4ConvEnd = (items, evaluation) => {
         const instruction4ConvEnd = `
         You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. 
-        Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
+        Now your task is to keep the focus of the conversation on the book and END the conversation with a friendly line, such as "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
         
         **Instructions for Response**:
-        - If the child asks a question, acknowledge their curiosity. If the asked question is not about the story, steer the conversation back to the story, and end the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
-        - Otherwise (the child didn't ask a question), end your response with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
+        - If the child asks a question, acknowledge their curiosity. If the asked question is not about the book, steer the conversation back to the book, and end the conversation with a friendly line, chosen from "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
+        - Otherwise (the child didn't ask a question), end your response with a friendly line, chosen from "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
         - DO NOT INCLUDE ANY QUESTION IN YOUR RESPONSE.
         - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
         `;
@@ -1489,7 +1516,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     const getInstruction4FollowUp = (items, evaluation) => {
         const instruction4FollowUp1 = `
         You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. Now your task is to generate a response to the child's latest answer, based on the following information: 
-        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+        ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
         
         - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
         - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
@@ -1510,7 +1537,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             - For acknowledgement, your acknowledgment should be friendly, non-repetitive, and under 25 words.
             - You need to avoid using judgmental words like 'wrong', 'incorrect', 'correct', 'right', etc.
             - Use various acknowledgments. Do not repeat the same acknowledgment as in the conversation history.
-            - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the story details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
+            - Since the evaluation of the child's response is 'correct', you should acknowledge their answer and tailor your acknowledgment to the context (e.g., "Great job!", "Wow, that is a great observation!", "You are on the right track!", "Exactly!", "Excellent! You are really paying attention to the book details!", "Ah! Interesting idea!", "Good thinking!", and other similar acknowledgments)
         2. Explanation:
             - Your explanation should be suitable for children aged 6 to 8.
             - Keep your explanation simple, engaging, and under 20 words.
@@ -1519,7 +1546,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         3. Conclusion:
             - Your conclusion should include ONE EXACT question "What questions do you have for me about this page?"
             - Keep the conclusion part concise, under 15 words. 
-            - Here is an example: "It was fun chatting with you! What questions do you have for me about this page? " (Make sure to use different conclusions based on the examples, but always end with ONLY ONE question "What questions do you have for me about this page?")
+            - You must choose from these examples: "What questions do you have for me about this page? " (end with ONLY ONE question "What questions do you have for me about this page?")
         - When organizing all the elements above to form a whole response, make sure the whole response only includes and ends with ONE question sentence, which is the question "What questions do you have for me about this page?"
 
         **Instructions for Response to Answers that are NOT correct**:
@@ -1546,28 +1573,28 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
         const instruction4FollowUp2 = `
         You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a storybook titled ${title}. 
-        Now your task is to keep the focus of the conversation on the story and END the conversation with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
+        Now your task is to keep the focus of the conversation on the book and END the conversation with a friendly line, such as "It was fun chatting with you!" / "Let's continue reading the book." / "Alrighty, let's turn the page together."
         
         **Instructions for Response**:
         Step 1: Evaluate the child's latest response based on the following information: 
-            ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- Story text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
+            ${currentPageRef.current !== 5 && currentPageRef.current !== 6 ? `- book text: ${pages[currentPageRef.current]?.text.join(' ')}` : ''}
             - Conversation history: 
-            ${items.map(item => `${item.role}: ${item.content[0]?.transcript}`).join('\n')};
+            ${items.map(item => `${item.role}: ${item.content?.[0]?.transcript ?? ''}`).join('\n')};
             - the question: ${knowledgeRef.current[currentPageRef.current]?.question}
             - the answer: ${knowledgeRef.current[currentPageRef.current]?.answer}
             - the acceptance criteria: ${knowledgeRef.current[currentPageRef.current]?.acceptance_criteria}
             - the evaluation of the child's latest response: ${evaluation};
         Step 2: Generate a response based on the evaluation.
-            - If the child asks a question, acknowledge their curiosity and steer the conversation back to the story.
+            - If the child asks a question, acknowledge their curiosity and steer the conversation back to the book.
             - If the child answers the question correctly, acknowledge their answer and provide a concise explanation to deepen their understanding.
             - If the child answers the question incorrectly, acknowledge their efforts and explain the correct answer.
         Step 3: End the conversation:
-            - End your response with a friendly line, such as "It was fun chatting with you! Let's continue reading the story."
+            - End your response with a friendly line, chosen from "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
         
         **Important Reminder**:
         - DO NOT INCLUDE ANY QUESTION IN YOUR RESPONSE.
         - DO NOT SAY ANYTHING ELSE THAT IS NOT IN THE INSTRUCTIONS.
-        - END THE CONVERSATION WITH A FRIENDLY, DECLARATIVE LINE, SUCH AS "It was fun chatting with you! Let's continue reading the story."
+        - END THE CONVERSATION WITH A FRIENDLY, DECLARATIVE LINE, CHOSEN FROM "Alright, let's turn the page together." / "It was fun chatting with you!" / "Let's continue reading the book."
         `;
 
         let sumCount = 0;
@@ -1587,7 +1614,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
 
     const getInstruction4NoResponse = () => {
         if (noResponseReminderCountRef.current == 1) {
-            const lastQuestion = items[items.length - 1]?.content[0]?.transcript;
+            const lastQuestion = items[items.length - 1]?.content?.[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
             if (lastQuestion?.toLowerCase().includes('what questions')) {
                 const instruction4NoResponse1_1 = `
@@ -1610,7 +1637,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 return instruction4NoResponse2_1;
             }
         } else if (noResponseReminderCountRef.current == 2) {
-            const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
+            const lastQuestion = items[items.length - 2]?.content?.[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
             if (lastQuestion?.toLowerCase().includes('what questions')) {
                 const instruction4NoResponse1_2 = `
@@ -1633,12 +1660,12 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 return instruction4NoResponse2_2;
             }
         } else {
-            const lastQuestion = items[items.length - 2]?.content[0]?.transcript;
+            const lastQuestion = items[items.length - 2]?.content?.[0]?.transcript;
             console.log('lastQuestion', lastQuestion);
             if (lastQuestion?.toLowerCase().includes('what questions')) {
                 const instruction4NoResponse1_3 = `
         **Instructions**:
-            1. Ignore the chat history. Say "Hey, let's continue reading the story."
+            1. Ignore the chat history. Say "Hey, let's continue reading the book." or "Alrighty, let's continue reading the book."
         **Important Reminder**:
             - You must not say or ask anything else.`;
                     console.log(instruction4NoResponse1_3);
@@ -1646,7 +1673,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 } else {
                     const instruction4NoResponse2_3 = `
        **Instructions**:
-            1. Ignore the chat history. Reveal the answer ( ${knowledgeRef.current[currentPageRef.current]?.answer?.split('(The acceptance criteria')[0]}), and say "Let's continue reading the story."
+            1. Ignore the chat history. Reveal the answer ( ${knowledgeRef.current[currentPageRef.current]?.answer?.split('(The acceptance criteria')[0]}), and say "Let's continue reading the book."
         **Important Reminder**:
             - If there is an acceptance criteria in the answer, remove it in your response.
             - You must not say or ask anything else.`;
@@ -1667,14 +1694,10 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     }
 
     const startResponseTimer = async () => {
-        // update the response timer every 1 second
+        // Start waiting for the user's reply after the assistant asks a question.
         console.log('startResponseTimer');
         userRespondedRef.current = false;
-        if (noResponseReminderCountRef.current < 3) {
-            isWaitingForResponseRef.current = false;
-        } else {
-            isWaitingForResponseRef.current = true;
-        }
+        isWaitingForResponseRef.current = true;
         setTimer(0); // 计时器从 0 开始
         if (timerRef.current) clearInterval(timerRef.current); 
         // if the user clicks replay during the timer, clear the timer, and wait until the replay is finished and start the timer again
@@ -1691,13 +1714,13 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     }
 
     useEffect(() => {
-        if (timer >= 15 && !userRespondedRef.current && isKnowledge) {
+        if (timer >= 15 && !userRespondedRef.current && isKnowledge && isWaitingForResponseRef.current) {
           console.log('User did not respond in 15 seconds. Sending another message...');
           console.log('isWaitingForResponse', isWaitingForResponseRef.current);
           const client = clientRef.current;
           
           // if the client is connected, send a message
-          if (isClientSetup && !evaluationInProgressRef.current) {
+          if (isClientSetup) {
             noReponseCntRef.current = noReponseCntRef.current + 1;
             noResponseReminderCountRef.current += 1;
             
@@ -1717,6 +1740,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             // 只有在发送了3次提醒后才停止计时器
             if (noResponseReminderCountRef.current >= 3) {
               if (timerRef.current) clearInterval(timerRef.current);
+              isWaitingForResponseRef.current = false;
             }
           }
         }
@@ -1860,9 +1884,9 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                 console.error('Error sending response:', error);
                             }
                         }
-                        else if (item.content[0]?.text && item.role === 'assistant' && item.id !==itemToRespondRef.current) {
-                            console.log('evaluation item', item.content[0]?.text);
-                            let evaluation = getEvaluation(item.content[0]?.text);
+                        else if (item.content?.[0]?.text && item.role === 'assistant' && item.id !==itemToRespondRef.current) {
+                            console.log('evaluation item', item.content?.[0]?.text);
+                            let evaluation = getEvaluation(item.content?.[0]?.text);
                             itemToRespondRef.current = item.id;
                             try {
                                 await client.realtime.send('conversation.item.delete', {
@@ -1898,44 +1922,48 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                         // }
                         if (item.role === 'assistant') {
                             // if the last item does not end with a question mark, it means the conversation is ended
-                            if (!item?.content[0]?.transcript?.endsWith('?') && !item?.content[0]?.transcript?.endsWith('? ') && !item?.content[0]?.transcript?.endsWith('talk.')) {
+                            const transcript = item?.content?.[0]?.transcript ?? '';
+                            const isPromptForUserReply = transcript.endsWith('?') || transcript.endsWith('? ') || transcript.endsWith('talk.');
+                            if (!isPromptForUserReply) {
                                 while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
                                     await new Promise(resolve => setTimeout(resolve, 100));
                                 }
                                 console.log('conversation ended');
                                 if (!isReplayingRef.current && !isAskingRef.current) {
                                     setIsVoiceInputDisabled(false);
+                                    isWaitingForResponseRef.current = false;
                                     setIsConversationEnded(true);
                                 }
                             } else {
                                 // every time after the assistant's response (except the response asking for the child's answer), set a timer to check if there is a user's response. If there is no user's response after 15 seconds, ask question again.
                                 // if the user interrupted the conversation, do not set the timer
-                                console.log('isWaitingForResponseRef.current', isWaitingForResponseRef.current);
-                                console.log('userRespondedRef.current', userRespondedRef.current);
-                                if (!isWaitingForResponseRef.current) {
-                                    while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
-                                        await new Promise(resolve => setTimeout(resolve, 100));
-                                    }
-                                    if (!isReplayingRef.current) {
-                                        setIsVoiceInputDisabled(false);
-                                        startResponseTimer();
-                                    }
+                                while (wavStreamPlayer.isPlaying() || isReplayingRef.current) {
+                                    await new Promise(resolve => setTimeout(resolve, 100));
+                                }
+                                if (!isReplayingRef.current) {
+                                    setIsVoiceInputDisabled(false);
+                                    startResponseTimer();
                                 }
                             }
                         } else {
                             setIsFirstTime(false);
                         }
-                    } else if (item.role === 'assistant' && item.content[0]?.transcript) {
+                    } else if (item.role === 'assistant' && item.content?.[0]?.transcript) {
                         // Conversation end detection when response has transcript but no audio (e.g. API edge case, async audio)
                         // Skip evaluation items (JSON format, get deleted - they have content[0].text with "evaluation")
-                        const transcript = item.content[0].transcript;
+                        const transcript = item.content?.[0]?.transcript ?? '';
                         const isEvaluationItem = transcript.trim().startsWith('{') || transcript.includes('"evaluation"');
-                        if (!isEvaluationItem && !transcript.endsWith('?') && !transcript.endsWith('? ') && !transcript.endsWith('talk.')) {
+                        const isPromptForUserReply = transcript.endsWith('?') || transcript.endsWith('? ') || transcript.endsWith('talk.');
+                        if (!isEvaluationItem && !isPromptForUserReply) {
                             console.log('conversation ended (transcript only, no audio)');
                             if (!isReplayingRef.current && !isAskingRef.current) {
                                 setIsVoiceInputDisabled(false);
+                                isWaitingForResponseRef.current = false;
                                 setIsConversationEnded(true);
                             }
+                        } else if (!isEvaluationItem && isPromptForUserReply && !isReplayingRef.current) {
+                            setIsVoiceInputDisabled(false);
+                            startResponseTimer();
                         }
                     }
                 }
@@ -2125,23 +2153,28 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
     }
 
     const handleExpandChat = () => {
-        setIsExpandedChat(!isExpandedChat);
-        const chatContainer = document.getElementById('chat-container');
-        chatContainer.style.height = isExpandedChat ? '35%' : '55%';
+        // Expand always un-minimizes the panel.
+        setIsMinimizedChat(false);
+        setIsExpandedChat(prev => !prev);
     }
     
-    const handleMinimizeChat = async () => {
-        setIsMinimizedChat(!isMinimizedChat);
+    const handleMinimizeChat = () => {
+        // Minimize collapses the panel; chat content won't cover the book.
+        preMinimizeIsExpandedChatRef.current = isExpandedChat;
         setIsExpandedChat(false);
-        const chatContainer = document.getElementById('chat-container');
-        chatContainer.style.height = isMinimizedChat ? '30%' : '35%';
+        setIsMinimizedChat(true);
         // const wavStreamPlayer = wavStreamPlayerRef.current;
         // await wavStreamPlayer.interrupt();
     }
 
+    const handleRestoreChat = () => {
+        setIsMinimizedChat(false);
+        setIsExpandedChat(preMinimizeIsExpandedChatRef.current);
+    }
+
     const handlePenguinClick = () => {
         if (isMinimizedChat) {
-            setIsMinimizedChat(false);
+            handleRestoreChat();
         }
     }
 
@@ -2150,23 +2183,23 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         console.log('handleCloseChat');
         const wavStreamPlayer = wavStreamPlayerRef.current;
         await wavStreamPlayer.interrupt();
-        try {
-            await uploadChatHistoryToBackend({
-                apiUrl,
-                user,
-                title,
-                page: currentPageRef.current,
-                chatHistory: currentPageChatHistory,
-            });
-        } catch (error) {
+        // Do not block page turning on network/upload latency.
+        uploadChatHistoryToBackend({
+            apiUrl,
+            user,
+            title,
+            page: currentPageRef.current,
+            chatHistory: currentPageChatHistory,
+        }).catch((error) => {
             console.error('Error sending chat history to backend', error);
-        }
+        });
         setIsVoiceInputDisabled(false);
         if (isKnowledge) {
             console.log('isKnowledge', isKnowledge);
             setIsKnowledge(false);
             isAskedRef.current = true;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
+            resetGuidingSessionState();
             setTimeout(() => {
                 // audioRef.current.play();
                 console.log('isKnowledge', isKnowledge);
@@ -2181,6 +2214,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
             setIsKnowledge(false);
             isAskingRef.current = false;
             chatHistoryRef.current[currentPageRef.current] = [...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory];
+            resetGuidingSessionState();
         }
     }
 
@@ -2215,7 +2249,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         // Get the evaluation result from the previous message
         const prevItems = items.slice(0, index);
         const lastEvaluation = prevItems.reverse().find(item => 
-            item?.content[0]?.transcript?.startsWith('<eval>'))?.content[0]?.transcript;
+            item?.content?.[0]?.transcript?.startsWith('<eval>'))?.content?.[0]?.transcript;
 
         console.log('lastEvaluation', lastEvaluation);
             
@@ -2379,13 +2413,22 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
         setShowSpeedSlider(!showSpeedSlider);
     };
 
+    const chatPanelHeight = isMinimizedChat
+        ? '120px'
+        : (isExpandedChat ? '55%' : '35%');
+
+    const chatPanelPadding = isMinimizedChat ? 0 : 16;
+
     const chatContainerStyle = {
         // height: isKnowledge 
         //     ? (currentPageRef.current === 2 || currentPageRef.current === 5) ? '40%' : (currentPageRef.current === 7)
         //         ? '35%'
         //         : '55%'
         //     : chatBoxSize.height
-        height: '36%'
+        // Decorative absolutely-positioned background (e.g. moon.svg) should not
+        // bleed outside the chat container.
+        overflow: 'hidden',
+        transition: 'height 180ms ease, padding 180ms ease',
     };
 
     const handleSpeedChange = (event, newValue) => {
@@ -2504,12 +2547,24 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                 </div>
             </div>
             {(isAskingRef.current || isKnowledge) && (
-                    <Box id='chat-container' style={chatContainerStyle} sx={{ position: 'absolute', width: chatBoxSize.width, height: chatBoxSize.height }}>
+                    <Box
+                        id='chat-container'
+                        style={{
+                            ...chatContainerStyle,
+                            height: chatPanelHeight,
+                            padding: chatPanelPadding,
+                            // Keep the blue gradient background from App.scss.
+                            backgroundColor: undefined,
+                            backgroundImage: undefined,
+                            boxShadow: isMinimizedChat ? '0 2px 6px 0 rgba(12,21,96,0.35)' : undefined,
+                        }}
+                        sx={{ position: 'absolute', width: chatBoxSize.width }}
+                    >
                         {/* if is recording, add a black layer on top of chat-window, if isn't recording, remove the layer */}
-                        {isRecording && (
+                        {isRecording && !isMinimizedChat && (
                             <Box id='recording-layer' style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 101 }}></Box>
                         )}
-                        {isRecording && (
+                        {isRecording && !isMinimizedChat && (
                             <div id='audio-visualizer' style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', width: '100px', height: '100px', zIndex: 105, pointerEvents: 'none' }}>
                                 <VoiceVisualizer 
                                     controls={recorderControls} 
@@ -2519,35 +2574,59 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                 />
                             </div>
                         )}
-                        <IconButton id='expand-btn' variant='plain' 
-                                onClick={handleExpandChat}
+                        {isMinimizedChat ? (
+                            <IconButton
+                                id='restore-btn'
+                                variant='plain'
+                                onClick={handleRestoreChat}
                                 onMouseOver={() => {
-                                    document.getElementById('expand-btn').style.backgroundColor = 'rgba(0,0,0,0)';
+                                    document.getElementById('restore-btn').style.backgroundColor = 'rgba(0,0,0,0)';
                                 }}
                                 sx={{
                                     position: 'absolute',
                                     top: '8px',
                                     left: '8px',
                                     zIndex: 1,
+                                    pointerEvents: 'auto',
                                 }}
                             >
-                            {isExpandedChat ? <FaChevronCircleDown size={30} color='#7AA2E3' /> : <FaChevronCircleUp size={30} color='#7AA2E3' />}
-                        </IconButton>
-                        <IconButton id='minimize-btn' variant='plain' 
-                                onClick={handleMinimizeChat}
-                                onMouseOver={() => {
-                                    document.getElementById('minimize-btn').style.backgroundColor = 'rgba(0,0,0,0)';
-                                }}
-                                sx={{
-                                    position: 'absolute',
-                                    top: '8px',
-                                    left: '45px',
-                                    zIndex: 1,
-                                }}
-                            >
-                            {/* always set the backgroud to transparent */}
-                            <FaMinusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }}/>
-                        </IconButton>
+                                <FaPlusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }} />
+                            </IconButton>
+                        ) : (
+                            <>
+                                <IconButton id='expand-btn' variant='plain'
+                                    onClick={handleExpandChat}
+                                    onMouseOver={() => {
+                                        document.getElementById('expand-btn').style.backgroundColor = 'rgba(0,0,0,0)';
+                                    }}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        left: '8px',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    {isExpandedChat ? <FaChevronCircleDown size={30} color='#7AA2E3' /> : <FaChevronCircleUp size={30} color='#7AA2E3' />}
+                                </IconButton>
+                                <IconButton
+                                    id='minimize-btn'
+                                    variant='plain'
+                                    onClick={handleMinimizeChat}
+                                    onMouseOver={() => {
+                                        document.getElementById('minimize-btn').style.backgroundColor = 'rgba(0,0,0,0)';
+                                    }}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        left: '45px',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    {/* always set the backgroud to transparent */}
+                                    <FaMinusCircle size={30} color='#7AA2E3' style={{ backgroundColor: 'transparent' }} />
+                                </IconButton>
+                            </>
+                        )}
                         {/* <IconButton 
                             id='close-btn'
                             onClick={handleCloseChat}
@@ -2564,7 +2643,17 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             <IoMdCloseCircle size={36} color='#7AA2E3' />
                         </IconButton> */}
                        
-                    <Box className='chat-window' ref={chatWindowRef}>
+                    <Box
+                        className='chat-window'
+                        ref={chatWindowRef}
+                        style={{
+                            display: 'block',
+                            height: '100%',
+                            // When minimized, don't render visual content inside the box.
+                            opacity: isMinimizedChat ? 0 : 1,
+                            pointerEvents: isMinimizedChat ? 'none' : 'auto',
+                        }}
+                    >
                         
                         {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].length == 0 && (
                             <Box id='loading-box'>
@@ -2572,15 +2661,15 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             </Box>
                         )}
                         {[...chatHistoryRef.current[currentPageRef.current], ...currentPageChatHistory].filter(msg => msg.type === 'message').map((msg, index) => (
-                            msg.content[0]?.transcript !== '' && (
+                            msg.content?.[0]?.transcript !== '' && (
                             <Box key={index} id={msg.role === 'user' ? 'user-msg' : 'chatbot-msg'}>
                                 {msg.role === 'user' ? (
                                     // if message is loading, add a loading icon
                                     <Box id="user-chat">
                                         <Avatar id='user-avatar' size='lg' sx={{ backgroundColor: '#ACD793', marginRight: "8px"}}>{user.substring(0, 2)}</Avatar>
                                         <Box id="msg-bubble" style={{ backgroundColor: '#ECECEC' }}>
-                                            {msg.content[0]?.transcript !== null ? (
-                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content[0]?.transcript}</h5>
+                                            {msg.content?.[0]?.transcript !== null ? (
+                                                <h5 level='body-lg' style={{margin: '0px'}}>{msg.content?.[0]?.transcript}</h5>
                                             ) : (
                                                 <AiOutlineLoading id='loading-icon' size={20} color='#7AA2E3' />
                                             )}
@@ -2626,7 +2715,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                                 </Box>
                             )))}
                     </Box>
-                    {canPushToTalk && !isEnding && (
+                    {!isMinimizedChat && canPushToTalk && !isEnding && (
                         <div id='recording-box'>
                             {/* only show these boxes when recording */}
                             { isRecording && (
@@ -2677,7 +2766,7 @@ You are a friendly chatbot engaging with a 6-8-year-old child, who is reading a 
                             </div>
                         </div>
                     )}
-                    <div id='moon-chat-box'>
+                    <div id='moon-chat-box' style={{ display: isMinimizedChat ? 'none' : 'block' }}>
                         <img src='./files/imgs/moon.svg' alt='moon' style={{ position: 'absolute', bottom: '0', right: '0', zIndex: -1 }} />
                     </div>
                 </Box>
